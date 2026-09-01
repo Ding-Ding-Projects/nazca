@@ -44,7 +44,37 @@ if (sha256(rootPreview) !== sha256(servedPreview)) {
   throw new Error('The served social preview differs from the root master.');
 }
 
+const dependencyManifest = JSON.parse(
+  await readFile(path.join(ROOT, 'dependency-manifest.json'), 'utf8'),
+);
+const workerEngines = files.filter(
+  (file) => path.basename(file) === 're2.wasm',
+);
+if (!workerEngines.length)
+  throw new Error('The static bundle is missing re2.wasm.');
+for (const workerEngine of workerEngines) {
+  const re2Wasm = await readFile(workerEngine);
+  if (sha256(re2Wasm) !== dependencyManifest.re2Wasm.sha256) {
+    throw new Error(
+      'The built RE2/WASM engine does not match the pinned dependency digest.',
+    );
+  }
+}
+
 if (pages) {
+  const rootAssets = await stat(path.join(CLIENT, '_next', 'static'));
+  if (!rootAssets.isDirectory()) {
+    throw new Error('GitHub Pages output is missing root _next assets.');
+  }
+  try {
+    await stat(path.join(CLIENT, 'nazca', '_next'));
+    throw new Error(
+      'GitHub Pages output still contains a nested nazca/_next directory.',
+    );
+  } catch (error) {
+    if (!error || typeof error !== 'object' || error.code !== 'ENOENT')
+      throw error;
+  }
   const home = await readFile(path.join(CLIENT, 'index.html'), 'utf8');
   const article = await readFile(
     path.join(CLIENT, 'wiki', 'Nazca_Railway_(Los_Sengas_Division).html'),

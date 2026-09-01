@@ -1,8 +1,12 @@
 'use client';
 
-import { ArrowLeft, ExternalLink, History, Search } from 'lucide-react';
+import { ArrowLeft, ExternalLink, History } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import {
+  SearchWorkbench,
+  type SearchRecord,
+} from '@/components/search-workbench';
 import { formatBuildTime, type BuildProvenance } from '@/lib/provenance';
 import { publicPath } from '@/lib/public-path';
 
@@ -67,61 +71,22 @@ const lines = [
   ['6', 'Arcgo Line', 'Core', '31', '49.635 km'],
 ];
 
-const MAX_REGEX_LENGTH = 256;
+const searchRecords: SearchRecord[] = sections.map((section) => ({
+  id: section.id,
+  title: section.title,
+  subtitle: `${section.body.length} paragraph${section.body.length === 1 ? '' : 's'}`,
+  text: `${section.title} ${section.body.join(' ')}`,
+}));
 
 export function ArticleReader({ provenance }: { provenance: BuildProvenance }) {
   const [activeSection, setActiveSection] = useState(sections[0].id);
-  const [query, setQuery] = useState('');
-  const [regexMode, setRegexMode] = useState(false);
-  const updatedAt = formatBuildTime(provenance.builtAt);
-
-  const searchState = useMemo(() => {
-    if (!query.trim())
-      return { matches: sections, error: null as string | null };
-    if (regexMode) {
-      if (query.length > MAX_REGEX_LENGTH) {
-        return {
-          matches: [] as ArticleSection[],
-          error: `The pattern exceeds the ${MAX_REGEX_LENGTH}-character preview limit.`,
-        };
-      }
-      try {
-        const expression = new RegExp(query, 'iu');
-        return {
-          matches: sections.filter((section) =>
-            expression.test(`${section.title} ${section.body.join(' ')}`),
-          ),
-          error: null,
-        };
-      } catch (error) {
-        return {
-          matches: [] as ArticleSection[],
-          error:
-            error instanceof Error ? error.message : 'The pattern is invalid.',
-        };
-      }
-    }
-    const needle = query.toLocaleLowerCase();
-    return {
-      matches: sections.filter((section) =>
-        `${section.title} ${section.body.join(' ')}`
-          .toLocaleLowerCase()
-          .includes(needle),
-      ),
-      error: null,
-    };
-  }, [query, regexMode]);
-
-  const filteredSections = searchState.matches;
+  const [updatedAt, setUpdatedAt] = useState(() =>
+    formatBuildTime(provenance.builtAt),
+  );
 
   useEffect(() => {
-    if (
-      filteredSections.length > 0 &&
-      !filteredSections.some((candidate) => candidate.id === activeSection)
-    ) {
-      setActiveSection(filteredSections[0].id);
-    }
-  }, [activeSection, filteredSections]);
+    setUpdatedAt(formatBuildTime(provenance.builtAt, true));
+  }, [provenance.builtAt]);
 
   const section =
     sections.find((candidate) => candidate.id === activeSection) ?? sections[0];
@@ -136,42 +101,28 @@ export function ArticleReader({ provenance }: { provenance: BuildProvenance }) {
           <ArrowLeft size={18} aria-hidden="true" />
           Atlas home
         </Link>
-        <div className="article-version" suppressHydrationWarning>
+        <div className="article-version">
           v{provenance.version} · updated {updatedAt}
         </div>
       </header>
 
       <div className="article-layout">
         <aside className="article-sections" aria-label="Article sections">
-          <div className="article-search" role="search">
-            <label htmlFor="article-search">Search this article</label>
-            <div>
-              <Search size={17} aria-hidden="true" />
-              <input
-                id="article-search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder={
-                  regexMode ? 'Enter a regex pattern' : 'Find a section'
-                }
-                maxLength={regexMode ? MAX_REGEX_LENGTH : undefined}
-              />
-              <button
-                type="button"
-                aria-pressed={regexMode}
-                onClick={() => setRegexMode((value) => !value)}
-              >
-                Regex
-              </button>
-            </div>
-          </div>
-          <p className="article-search-scope">
-            {regexMode
-              ? 'JavaScript Unicode regex preview, bounded to 256 characters and six sections.'
-              : 'Plain-text section search.'}
-          </p>
+          <SearchWorkbench
+            surfaceId="nazca-article-search"
+            label="Search this article"
+            placeholder="Find a section"
+            records={searchRecords}
+            compact
+            onActivate={(record) => {
+              setActiveSection(record.id);
+              requestAnimationFrame(() =>
+                document.getElementById('article-content')?.focus(),
+              );
+            }}
+          />
           <nav className="article-section-tabs" aria-label="Article sections">
-            {filteredSections.map((candidate) => (
+            {sections.map((candidate) => (
               <button
                 key={candidate.id}
                 type="button"
@@ -184,16 +135,6 @@ export function ArticleReader({ provenance }: { provenance: BuildProvenance }) {
               </button>
             ))}
           </nav>
-          {searchState.error ? (
-            <p className="article-search-error" role="alert">
-              Pattern error: {searchState.error}
-            </p>
-          ) : null}
-          {!filteredSections.length && !searchState.error ? (
-            <p className="article-no-match">
-              No section matches the current search.
-            </p>
-          ) : null}
         </aside>
 
         <article className="article-body" id="article-content" tabIndex={-1}>

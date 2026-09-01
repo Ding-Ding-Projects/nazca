@@ -3,22 +3,24 @@
 ## Behavior
 
 The current home search filters six local fixture records. The article search
-filters six structured preview sections. Plain text is the default. The home
-route has an adjacent anchored regex preview, and the article route has a bounded
-regex mode.
+filters six structured preview sections. Plain text is the default. Both fields
+use the same adjacent anchored workbench and isolated local state.
 
 ## Current limits
 
-The complete shared workbench is not implemented. Guided construction, dialect
-capabilities, token annotations, capture tables, replacement preview, saved
-cases, profiling, match navigation, and a worker-isolated engine remain pending.
+The shared workbench uses `re2-wasm` 1.0.2 in a local Web Worker. It exposes the
+real dialect, supported flags, unsupported backtracking constructs, capture
+table, replacement preview, timing, local history, zero-width handling, and a
+1,000-match result bound. Guided token construction, saved persistent snippets,
+expected-result suites, token annotations, and match navigation remain pending.
 
 ## Failure modes
 
-Invalid article patterns produce an explicit pattern message rather than a false
-zero-result state. Article patterns are limited to 256 characters and six local
-sections. The home preview is still JavaScript-engine based and must move behind
-the shared bounded engine before release.
+Invalid patterns produce an explicit pattern message rather than a false
+zero-result state. Patterns are limited to 256 characters, each sample to 8 KiB,
+the aggregate sample set to 2 MiB, and result output to 1,000 matches. When the
+worker is unavailable, regex mode stays unavailable and never falls back to a
+backtracking engine.
 
 ## Security and privacy
 

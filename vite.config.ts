@@ -1,13 +1,49 @@
 import { sites } from '@openai/sites-vite-plugin';
 import tailwindcss from '@tailwindcss/postcss';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import vinext from 'vinext';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
 import hostingConfig from './.openai/hosting.json' with { type: 'json' };
 
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
   '00000000-0000-4000-8000-000000000000';
 
 const { d1, r2 } = hostingConfig;
+const re2WasmPath = path.resolve(
+  'node_modules',
+  're2-wasm',
+  'build',
+  'wasm',
+  're2.wasm',
+);
+
+function re2WasmDevelopmentPlugin(): Plugin {
+  const mount = (server: ViteDevServer) => {
+    server.middlewares.use(async (request, response, next) => {
+      const pathname = new URL(request.url ?? '/', 'http://localhost').pathname;
+      if (!pathname.endsWith('/re2.wasm')) {
+        next();
+        return;
+      }
+      try {
+        const bytes = await readFile(re2WasmPath);
+        response.writeHead(200, {
+          'Cache-Control': 'no-store',
+          'Content-Length': String(bytes.byteLength),
+          'Content-Type': 'application/wasm',
+        });
+        response.end(bytes);
+      } catch (error) {
+        next(error as Error);
+      }
+    });
+  };
+  return {
+    name: 'nazca-re2-wasm-development',
+    configureServer: mount,
+  };
+}
 
 // macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === 'seatbelt';
@@ -51,6 +87,7 @@ export default defineConfig(async () => {
       : undefined,
     plugins: [
       vinext(),
+      re2WasmDevelopmentPlugin(),
       sites(),
       cloudflare({
         viteEnvironment: { name: 'rsc', childEnvironments: ['ssr'] },

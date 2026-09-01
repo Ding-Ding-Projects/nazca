@@ -14,5 +14,11 @@
         "sha256": "fec025a6da31757e3b6af84c5a1628e9d38442ca99a2161091d78f2fcfa35ef3"
       }
     }
+  },
+  "re2Wasm": {
+    "version": "1.0.2",
+    "packagePath": "node_modules/re2-wasm/build/wasm/re2.wasm",
+    "runtimeFileName": "re2.wasm",
+    "sha256": "79e025a30d20157807add5e7d01acefe700f06721f4a56669b0bad5d00995e72"
   }
 }

@@ -1,7 +1,16 @@
 #!/usr/bin/env node
 
 import { execFileSync, spawn } from 'node:child_process';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import {
+  copyFile,
+  mkdir,
+  readdir,
+  readFile,
+  rename,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -58,41 +67,101 @@ async function writeProvenance() {
   return provenance;
 }
 
+async function readBundledAsset() {
+  const manifest = JSON.parse(
+    await readFile(path.join(ROOT, 'dependency-manifest.json'), 'utf8'),
+  );
+  const source = path.join(ROOT, manifest.re2Wasm.packagePath);
+  const bytes = await readFile(source);
+  const digest = createHash('sha256').update(bytes).digest('hex');
+  if (digest !== manifest.re2Wasm.sha256) {
+    throw new Error(
+      `re2.wasm digest mismatch. Expected ${manifest.re2Wasm.sha256}; received ${digest}.`,
+    );
+  }
+  console.log(
+    `[bundled-asset] re2-wasm=${manifest.re2Wasm.version} bytes=${bytes.byteLength} sha256=${digest}`,
+  );
+  return { fileName: manifest.re2Wasm.runtimeFileName, source };
+}
+
+async function findWorkerDirectories(directory) {
+  const output = [];
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const target = path.join(directory, entry.name);
+    if (entry.isDirectory())
+      output.push(...(await findWorkerDirectories(target)));
+    else if (entry.isFile() && /^regex-worker-.*\.js$/i.test(entry.name))
+      output.push(directory);
+  }
+  return output;
+}
+
+async function stageBuiltAsset(asset) {
+  const directories = [
+    ...new Set(await findWorkerDirectories(path.join(ROOT, 'dist', 'client'))),
+  ];
+  if (!directories.length)
+    throw new Error('The build emitted no regex worker directory.');
+  for (const directory of directories) {
+    await copyFile(asset.source, path.join(directory, asset.fileName));
+  }
+  console.log(
+    `[bundled-asset] staged ${asset.fileName} beside ${directories.length} worker output(s)`,
+  );
+}
+
+async function normalizePagesOutput() {
+  const client = path.join(ROOT, 'dist', 'client');
+  const nestedRoot = path.join(client, 'nazca');
+  const nestedAssets = path.join(nestedRoot, '_next');
+  const targetAssets = path.join(client, '_next');
+  try {
+    await rename(nestedAssets, targetAssets);
+    await rm(nestedRoot, { recursive: true, force: true });
+  } catch (error) {
+    throw new Error(
+      `Could not normalize GitHub Pages assets from ${nestedAssets} to ${targetAssets}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+  console.log('[pages] normalized artifact assets from nazca/_next to _next');
+}
+
+const bundledAsset = await readBundledAsset();
 const provenance = await writeProvenance();
 console.log(
   `[provenance] version=${provenance.version} commit=${provenance.commitSha ?? 'unavailable'} builtAt=${provenance.builtAt} dirty=${provenance.dirty}`,
 );
 
-const child = spawn(process.execPath, [VINEXT, command, ...forwarded], {
-  cwd: ROOT,
-  env: {
-    ...process.env,
-    NEXT_PUBLIC_BUILD_VERSION: provenance.version,
-    NEXT_PUBLIC_BUILD_TIMESTAMP: provenance.builtAt,
-    NEXT_PUBLIC_BUILD_COMMIT_SHA: provenance.commitSha ?? '',
-    NEXT_PUBLIC_BUILD_DIRTY: String(provenance.dirty),
-    NEXT_PUBLIC_BUILD_DEPLOYMENT: provenance.deployment,
-    ...(staticExport ? { STATIC_EXPORT: '1' } : {}),
-    ...(pages
-      ? {
-          PAGES_BASE_PATH: '/nazca',
-          NEXT_PUBLIC_BASE_PATH: '/nazca',
-        }
-      : {}),
-  },
-  stdio: 'inherit',
+const result = await new Promise((resolve) => {
+  const child = spawn(process.execPath, [VINEXT, command, ...forwarded], {
+    cwd: ROOT,
+    env: {
+      ...process.env,
+      NEXT_PUBLIC_BUILD_VERSION: provenance.version,
+      NEXT_PUBLIC_BUILD_TIMESTAMP: provenance.builtAt,
+      NEXT_PUBLIC_BUILD_COMMIT_SHA: provenance.commitSha ?? '',
+      NEXT_PUBLIC_BUILD_DIRTY: String(provenance.dirty),
+      NEXT_PUBLIC_BUILD_DEPLOYMENT: provenance.deployment,
+      ...(staticExport ? { STATIC_EXPORT: '1' } : {}),
+      ...(pages
+        ? {
+            PAGES_BASE_PATH: '/nazca',
+            NEXT_PUBLIC_BASE_PATH: '/nazca',
+          }
+        : {}),
+    },
+    stdio: 'inherit',
+  });
+  child.on('error', (error) => resolve({ code: 1, error }));
+  child.on('exit', (code, signal) => resolve({ code: code ?? 1, signal }));
 });
 
-child.on('error', (error) => {
-  console.error(`[vinext] ${error.message}`);
-  process.exitCode = 1;
-});
-
-child.on('exit', (code, signal) => {
-  if (signal) {
-    console.error(`[vinext] terminated by signal ${signal}`);
-    process.exitCode = 1;
-    return;
-  }
-  process.exitCode = code ?? 1;
-});
+if (result.error) console.error(`[vinext] ${result.error.message}`);
+if (result.signal)
+  console.error(`[vinext] terminated by signal ${result.signal}`);
+if (result.code === 0 && command === 'build') {
+  if (pages) await normalizePagesOutput();
+  await stageBuiltAsset(bundledAsset);
+}
+process.exitCode = result.code;

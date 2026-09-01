@@ -18,11 +18,11 @@ export const buildProvenance: BuildProvenance = {
   deployment: process.env.NEXT_PUBLIC_BUILD_DEPLOYMENT ?? 'unavailable',
 };
 
-export function formatBuildTime(value: string | null) {
+export function formatBuildTime(value: string | null, local = false) {
   if (!value) return 'Updated time unavailable';
   const date = new Date(value);
   if (Number.isNaN(date.valueOf())) return 'Updated time unavailable';
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat('en-CA', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -30,5 +30,7 @@ export function formatBuildTime(value: string | null) {
     minute: '2-digit',
     second: '2-digit',
     timeZoneName: 'short',
+    hourCycle: 'h23',
+    ...(local ? {} : { timeZone: 'UTC' }),
   }).format(date);
 }

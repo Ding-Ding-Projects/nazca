@@ -4,7 +4,7 @@
 
 - Repository: `Ding-Ding-Projects/nazca`
 - Default branch: `main`
-- Last verified pushed commit: `a847c731c289cd510c2e6c9c204f84e0e38e082b`
+- Last verified pushed commit: `a6b95428167ccf2471de6719db58f00eae0906fc`
 - Tracking issue: https://github.com/Ding-Ding-Projects/nazca/issues/1
 - Rolling progress: https://github.com/Ding-Ding-Projects/nazca/discussions/2
 - Release progress: https://github.com/Ding-Ding-Projects/nazca/discussions/3
@@ -13,6 +13,9 @@
 
 - Modern transit-atlas shell with responsive light and dark presentation.
 - Global search over the first local fixture records.
+- Shared RE2/WASM worker workbench for the global and article search fields,
+  including explicit dialect limits, captures, replacement preview, timing,
+  zero-width handling, and bounded output.
 - Nazca Railway article route with section search, bounded regex preview, line
   table, source link, and noncanonical preview disclosure.
 - Typed corpus, page, redirect, revision, map, media, rights, volume, feature,

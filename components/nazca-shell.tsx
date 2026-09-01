@@ -9,17 +9,19 @@ import {
   Layers3,
   Map,
   Moon,
-  Search,
   Settings,
   Sun,
   TramFront,
   TrainFront,
   Wrench,
-  X,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import {
+  SearchWorkbench,
+  type SearchRecord,
+} from '@/components/search-workbench';
 import { formatBuildTime, type BuildProvenance } from '@/lib/provenance';
 import { publicPath } from '@/lib/public-path';
 
@@ -145,26 +147,24 @@ const quickLinks = [
   },
 ];
 
-function normalized(value: string) {
-  return value.normalize('NFKC').toLocaleLowerCase();
-}
-
 function recordText(record: AtlasRecord) {
   return `${record.title} ${record.kind} ${record.detail}`;
 }
 
+const searchRecords: SearchRecord[] = records.map((record) => ({
+  id: record.id,
+  title: record.title,
+  subtitle: `${record.kind} · ${record.detail}`,
+  text: recordText(record),
+}));
+
 export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('home');
-  const [query, setQuery] = useState('');
-  const [regexOpen, setRegexOpen] = useState(false);
-  const [pattern, setPattern] = useState('Nazca|Station|Line');
-  const [flags, setFlags] = useState('i');
   const [dark, setDark] = useState(false);
-  const searchInput = useRef<HTMLInputElement>(null);
-  const regexButton = useRef<HTMLButtonElement>(null);
-  const patternInput = useRef<HTMLInputElement>(null);
-  const updatedAt = formatBuildTime(provenance.builtAt);
+  const [updatedAt, setUpdatedAt] = useState(() =>
+    formatBuildTime(provenance.builtAt),
+  );
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
@@ -172,55 +172,19 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
   }, [dark]);
 
   useEffect(() => {
-    if (regexOpen) patternInput.current?.focus();
-  }, [regexOpen]);
-
-  const closeRegex = () => {
-    setRegexOpen(false);
-    regexButton.current?.focus();
-  };
+    setUpdatedAt(formatBuildTime(provenance.builtAt, true));
+  }, [provenance.builtAt]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'f') {
         event.preventDefault();
-        searchInput.current?.focus();
-      }
-      if (event.key === 'Escape' && regexOpen) {
-        closeRegex();
+        document.getElementById('global-atlas-search-input')?.focus();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [regexOpen]);
-
-  const regexPreview = useMemo(() => {
-    if (!regexOpen)
-      return { results: [] as AtlasRecord[], error: null as string | null };
-    try {
-      const expression = new RegExp(pattern, flags.replaceAll('g', ''));
-      return {
-        results: records.filter((record) =>
-          expression.test(recordText(record)),
-        ),
-        error: null,
-      };
-    } catch (error) {
-      return {
-        results: [] as AtlasRecord[],
-        error:
-          error instanceof Error ? error.message : 'The pattern is invalid.',
-      };
-    }
-  }, [flags, pattern, regexOpen]);
-
-  const plainResults = useMemo(() => {
-    const needle = normalized(query.trim());
-    if (!needle) return [];
-    return records.filter((record) =>
-      normalized(recordText(record)).includes(needle),
-    );
-  }, [query]);
+  }, []);
 
   const selectedLabel =
     groups.flatMap((group) => group.items).find((item) => item.id === activeTab)
@@ -240,8 +204,13 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
             ? 'places'
             : 'explore',
     );
-    setQuery('');
-    setRegexOpen(false);
+  };
+
+  const activateSearchRecord = (searchRecord: SearchRecord) => {
+    const record = records.find(
+      (candidate) => candidate.id === searchRecord.id,
+    );
+    if (record) openRecord(record);
   };
 
   return (
@@ -270,127 +239,14 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
           </span>
         </button>
 
-        <div className="global-search-wrap" role="search">
-          <label className="sr-only" htmlFor="global-search">
-            Search the encyclopedia
-          </label>
-          <div className="search-row">
-            <input
-              ref={searchInput}
-              id="global-search"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search stations, lines, places, and articles"
-              aria-controls={
-                query.trim() && !regexOpen ? 'global-search-results' : undefined
-              }
-            />
-            <button
-              ref={regexButton}
-              type="button"
-              aria-label="Open regular expression builder"
-              aria-expanded={regexOpen}
-              aria-controls={regexOpen ? 'global-regex-builder' : undefined}
-              onClick={() => setRegexOpen((value) => !value)}
-            >
-              <Search size={18} aria-hidden="true" />
-            </button>
-          </div>
-
-          {regexOpen ? (
-            <section
-              id="global-regex-builder"
-              className="regex-popover"
-              aria-label="Regular expression builder"
-            >
-              <div className="popover-title">
-                <div>
-                  <h2>Advanced regex builder</h2>
-                  <p>Local preview for the current atlas records.</p>
-                </div>
-                <button
-                  className="icon-button"
-                  type="button"
-                  aria-label="Close regex builder"
-                  onClick={closeRegex}
-                >
-                  <X size={18} aria-hidden="true" />
-                </button>
-              </div>
-              <div className="field-grid">
-                <div className="field">
-                  <label htmlFor="regex-pattern">Pattern</label>
-                  <input
-                    ref={patternInput}
-                    id="regex-pattern"
-                    value={pattern}
-                    onChange={(event) => setPattern(event.target.value)}
-                    spellCheck={false}
-                  />
-                </div>
-                <div className="field">
-                  <label htmlFor="regex-flags">Flags</label>
-                  <input
-                    id="regex-flags"
-                    value={flags}
-                    onChange={(event) => setFlags(event.target.value)}
-                    spellCheck={false}
-                  />
-                </div>
-              </div>
-              <div className="regex-explanation" role="status">
-                {regexPreview.error
-                  ? `Pattern error: ${regexPreview.error}`
-                  : `Valid pattern. ${regexPreview.results.length} local records match.`}
-                <br />
-                This first slice proves the anchored field. The complete build
-                adds guided construction, capture tables, replacement preview,
-                saved cases, profiling, and bounded worker evaluation.
-              </div>
-            </section>
-          ) : null}
-
-          {query.trim() && !regexOpen ? (
-            <section
-              id="global-search-results"
-              className="search-results-popover"
-              aria-label="Search results"
-            >
-              <div aria-live="polite" className="sr-only">
-                {plainResults.length} results
-              </div>
-              {plainResults.length ? (
-                <ul className="result-list">
-                  {plainResults.map((record) => (
-                    <li key={record.id}>
-                      <button
-                        className="result-item"
-                        type="button"
-                        onClick={() => openRecord(record)}
-                      >
-                        <span
-                          className="route-dot"
-                          style={{ color: record.color }}
-                          aria-hidden="true"
-                        />
-                        <span>
-                          <strong>{record.title}</strong>
-                          <span>
-                            {record.kind} · {record.detail}
-                          </span>
-                        </span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="empty-result">
-                  No atlas records match “{query}”.
-                </p>
-              )}
-            </section>
-          ) : null}
+        <div className="global-search-wrap">
+          <SearchWorkbench
+            surfaceId="global-atlas-search"
+            label="Search the encyclopedia"
+            placeholder="Search stations, lines, places, and articles"
+            records={searchRecords}
+            onActivate={activateSearchRecord}
+          />
         </div>
 
         <div className="header-actions">
@@ -399,7 +255,7 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
             aria-label={`Version ${provenance.version}. Updated ${updatedAt}.`}
           >
             <strong>v{provenance.version}</strong>
-            <span suppressHydrationWarning>{updatedAt}</span>
+            <span>{updatedAt}</span>
           </div>
           <button
             className="icon-button"

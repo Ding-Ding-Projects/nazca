@@ -47,3 +47,4 @@ next-env.d.ts
 /data/corpus/current.json
 /data/import-journal/
 /public/provenance.json
+/public/_next/
