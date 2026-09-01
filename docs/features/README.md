@@ -11,6 +11,8 @@ The current build implements only the first reader and delivery foundations.
 Rows marked `missing` or `partial` are release blockers, not future ideas that can
 quietly disappear.
 
+- [Visitor settings](visitor-settings.md)
+
 ## Configuration
 
 Run:

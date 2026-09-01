@@ -24,4 +24,5 @@
 ## Features and verification
 
 - [Universal feature status](features/README.md)
+- [Visitor settings](features/visitor-settings.md)
 - [Verification and evidence](verification/README.md)

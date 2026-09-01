@@ -109,17 +109,17 @@
     {
       "id": "S-008",
       "route": "/settings and each settings tab",
-      "owner": "SettingsSearch",
+      "owner": "SettingsWorkspace with SearchWorkbench",
       "scope": "local option labels, descriptions, and values",
-      "fieldId": "settings-search",
-      "builderId": "settings-regex-builder",
+      "fieldId": "settings-<tab>-search-input",
+      "builderId": "settings-<tab>-search-builder",
       "stateKey": "search.settings",
       "activationTarget": "exact setting control",
       "focusReturnTarget": "settings-search",
       "plainTextDefault": true,
       "anchoredBuilder": true,
-      "documentation": "docs/features/README.md",
-      "state": "missing"
+      "documentation": "docs/features/visitor-settings.md",
+      "state": "partial"
     },
     {
       "id": "S-009",

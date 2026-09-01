@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { VisitorStateProvider } from '@/components/visitor-state-provider';
 import './globals.css';
 
 const deploymentOrigin =
@@ -54,7 +55,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>{children}</body>
+      <body>
+        <VisitorStateProvider>{children}</VisitorStateProvider>
+      </body>
     </html>
   );
 }

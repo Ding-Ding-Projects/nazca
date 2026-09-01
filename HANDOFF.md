@@ -4,7 +4,7 @@
 
 - Repository: `Ding-Ding-Projects/nazca`
 - Default branch: `main`
-- Last verified pushed commit: `a6b95428167ccf2471de6719db58f00eae0906fc`
+- Last verified pushed commit: `1053bf92b3bc0dd6595065268281598cc5009404`
 - Tracking issue: https://github.com/Ding-Ding-Projects/nazca/issues/1
 - Rolling progress: https://github.com/Ding-Ding-Projects/nazca/discussions/2
 - Release progress: https://github.com/Ding-Ding-Projects/nazca/discussions/3
@@ -16,6 +16,11 @@
 - Shared RE2/WASM worker workbench for the global and article search fields,
   including explicit dialect limits, captures, replacement preview, timing,
   zero-width handling, and bounded output.
+- Strict browser-local visitor state with IndexedDB persistence, cross-tab
+  revision notices, language and funny-level controls, personal vocabulary,
+  renamed School mode, narrator voice settings, schedules, and five attention
+  controls. These settings are functional first slices, not release-complete
+  implementations of every related feature contract.
 - Nazca Railway article route with section search, bounded regex preview, line
   table, source link, and noncanonical preview disclosure.
 - Typed corpus, page, redirect, revision, map, media, rights, volume, feature,

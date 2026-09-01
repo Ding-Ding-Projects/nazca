@@ -1046,6 +1046,191 @@ input:focus-visible,
   text-decoration: none;
 }
 
+.settings-workspace {
+  width: min(100%, 76rem);
+  margin-inline: auto;
+}
+.workspace-title {
+  max-width: 22ch;
+  margin: 0;
+  font-size: clamp(2rem, 4.5vw, 3.8rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+.settings-layout {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(11rem, 15rem) minmax(0, 1fr);
+  gap: 1rem;
+  margin-block-start: 1.5rem;
+}
+.settings-tabs {
+  align-self: start;
+  display: grid;
+  gap: 0.25rem;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: 0.65rem;
+  box-shadow: var(--shadow-card);
+}
+.settings-tabs button {
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: 0.7rem;
+  background: transparent;
+  color: var(--ink-soft);
+  padding: 0.55rem 0.75rem;
+  text-align: start;
+  cursor: pointer;
+}
+.settings-tabs button:hover {
+  background: var(--surface-soft);
+}
+.settings-tabs button[aria-current='page'] {
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+  font-weight: 800;
+}
+.settings-panel {
+  min-width: 0;
+  display: grid;
+  gap: 1rem;
+}
+.settings-list {
+  display: grid;
+  gap: 0.7rem;
+}
+.setting-row {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(10rem, auto);
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: 1rem;
+  box-shadow: var(--shadow-card);
+}
+.setting-row > span:first-child {
+  min-width: 0;
+}
+.setting-row strong,
+.setting-row small {
+  display: block;
+}
+.setting-row small {
+  margin-block-start: 0.3rem;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+.setting-row
+  input:not([type='checkbox']):not([type='range']):not([type='color']),
+.setting-row select {
+  width: min(100%, 22rem);
+  min-height: 2.75rem;
+  border: 1px solid var(--outline);
+  border-radius: 0.7rem;
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding-inline: 0.7rem;
+}
+.setting-row input[type='checkbox'] {
+  width: 1.5rem;
+  height: 1.5rem;
+  accent-color: var(--primary);
+}
+.setting-row input[type='range'] {
+  width: min(100%, 18rem);
+  accent-color: var(--primary);
+}
+.setting-row input[type='color'] {
+  width: 4rem;
+  height: 2.75rem;
+  border: 1px solid var(--outline);
+  border-radius: 0.7rem;
+  background: var(--surface);
+}
+.setting-row > p,
+.settings-status {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+.setting-actions,
+.schedule-editor {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+.setting-actions button,
+.schedule-editor button,
+.schedule-list button,
+.primary-action {
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--on-primary);
+  padding-inline: 1rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+.setting-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.setting-actions input[type='file'] {
+  max-width: min(100%, 22rem);
+}
+.schedule-editor input {
+  max-width: 11rem;
+}
+.schedule-list {
+  min-width: 0;
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.schedule-list li {
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-block-end: 1px solid var(--outline);
+}
+[data-density='compact'] .setting-row,
+[data-density='compact'] .content-card,
+[data-density='compact'] .rail-card {
+  padding: 0.7rem;
+}
+.low-stimulation *,
+.low-stimulation *::before,
+.low-stimulation *::after {
+  animation: none !important;
+  transition: none !important;
+}
+.low-stimulation .map-card::before,
+.low-stimulation .map-card::after {
+  opacity: 0.38;
+}
+.focus-mode .right-rail,
+.focus-mode .quick-grid {
+  opacity: 0.42;
+}
+.focus-mode .main-viewport:focus-within {
+  opacity: 1;
+}
+
 @media (max-width: 74rem) {
   :root {
     --rail-width: 0rem;
@@ -1097,6 +1282,13 @@ input:focus-visible,
     grid-template-columns: repeat(3, minmax(9rem, 1fr));
     overflow-x: auto;
     padding-block-end: 0.25rem;
+  }
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+  .settings-tabs {
+    grid-template-columns: repeat(4, minmax(10rem, 1fr));
+    overflow-x: auto;
   }
 }
 
@@ -1185,6 +1377,17 @@ input:focus-visible,
   }
   .article-source-card a {
     justify-content: center;
+  }
+  .settings-tabs {
+    grid-template-columns: repeat(8, minmax(9.5rem, 1fr));
+  }
+  .setting-row {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+  .setting-actions,
+  .schedule-editor {
+    justify-content: flex-start;
   }
 }
 

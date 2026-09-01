@@ -22,6 +22,9 @@ import {
   SearchWorkbench,
   type SearchRecord,
 } from '@/components/search-workbench';
+import { SettingsWorkspace } from '@/components/settings-workspace';
+import { useVisitorState } from '@/components/visitor-state-provider';
+import { labels, localize } from '@/lib/i18n';
 import { formatBuildTime, type BuildProvenance } from '@/lib/provenance';
 import { publicPath } from '@/lib/public-path';
 
@@ -160,16 +163,17 @@ const searchRecords: SearchRecord[] = records.map((record) => ({
 
 export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
   const router = useRouter();
+  const { state, text, updateSettings } = useVisitorState();
+  const settings = state.settings;
+  const languageMode = settings.schoolMode.enabled
+    ? 'en'
+    : settings.languageMode;
+  const L = (english: string, cantonese: string) =>
+    text(localize(english, cantonese, languageMode));
   const [activeTab, setActiveTab] = useState('home');
-  const [dark, setDark] = useState(false);
   const [updatedAt, setUpdatedAt] = useState(() =>
     formatBuildTime(provenance.builtAt),
   );
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', dark);
-    return () => document.documentElement.classList.remove('dark');
-  }, [dark]);
 
   useEffect(() => {
     setUpdatedAt(formatBuildTime(provenance.builtAt, true));
@@ -189,6 +193,10 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
   const selectedLabel =
     groups.flatMap((group) => group.items).find((item) => item.id === activeTab)
       ?.label ?? 'Explore';
+  const tabLabel = (id: string, fallback: string) => {
+    const pair = labels[id as keyof typeof labels];
+    return pair ? L(pair[0], pair[1]) : fallback;
+  };
 
   const openRecord = (record: AtlasRecord) => {
     if (record.id === 'nazca') {
@@ -234,8 +242,10 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
             NR
           </span>
           <span className="brand-copy">
-            <strong>Nazca Railway</strong>
-            <span>The Encyclopedia of Los Sengas</span>
+            <strong>{settings.displayName ?? 'Nazca Railway'}</strong>
+            <span>
+              {L('The Encyclopedia of Los Sengas', '洛斯辛格斯百科全書')}
+            </span>
           </span>
         </button>
 
@@ -260,11 +270,19 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
           <button
             className="icon-button"
             type="button"
-            aria-label={dark ? 'Use light theme' : 'Use dark theme'}
-            aria-pressed={dark}
-            onClick={() => setDark((value) => !value)}
+            aria-label={
+              settings.theme === 'dark'
+                ? L('Use light theme', '用淺色主題')
+                : L('Use dark theme', '用深色主題')
+            }
+            aria-pressed={settings.theme === 'dark'}
+            onClick={() =>
+              updateSettings({
+                theme: settings.theme === 'dark' ? 'light' : 'dark',
+              })
+            }
           >
-            {dark ? (
+            {settings.theme === 'dark' ? (
               <Sun size={19} aria-hidden="true" />
             ) : (
               <Moon size={19} aria-hidden="true" />
@@ -277,7 +295,13 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
         <nav className="tab-dock" aria-label="Atlas tabs">
           {groups.map((group) => (
             <div key={group.label}>
-              <p className="dock-label">{group.label}</p>
+              <p className="dock-label">
+                {group.label === 'Reader'
+                  ? L('Reader', '閱讀')
+                  : group.label === 'Atlas'
+                    ? L('Atlas', '圖鑑')
+                    : L('Research', '研究')}
+              </p>
               <div className="tab-list">
                 {group.items.map((item) => {
                   const Icon = item.icon;
@@ -288,13 +312,13 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
                       type="button"
                       className="tab-button"
                       aria-current={selected ? 'page' : undefined}
-                      title={item.label}
+                      title={tabLabel(item.id, item.label)}
                       onClick={() => setActiveTab(item.id)}
                     >
                       <span className="tab-icon">
                         <Icon size={18} aria-hidden="true" />
                       </span>
-                      <span>{item.label}</span>
+                      <span>{tabLabel(item.id, item.label)}</span>
                       {item.count ? (
                         <span className="tab-count">{item.count}</span>
                       ) : null}
@@ -307,118 +331,133 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
         </nav>
 
         <main id="main-content" className="main-viewport" tabIndex={-1}>
-          <div className="route-content">
-            <p className="eyebrow">Nazca Railway atlas</p>
-            <h1 className="page-title">
-              {activeTab === 'home'
-                ? 'Railways without the clutter.'
-                : selectedLabel}
-            </h1>
-            <p className="lede">
-              A modern, searchable home for the complete Los Sengas transport
-              encyclopedia, with clear routes, readable tables, source history,
-              and a focused map-first experience.
-            </p>
+          {activeTab === 'settings' ? (
+            <SettingsWorkspace />
+          ) : (
+            <div className="route-content">
+              <p className="eyebrow">
+                {L('Nazca Railway atlas', 'Nazca Railway 鐵路圖鑑')}
+              </p>
+              <h1 className="page-title">
+                {activeTab === 'home'
+                  ? localize(
+                      settings.funnyLevelEnglish === 1
+                        ? 'A clear railway encyclopedia.'
+                        : 'Railways without the clutter.',
+                      settings.funnyLevelCantonese === 1
+                        ? '清晰嘅鐵路百科。'
+                        : '清楚睇鐵路，唔使同雜亂版面搏鬥。',
+                      languageMode,
+                    )
+                  : tabLabel(activeTab, selectedLabel)}
+              </h1>
+              <p className="lede">
+                {L(
+                  'A modern, searchable home for the complete Los Sengas transport encyclopedia, with clear routes, readable tables, source history, and a focused map-first experience.',
+                  '一個現代、可搜尋嘅洛斯辛格斯交通百科首頁，路線清楚、表格易讀、來源歷史齊全，地圖放喺最有用嘅位置。',
+                )}
+              </p>
 
-            <section
-              className="quick-grid"
-              aria-label="Explore the encyclopedia"
-            >
-              {quickLinks.map((link) => (
-                <button
-                  key={link.label}
-                  type="button"
-                  className="quick-card"
-                  onClick={() => setActiveTab(link.tab)}
-                >
-                  <span
-                    className="route-dot"
-                    style={{ color: link.color }}
-                    aria-hidden="true"
-                  />
-                  <span>
-                    <strong>{link.label}</strong>
-                    <span>{link.meta}</span>
-                  </span>
-                </button>
-              ))}
-            </section>
-
-            <div className="home-grid">
-              <section className="map-card" aria-labelledby="map-heading">
-                <div className="map-card-header">
-                  <div>
-                    <h2 id="map-heading">Metropolis network overview</h2>
-                    <p>
-                      The final interactive view preserves all three source map
-                      records and a complete text equivalent.
-                    </p>
-                  </div>
-                  <Map size={20} aria-hidden="true" />
-                </div>
-                <span className="map-label one">Metropolis</span>
-                <span className="map-label two">Arcgo</span>
-                <span className="map-label three">Oasis Bay</span>
+              <section
+                className="quick-grid"
+                aria-label="Explore the encyclopedia"
+              >
+                {quickLinks.map((link) => (
+                  <button
+                    key={link.label}
+                    type="button"
+                    className="quick-card"
+                    onClick={() => setActiveTab(link.tab)}
+                  >
+                    <span
+                      className="route-dot"
+                      style={{ color: link.color }}
+                      aria-hidden="true"
+                    />
+                    <span>
+                      <strong>{tabLabel(link.tab, link.label)}</strong>
+                      <span>{link.meta}</span>
+                    </span>
+                  </button>
+                ))}
               </section>
 
-              <div className="content-stack">
-                <section
-                  className="content-card"
-                  aria-labelledby="corpus-heading"
-                >
-                  <h2 id="corpus-heading">Pinned corpus baseline</h2>
-                  <p>
-                    The importer recaptures and reconciles one stable cutoff
-                    before this repository becomes canonical.
-                  </p>
-                  <div className="stat-row">
-                    <div className="stat">
-                      <strong>3,422</strong>
-                      <span>articles</span>
+              <div className="home-grid">
+                <section className="map-card" aria-labelledby="map-heading">
+                  <div className="map-card-header">
+                    <div>
+                      <h2 id="map-heading">Metropolis network overview</h2>
+                      <p>
+                        The final interactive view preserves all three source
+                        map records and a complete text equivalent.
+                      </p>
                     </div>
-                    <div className="stat">
-                      <strong>194</strong>
-                      <span>redirects</span>
-                    </div>
-                    <div className="stat">
-                      <strong>16,555</strong>
-                      <span>media</span>
-                    </div>
+                    <Map size={20} aria-hidden="true" />
                   </div>
+                  <span className="map-label one">Metropolis</span>
+                  <span className="map-label two">Arcgo</span>
+                  <span className="map-label three">Oasis Bay</span>
                 </section>
 
-                <section
-                  className="content-card"
-                  aria-labelledby="recent-heading"
-                >
-                  <h2 id="recent-heading">Start with a useful record</h2>
-                  <ul className="recent-list">
-                    {records.slice(0, 3).map((record) => (
-                      <li key={record.id}>
-                        <button
-                          type="button"
-                          className="recent-item"
-                          onClick={() => openRecord(record)}
-                        >
-                          <span
-                            className="route-dot"
-                            style={{ color: record.color }}
-                            aria-hidden="true"
-                          />
-                          <span>
-                            <strong>{record.title}</strong>
+                <div className="content-stack">
+                  <section
+                    className="content-card"
+                    aria-labelledby="corpus-heading"
+                  >
+                    <h2 id="corpus-heading">Pinned corpus baseline</h2>
+                    <p>
+                      The importer recaptures and reconciles one stable cutoff
+                      before this repository becomes canonical.
+                    </p>
+                    <div className="stat-row">
+                      <div className="stat">
+                        <strong>3,422</strong>
+                        <span>articles</span>
+                      </div>
+                      <div className="stat">
+                        <strong>194</strong>
+                        <span>redirects</span>
+                      </div>
+                      <div className="stat">
+                        <strong>16,555</strong>
+                        <span>media</span>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section
+                    className="content-card"
+                    aria-labelledby="recent-heading"
+                  >
+                    <h2 id="recent-heading">Start with a useful record</h2>
+                    <ul className="recent-list">
+                      {records.slice(0, 3).map((record) => (
+                        <li key={record.id}>
+                          <button
+                            type="button"
+                            className="recent-item"
+                            onClick={() => openRecord(record)}
+                          >
+                            <span
+                              className="route-dot"
+                              style={{ color: record.color }}
+                              aria-hidden="true"
+                            />
                             <span>
-                              {record.kind} · {record.detail}
+                              <strong>{record.title}</strong>
+                              <span>
+                                {record.kind} · {record.detail}
+                              </span>
                             </span>
-                          </span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </main>
 
         <aside className="right-rail" aria-label="Provenance and status">
