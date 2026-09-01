@@ -1,0 +1,22 @@
+{
+  "recordType": "PlanningSnapshotV1",
+  "schemaVersion": "1.0.0",
+  "capturedAt": "2026-08-31T22:31:18Z",
+  "source": "https://enlossengas.fandom.com/api.php",
+  "rights": "https://www.fandom.com/licensing",
+  "counts": {
+    "totalPages": 22239,
+    "articles": 3425,
+    "mainNamespaceRoutes": 3616,
+    "mainNamespaceCurrentArticles": 3422,
+    "mainNamespaceRedirects": 194,
+    "templates": 1996,
+    "modules": 18,
+    "maps": 3,
+    "edits": 62898,
+    "currentMedia": 16555,
+    "currentMediaBytes": 5706615419
+  },
+  "status": "planning-only",
+  "replacementRule": "The final stable importer manifest replaces these planning counts."
+}

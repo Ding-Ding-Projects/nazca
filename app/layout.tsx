@@ -2,7 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 const deploymentOrigin =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ding-ding-projects.github.io/nazca/';
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  'https://ding-ding-projects.github.io/nazca/';
 
 export const metadata: Metadata = {
   metadataBase: new URL(deploymentOrigin),
@@ -13,18 +14,29 @@ export const metadata: Metadata = {
   description:
     'A modern, searchable transit atlas and encyclopedia for Nazca Railway and Los Sengas.',
   applicationName: 'Nazca Railway',
+  alternates: { canonical: deploymentOrigin },
   openGraph: {
     type: 'website',
     title: 'Nazca Railway',
     description:
       'A modern, searchable transit atlas and encyclopedia for Nazca Railway and Los Sengas.',
     siteName: 'Nazca Railway',
+    url: deploymentOrigin,
+    images: [
+      {
+        url: 'social-preview.png',
+        width: 1774,
+        height: 887,
+        alt: 'Nazca Railway transit atlas with colored railway lines and the Encyclopedia of Los Sengas title.',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Nazca Railway',
     description:
       'A modern, searchable transit atlas and encyclopedia for Nazca Railway and Los Sengas.',
+    images: ['social-preview.png'],
   },
 };
 

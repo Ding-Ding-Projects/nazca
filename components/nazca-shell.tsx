@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  Bell,
   Building2,
   Clock3,
   Compass,
@@ -13,11 +12,16 @@ import {
   Search,
   Settings,
   Sun,
+  TramFront,
   TrainFront,
   Wrench,
   X,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { formatBuildTime, type BuildProvenance } from '@/lib/provenance';
+import { publicPath } from '@/lib/public-path';
 
 type AtlasRecord = {
   id: string;
@@ -27,12 +31,25 @@ type AtlasRecord = {
   color: string;
 };
 
+type AtlasTab = {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  count: string;
+};
+
+type AtlasTabGroup = {
+  label: string;
+  items: readonly AtlasTab[];
+};
+
 const records: AtlasRecord[] = [
   {
     id: 'nazca',
     title: 'Nazca Railway (Los Sengas Division)',
     kind: 'Article',
-    detail: 'Railway systems, rolling stock, structures, incidents, and future development',
+    detail:
+      'Railway systems, rolling stock, structures, incidents, and future development',
     color: 'var(--route-blue)',
   },
   {
@@ -72,7 +89,7 @@ const records: AtlasRecord[] = [
   },
 ];
 
-const groups = [
+const groups: readonly AtlasTabGroup[] = [
   {
     label: 'Reader',
     items: [
@@ -88,6 +105,7 @@ const groups = [
       { id: 'places', label: 'Places', icon: Building2, count: '' },
       { id: 'maps', label: 'Maps', icon: Map, count: '3' },
       { id: 'timeline', label: 'Timeline', icon: Clock3, count: '' },
+      { id: 'streetcars', label: 'Streetcars', icon: TramFront, count: '581' },
     ],
   },
   {
@@ -98,13 +116,33 @@ const groups = [
       { id: 'settings', label: 'Settings', icon: Settings, count: '' },
     ],
   },
-] as const;
+];
 
 const quickLinks = [
-  { label: 'Stations', meta: '1,222 indexed titles', color: 'var(--route-blue)', tab: 'stations' },
-  { label: 'Lines', meta: '156 line records', color: 'var(--route-red)', tab: 'lines' },
-  { label: 'Places', meta: 'Districts and islands', color: 'var(--route-green)', tab: 'places' },
-  { label: 'Infrastructure', meta: 'Roads, bridges, depots', color: 'var(--route-gold)', tab: 'explore' },
+  {
+    label: 'Stations',
+    meta: '1,222 indexed titles',
+    color: 'var(--route-blue)',
+    tab: 'stations',
+  },
+  {
+    label: 'Lines',
+    meta: '156 line records',
+    color: 'var(--route-red)',
+    tab: 'lines',
+  },
+  {
+    label: 'Places',
+    meta: 'Districts and islands',
+    color: 'var(--route-green)',
+    tab: 'places',
+  },
+  {
+    label: 'Infrastructure',
+    meta: 'Roads, bridges, depots',
+    color: 'var(--route-gold)',
+    tab: 'explore',
+  },
 ];
 
 function normalized(value: string) {
@@ -115,7 +153,8 @@ function recordText(record: AtlasRecord) {
   return `${record.title} ${record.kind} ${record.detail}`;
 }
 
-export function NazcaShell() {
+export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('home');
   const [query, setQuery] = useState('');
   const [regexOpen, setRegexOpen] = useState(false);
@@ -123,11 +162,23 @@ export function NazcaShell() {
   const [flags, setFlags] = useState('i');
   const [dark, setDark] = useState(false);
   const searchInput = useRef<HTMLInputElement>(null);
+  const regexButton = useRef<HTMLButtonElement>(null);
+  const patternInput = useRef<HTMLInputElement>(null);
+  const updatedAt = formatBuildTime(provenance.builtAt);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
     return () => document.documentElement.classList.remove('dark');
   }, [dark]);
+
+  useEffect(() => {
+    if (regexOpen) patternInput.current?.focus();
+  }, [regexOpen]);
+
+  const closeRegex = () => {
+    setRegexOpen(false);
+    regexButton.current?.focus();
+  };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -136,8 +187,7 @@ export function NazcaShell() {
         searchInput.current?.focus();
       }
       if (event.key === 'Escape' && regexOpen) {
-        setRegexOpen(false);
-        searchInput.current?.focus();
+        closeRegex();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -145,17 +195,21 @@ export function NazcaShell() {
   }, [regexOpen]);
 
   const regexPreview = useMemo(() => {
-    if (!regexOpen) return { results: [] as AtlasRecord[], error: null as string | null };
+    if (!regexOpen)
+      return { results: [] as AtlasRecord[], error: null as string | null };
     try {
       const expression = new RegExp(pattern, flags.replaceAll('g', ''));
       return {
-        results: records.filter((record) => expression.test(recordText(record))),
+        results: records.filter((record) =>
+          expression.test(recordText(record)),
+        ),
         error: null,
       };
     } catch (error) {
       return {
         results: [] as AtlasRecord[],
-        error: error instanceof Error ? error.message : 'The pattern is invalid.',
+        error:
+          error instanceof Error ? error.message : 'The pattern is invalid.',
       };
     }
   }, [flags, pattern, regexOpen]);
@@ -163,14 +217,20 @@ export function NazcaShell() {
   const plainResults = useMemo(() => {
     const needle = normalized(query.trim());
     if (!needle) return [];
-    return records.filter((record) => normalized(recordText(record)).includes(needle));
+    return records.filter((record) =>
+      normalized(recordText(record)).includes(needle),
+    );
   }, [query]);
 
   const selectedLabel =
-    groups.flatMap((group) => group.items).find((item) => item.id === activeTab)?.label ??
-    'Explore';
+    groups.flatMap((group) => group.items).find((item) => item.id === activeTab)
+      ?.label ?? 'Explore';
 
   const openRecord = (record: AtlasRecord) => {
+    if (record.id === 'nazca') {
+      router.push(publicPath('/wiki/Nazca_Railway_(Los_Sengas_Division)'));
+      return;
+    }
     setActiveTab(
       record.kind === 'Station'
         ? 'stations'
@@ -185,7 +245,11 @@ export function NazcaShell() {
   };
 
   return (
-    <div className="app-shell" data-element-id="shell:nazca" data-element-kind="page">
+    <div
+      className="app-shell"
+      data-element-id="shell:nazca"
+      data-element-kind="page"
+    >
       <a className="skip-link" href="#main-content">
         Skip to atlas content
       </a>
@@ -218,13 +282,16 @@ export function NazcaShell() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search stations, lines, places, and articles"
-              aria-controls="global-search-results"
+              aria-controls={
+                query.trim() && !regexOpen ? 'global-search-results' : undefined
+              }
             />
             <button
+              ref={regexButton}
               type="button"
               aria-label="Open regular expression builder"
               aria-expanded={regexOpen}
-              aria-controls="global-regex-builder"
+              aria-controls={regexOpen ? 'global-regex-builder' : undefined}
               onClick={() => setRegexOpen((value) => !value)}
             >
               <Search size={18} aria-hidden="true" />
@@ -246,7 +313,7 @@ export function NazcaShell() {
                   className="icon-button"
                   type="button"
                   aria-label="Close regex builder"
-                  onClick={() => setRegexOpen(false)}
+                  onClick={closeRegex}
                 >
                   <X size={18} aria-hidden="true" />
                 </button>
@@ -255,6 +322,7 @@ export function NazcaShell() {
                 <div className="field">
                   <label htmlFor="regex-pattern">Pattern</label>
                   <input
+                    ref={patternInput}
                     id="regex-pattern"
                     value={pattern}
                     onChange={(event) => setPattern(event.target.value)}
@@ -276,9 +344,9 @@ export function NazcaShell() {
                   ? `Pattern error: ${regexPreview.error}`
                   : `Valid pattern. ${regexPreview.results.length} local records match.`}
                 <br />
-                This first slice proves the anchored field. The complete build adds guided
-                construction, capture tables, replacement preview, saved cases, profiling, and
-                bounded worker evaluation.
+                This first slice proves the anchored field. The complete build
+                adds guided construction, capture tables, replacement preview,
+                saved cases, profiling, and bounded worker evaluation.
               </div>
             </section>
           ) : null}
@@ -317,7 +385,9 @@ export function NazcaShell() {
                   ))}
                 </ul>
               ) : (
-                <p className="empty-result">No atlas records match “{query}”.</p>
+                <p className="empty-result">
+                  No atlas records match “{query}”.
+                </p>
               )}
             </section>
           ) : null}
@@ -326,21 +396,23 @@ export function NazcaShell() {
         <div className="header-actions">
           <div
             className="version-chip"
-            aria-label="Version 0.1.0. Build provenance is unavailable before the first commit."
+            aria-label={`Version ${provenance.version}. Updated ${updatedAt}.`}
           >
-            <strong>v0.1.0</strong>
-            <span>Provenance pending</span>
+            <strong>v{provenance.version}</strong>
+            <span suppressHydrationWarning>{updatedAt}</span>
           </div>
           <button
             className="icon-button"
             type="button"
             aria-label={dark ? 'Use light theme' : 'Use dark theme'}
+            aria-pressed={dark}
             onClick={() => setDark((value) => !value)}
           >
-            {dark ? <Sun size={19} aria-hidden="true" /> : <Moon size={19} aria-hidden="true" />}
-          </button>
-          <button className="icon-button" type="button" aria-label="Open notifications">
-            <Bell size={19} aria-hidden="true" />
+            {dark ? (
+              <Sun size={19} aria-hidden="true" />
+            ) : (
+              <Moon size={19} aria-hidden="true" />
+            )}
           </button>
         </div>
       </header>
@@ -350,7 +422,7 @@ export function NazcaShell() {
           {groups.map((group) => (
             <div key={group.label}>
               <p className="dock-label">{group.label}</p>
-              <div className="tab-list" role="tablist" aria-orientation="vertical">
+              <div className="tab-list">
                 {group.items.map((item) => {
                   const Icon = item.icon;
                   const selected = activeTab === item.id;
@@ -359,9 +431,7 @@ export function NazcaShell() {
                       key={item.id}
                       type="button"
                       className="tab-button"
-                      role="tab"
-                      aria-selected={selected}
-                      aria-controls="main-content"
+                      aria-current={selected ? 'page' : undefined}
                       title={item.label}
                       onClick={() => setActiveTab(item.id)}
                     >
@@ -369,7 +439,9 @@ export function NazcaShell() {
                         <Icon size={18} aria-hidden="true" />
                       </span>
                       <span>{item.label}</span>
-                      {item.count ? <span className="tab-count">{item.count}</span> : null}
+                      {item.count ? (
+                        <span className="tab-count">{item.count}</span>
+                      ) : null}
                     </button>
                   );
                 })}
@@ -382,15 +454,20 @@ export function NazcaShell() {
           <div className="route-content">
             <p className="eyebrow">Nazca Railway atlas</p>
             <h1 className="page-title">
-              {activeTab === 'home' ? 'Railways without the clutter.' : selectedLabel}
+              {activeTab === 'home'
+                ? 'Railways without the clutter.'
+                : selectedLabel}
             </h1>
             <p className="lede">
-              A modern, searchable home for the complete Los Sengas transport encyclopedia,
-              with clear routes, readable tables, source history, and a focused map-first
-              experience.
+              A modern, searchable home for the complete Los Sengas transport
+              encyclopedia, with clear routes, readable tables, source history,
+              and a focused map-first experience.
             </p>
 
-            <section className="quick-grid" aria-label="Explore the encyclopedia">
+            <section
+              className="quick-grid"
+              aria-label="Explore the encyclopedia"
+            >
               {quickLinks.map((link) => (
                 <button
                   key={link.label}
@@ -417,8 +494,8 @@ export function NazcaShell() {
                   <div>
                     <h2 id="map-heading">Metropolis network overview</h2>
                     <p>
-                      The final interactive view preserves all three source map records and a
-                      complete text equivalent.
+                      The final interactive view preserves all three source map
+                      records and a complete text equivalent.
                     </p>
                   </div>
                   <Map size={20} aria-hidden="true" />
@@ -429,11 +506,14 @@ export function NazcaShell() {
               </section>
 
               <div className="content-stack">
-                <section className="content-card" aria-labelledby="corpus-heading">
+                <section
+                  className="content-card"
+                  aria-labelledby="corpus-heading"
+                >
                   <h2 id="corpus-heading">Pinned corpus baseline</h2>
                   <p>
-                    The importer recaptures and reconciles one stable cutoff before this repository
-                    becomes canonical.
+                    The importer recaptures and reconciles one stable cutoff
+                    before this repository becomes canonical.
                   </p>
                   <div className="stat-row">
                     <div className="stat">
@@ -451,7 +531,10 @@ export function NazcaShell() {
                   </div>
                 </section>
 
-                <section className="content-card" aria-labelledby="recent-heading">
+                <section
+                  className="content-card"
+                  aria-labelledby="recent-heading"
+                >
                   <h2 id="recent-heading">Start with a useful record</h2>
                   <ul className="recent-list">
                     {records.slice(0, 3).map((record) => (
@@ -486,8 +569,8 @@ export function NazcaShell() {
           <section className="rail-card">
             <h2>Source provenance</h2>
             <p>
-              Fandom remains the credited legacy source. This repository becomes canonical at the
-              stable import cutoff.
+              Fandom remains the credited legacy source. This repository becomes
+              canonical at the stable import cutoff.
             </p>
             <table className="source-table">
               <tbody>
@@ -513,18 +596,20 @@ export function NazcaShell() {
           <section className="rail-card">
             <h2>Implementation status</h2>
             <p>
-              The Sites foundation is active. Corpus, media, universal features, verification,
-              and public delivery remain in progress.
+              The Sites foundation is active. Corpus, media, universal features,
+              verification, and public delivery remain in progress.
             </p>
             <div className="status-line">
-              <span className="status-dot" aria-hidden="true" /> Running · first atlas slice
+              <span className="status-dot" aria-hidden="true" /> Running · first
+              atlas slice
             </div>
           </section>
           <section className="rail-card">
             <h2>Modern by design</h2>
             <p>
-              One navigation model, calm product chrome, route colours as data, no advertising,
-              readable tables, and search wherever information lives.
+              One navigation model, calm product chrome, route colours as data,
+              no advertising, readable tables, and search wherever information
+              lives.
             </p>
           </section>
         </aside>

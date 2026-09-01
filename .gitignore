@@ -36,3 +36,14 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+*.tsbuildinfo
+
+# resumable source and media staging
+/.cache/
+/.media-cache/
+/staging/
+/data/corpus/.staging/
+/data/corpus/captures/
+/data/corpus/current.json
+/data/import-journal/
+/public/provenance.json
