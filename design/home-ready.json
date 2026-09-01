@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "home-ready",
+  "title": "Nazca Railway home",
+  "route": "/",
+  "state": "populated-first-viewport",
+  "theme": "light",
+  "language": "en",
+  "viewport": { "width": 1440, "height": 1000, "scale": 1 },
+  "requirements": [
+    "global-search-visible",
+    "left-tab-dock-visible",
+    "version-and-updated-at-visible",
+    "interactive-map-entry-visible",
+    "useful-result-visible",
+    "no-advertising-or-duplicate-navigation"
+  ]
+}

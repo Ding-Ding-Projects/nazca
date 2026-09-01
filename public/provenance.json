@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "product": "Nazca Railway",
+  "version": "0.1.0",
+  "commitSha": "unavailable-before-first-commit",
+  "buildId": "initial-sites-slice",
+  "builtAt": "2026-08-31T22:40:00Z",
+  "timezone": "UTC",
+  "source": "local",
+  "manifestSha256": "unavailable-before-first-build"
+}
