@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   SearchWorkbench,
   type SearchRecord,
@@ -38,6 +38,8 @@ const tabs: Array<{ id: SettingsTab; en: string; zh: string }> = [
   { id: 'attention', en: 'Attention modes', zh: '專注模式' },
   { id: 'privacy', en: 'Data and privacy', zh: '資料同私隱' },
 ];
+
+const localTimeZone = new Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 const controlsByTab: Record<
   SettingsTab,
@@ -231,10 +233,12 @@ export function SettingsWorkspace() {
   useEffect(() => {
     if (!('speechSynthesis' in window)) return undefined;
     const refresh = () => setVoices(window.speechSynthesis.getVoices());
-    refresh();
+    const initialRefresh = setTimeout(refresh, 0);
     window.speechSynthesis.addEventListener('voiceschanged', refresh);
-    return () =>
+    return () => {
+      clearTimeout(initialRefresh);
       window.speechSynthesis.removeEventListener('voiceschanged', refresh);
+    };
   }, []);
 
   useEffect(() => {
@@ -242,7 +246,7 @@ export function SettingsWorkspace() {
       settings.schoolMode.enabled &&
       ['language', 'narrator'].includes(activeTab)
     )
-      setActiveTab('school');
+      setTimeout(() => setActiveTab('school'), 0);
   }, [activeTab, settings.schoolMode.enabled]);
 
   const visibleTabs = tabs.filter(
@@ -250,15 +254,13 @@ export function SettingsWorkspace() {
       !settings.schoolMode.enabled ||
       !['language', 'narrator'].includes(tab.id),
   );
-  const searchRecords = useMemo<SearchRecord[]>(
-    () =>
-      controlsByTab[activeTab].map((control) => ({
-        id: control.id,
-        title: L(control.en, control.zh),
-        subtitle: control.description,
-        text: `${control.en} ${control.zh} ${control.description}`,
-      })),
-    [activeTab, effectiveLanguage, vocabulary],
+  const searchRecords: SearchRecord[] = controlsByTab[activeTab].map(
+    (control) => ({
+      id: control.id,
+      title: L(control.en, control.zh),
+      subtitle: control.description,
+      text: `${control.en} ${control.zh} ${control.description}`,
+    }),
   );
 
   const updateNarrator = (patch: Partial<typeof settings.narrator>) =>
@@ -398,7 +400,11 @@ export function SettingsWorkspace() {
 
           {activeTab === 'general' ? (
             <div className="settings-list">
-              <label className="setting-row" htmlFor="setting-display-name">
+              <label
+                className="setting-row"
+                htmlFor="setting-display-name"
+                aria-label="Display name setting"
+              >
                 <span>
                   <strong>{L('Display name', '顯示名稱')}</strong>
                   <small>
@@ -418,7 +424,11 @@ export function SettingsWorkspace() {
                   }
                 />
               </label>
-              <label className="setting-row" htmlFor="setting-dialog-emojis">
+              <label
+                className="setting-row"
+                htmlFor="setting-dialog-emojis"
+                aria-label="Dialog emoji setting"
+              >
                 <span>
                   <strong>
                     {L(
@@ -442,18 +452,22 @@ export function SettingsWorkspace() {
                   }
                 />
               </label>
-              <p className="settings-status" role="status">
+              <output className="settings-status">
                 {ready
                   ? L('Visitor state is ready.', '訪客狀態已準備好。')
                   : L('Loading local visitor state…', '載入本機訪客狀態…')}{' '}
                 {storageError}
-              </p>
+              </output>
             </div>
           ) : null}
 
           {activeTab === 'language' && !settings.schoolMode.enabled ? (
             <div className="settings-list">
-              <label className="setting-row" htmlFor="setting-language">
+              <label
+                className="setting-row"
+                htmlFor="setting-language"
+                aria-label="Language mode setting"
+              >
                 <span>
                   <strong>{L('Language mode', '語言模式')}</strong>
                   <small>
@@ -477,7 +491,11 @@ export function SettingsWorkspace() {
                   <option value="bilingual">English + 廣東話</option>
                 </select>
               </label>
-              <label className="setting-row" htmlFor="setting-funny-en">
+              <label
+                className="setting-row"
+                htmlFor="setting-funny-en"
+                aria-label="English funny level setting"
+              >
                 <span>
                   <strong>{L('English funny level', '英文幽默程度')}</strong>
                   <small>1 = serious, 5 = maximum playfulness</small>
@@ -496,7 +514,11 @@ export function SettingsWorkspace() {
                 />
                 <output>{settings.funnyLevelEnglish}</output>
               </label>
-              <label className="setting-row" htmlFor="setting-funny-zh">
+              <label
+                className="setting-row"
+                htmlFor="setting-funny-zh"
+                aria-label="Cantonese funny level setting"
+              >
                 <span>
                   <strong>
                     {L('Cantonese funny level', '廣東話幽默程度')}
@@ -557,19 +579,23 @@ export function SettingsWorkspace() {
                     {L('Clear', '清除')}
                   </button>
                 </div>
-                <p role="status">
+                <output>
                   {vocabulary.length
                     ? `${vocabulary.length} entries active. `
                     : ''}
                   {vocabularyStatus}
-                </p>
+                </output>
               </div>
             </div>
           ) : null}
 
           {activeTab === 'appearance' ? (
             <div className="settings-list">
-              <label className="setting-row" htmlFor="setting-theme">
+              <label
+                className="setting-row"
+                htmlFor="setting-theme"
+                aria-label="Theme setting"
+              >
                 <span>
                   <strong>{L('Theme', '主題')}</strong>
                   <small>
@@ -593,7 +619,11 @@ export function SettingsWorkspace() {
                   <option value="dark">Dark</option>
                 </select>
               </label>
-              <label className="setting-row" htmlFor="setting-density">
+              <label
+                className="setting-row"
+                htmlFor="setting-density"
+                aria-label="Density setting"
+              >
                 <span>
                   <strong>{L('Density', '密度')}</strong>
                   <small>
@@ -616,7 +646,11 @@ export function SettingsWorkspace() {
                   <option value="compact">Compact</option>
                 </select>
               </label>
-              <label className="setting-row" htmlFor="setting-seed-color">
+              <label
+                className="setting-row"
+                htmlFor="setting-seed-color"
+                aria-label="Seed color setting"
+              >
                 <span>
                   <strong>{L('Seed color', '主色')}</strong>
                   <small>
@@ -640,7 +674,11 @@ export function SettingsWorkspace() {
 
           {activeTab === 'school' ? (
             <div className="settings-list">
-              <label className="setting-row" htmlFor="setting-school-name">
+              <label
+                className="setting-row"
+                htmlFor="setting-school-name"
+                aria-label="School mode name setting"
+              >
                 <span>
                   <strong>{settings.schoolMode.displayName}</strong>
                   <small>
@@ -696,14 +734,18 @@ export function SettingsWorkspace() {
                     {settings.schoolMode.enabled ? 'Unlock' : 'Enable'}
                   </button>
                 </div>
-                <p role="status">{credentialStatus}</p>
+                <output>{credentialStatus}</output>
               </div>
             </div>
           ) : null}
 
           {activeTab === 'narrator' && !settings.schoolMode.enabled ? (
             <div className="settings-list">
-              <label className="setting-row" htmlFor="setting-narrator-enabled">
+              <label
+                className="setting-row"
+                htmlFor="setting-narrator-enabled"
+                aria-label="Narrator setting"
+              >
                 <span>
                   <strong>{L('Narrator', '旁白')}</strong>
                   <small>
@@ -725,6 +767,7 @@ export function SettingsWorkspace() {
               <label
                 className="setting-row"
                 htmlFor="setting-narrator-language"
+                aria-label="Narrated language setting"
               >
                 <span>
                   <strong>{L('Narrated language', '旁白語言')}</strong>
@@ -753,6 +796,7 @@ export function SettingsWorkspace() {
               <label
                 className="setting-row"
                 htmlFor="setting-narrator-en-voice"
+                aria-label="English voice setting"
               >
                 <span>
                   <strong>English voice</strong>
@@ -784,6 +828,7 @@ export function SettingsWorkspace() {
               <label
                 className="setting-row"
                 htmlFor="setting-narrator-zh-voice"
+                aria-label="Cantonese voice setting"
               >
                 <span>
                   <strong>廣東話聲音</strong>
@@ -806,7 +851,11 @@ export function SettingsWorkspace() {
                     ))}
                 </select>
               </label>
-              <label className="setting-row" htmlFor="setting-narrator-rate">
+              <label
+                className="setting-row"
+                htmlFor="setting-narrator-rate"
+                aria-label="Narrator rate setting"
+              >
                 <span>
                   <strong>{L('Rate', '速度')}</strong>
                   <small>{settings.narrator.rate.toFixed(1)}</small>
@@ -823,7 +872,11 @@ export function SettingsWorkspace() {
                   }
                 />
               </label>
-              <label className="setting-row" htmlFor="setting-narrator-pitch">
+              <label
+                className="setting-row"
+                htmlFor="setting-narrator-pitch"
+                aria-label="Narrator pitch setting"
+              >
                 <span>
                   <strong>{L('Pitch', '音調')}</strong>
                   <small>{settings.narrator.pitch.toFixed(1)}</small>
@@ -899,8 +952,7 @@ export function SettingsWorkspace() {
                 <span>
                   <strong>{L('Schedule list', '排程清單')}</strong>
                   <small>
-                    {Intl.DateTimeFormat().resolvedOptions().timeZone} · local
-                    daylight-saving rules apply.
+                    {localTimeZone} · local daylight-saving rules apply.
                   </small>
                 </span>
                 <ul className="schedule-list">
@@ -955,6 +1007,7 @@ export function SettingsWorkspace() {
                     className="setting-row"
                     htmlFor={controlIds[key]}
                     key={key}
+                    aria-label={`${en} setting`}
                   >
                     <span>
                       <strong>{L(en, zh)}</strong>
@@ -976,7 +1029,11 @@ export function SettingsWorkspace() {
                   </label>
                 );
               })}
-              <label className="setting-row" htmlFor="setting-next-action">
+              <label
+                className="setting-row"
+                htmlFor="setting-next-action"
+                aria-label="Next action setting"
+              >
                 <span>
                   <strong>{L('Current next action', '目前下一步')}</strong>
                   <small>

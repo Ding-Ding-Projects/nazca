@@ -2,9 +2,9 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -197,7 +197,7 @@ export function VisitorStateProvider({
     setVocabularyState([]);
   };
 
-  const notify: VisitorContextValue['notify'] = (record) => {
+  const notify: VisitorContextValue['notify'] = useCallback((record) => {
     const created: NotificationRecord = {
       ...record,
       id: crypto.randomUUID(),
@@ -209,7 +209,7 @@ export function VisitorStateProvider({
       saveNotifications(updated).catch(() => undefined);
       return updated;
     });
-  };
+  }, []);
 
   const dismissNotification = (id: string) => {
     setNotifications((records) => {
@@ -226,59 +226,47 @@ export function VisitorStateProvider({
     saveNotifications([]).catch(() => undefined);
   };
 
-  const value = useMemo<VisitorContextValue>(
-    () => ({
-      state,
-      ready,
-      storageError,
-      vocabulary,
-      updateSettings,
-      setVocabulary: setVocabularyState,
-      clearVocabularyState,
-      notifications,
-      history,
-      paletteOpen,
-      setPaletteOpen,
-      notify,
-      dismissNotification,
-      clearNotifications,
-      exportVisitorData() {
-        return JSON.stringify(
-          {
-            schemaVersion: '1.0.0',
-            exportedAt: new Date().toISOString(),
-            state,
-            notifications,
-            history,
-            omitted: [
-              'personal vocabulary',
-              'local credentials',
-              'authenticator secrets',
-            ],
-          },
-          null,
-          2,
-        );
-      },
-      text(value) {
-        if (state.settings.schoolMode.enabled || !vocabulary.length)
-          return value;
-        return vocabulary.reduce(
-          (output, entry) => output.replaceAll(entry.from, entry.to),
-          value,
-        );
-      },
-    }),
-    [
-      history,
-      notifications,
-      paletteOpen,
-      ready,
-      state,
-      storageError,
-      vocabulary,
-    ],
-  );
+  const value: VisitorContextValue = {
+    state,
+    ready,
+    storageError,
+    vocabulary,
+    updateSettings,
+    setVocabulary: setVocabularyState,
+    clearVocabularyState,
+    notifications,
+    history,
+    paletteOpen,
+    setPaletteOpen,
+    notify,
+    dismissNotification,
+    clearNotifications,
+    exportVisitorData() {
+      return JSON.stringify(
+        {
+          schemaVersion: '1.0.0',
+          exportedAt: new Date().toISOString(),
+          state,
+          notifications,
+          history,
+          omitted: [
+            'personal vocabulary',
+            'local credentials',
+            'authenticator secrets',
+          ],
+        },
+        null,
+        2,
+      );
+    },
+    text(value) {
+      if (state.settings.schoolMode.enabled || !vocabulary.length) return value;
+      return vocabulary.reduce(
+        (output, entry) => output.replaceAll(entry.from, entry.to),
+        value,
+      );
+    },
+  };
 
   return (
     <VisitorContext.Provider value={value}>{children}</VisitorContext.Provider>

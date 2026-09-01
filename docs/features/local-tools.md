@@ -55,6 +55,27 @@ and authenticator secrets. Other formats stay visibly unavailable until they can
 preserve every field. Visual Studio Code handoff is unavailable from this static
 browser and is not represented by a fake action.
 
+## Changelog and release code name
+
+The changelog lists every current development commit with its exact timestamp,
+category, summary, full SHA, and clickable repository link. Date ranges and RE2
+search compose, and the filtered view exports to Markdown.
+
+The v0.1.0 code name is `Classic Har Gow · 蝦餃`. Its image is referenced from the
+verified public `catalog-v1` release. A first launch never shows the surprise.
+Later launches make one fresh 10% draw, suppress it under School mode, avoid
+focus changes, and dismiss it automatically or explicitly.
+
+## Support Tickets
+
+Support Tickets are a local fictional desk with category, description, generated
+number, severity, status, canned responses, search, and persistence. A plain line
+states that nothing is sent, nobody is reading it, and no network call occurs.
+
+For a static browser, recovery means clearing data for the current origin. The
+surface can copy that origin, but it cannot open or delete a browser’s internal
+storage folder. It says so rather than showing a fake file-manager action.
+
 ## Verification
 
 RFC 6238 published vectors cover all three algorithms and six timestamps.

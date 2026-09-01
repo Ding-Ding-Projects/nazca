@@ -2,15 +2,21 @@
 
 import {
   Bell,
+  BookOpen,
   Building2,
+  CircleGauge,
   Clock3,
   Command,
   Compass,
   History,
   Home,
+  Image,
+  Info,
+  Landmark,
   Layers3,
   Map,
   Moon,
+  ScrollText,
   Settings,
   Sun,
   TramFront,
@@ -25,6 +31,8 @@ import {
   type SearchRecord,
 } from '@/components/search-workbench';
 import { SettingsWorkspace } from '@/components/settings-workspace';
+import { SimpleWorkspace } from '@/components/simple-workspace';
+import { StatusWorkspace } from '@/components/status-workspace';
 import { ToolsWorkspace } from '@/components/tools-workspace';
 import { useVisitorState } from '@/components/visitor-state-provider';
 import { labels, localize } from '@/lib/i18n';
@@ -105,6 +113,12 @@ const groups: readonly AtlasTabGroup[] = [
       { id: 'explore', label: 'Explore', icon: Compass, count: '' },
       { id: 'stations', label: 'Stations', icon: TrainFront, count: '1.2k' },
       { id: 'lines', label: 'Lines', icon: Layers3, count: '156' },
+      {
+        id: 'infrastructure',
+        label: 'Infrastructure',
+        icon: Landmark,
+        count: '',
+      },
     ],
   },
   {
@@ -114,14 +128,19 @@ const groups: readonly AtlasTabGroup[] = [
       { id: 'maps', label: 'Maps', icon: Map, count: '3' },
       { id: 'timeline', label: 'Timeline', icon: Clock3, count: '' },
       { id: 'streetcars', label: 'Streetcars', icon: TramFront, count: '581' },
+      { id: 'media', label: 'Media', icon: Image, count: '16.5k' },
     ],
   },
   {
     label: 'Research',
     items: [
       { id: 'history', label: 'History', icon: History, count: '' },
+      { id: 'changelog', label: 'Changelog', icon: ScrollText, count: '6' },
+      { id: 'status', label: 'Status', icon: CircleGauge, count: '' },
       { id: 'tools', label: 'Tools', icon: Wrench, count: '' },
       { id: 'settings', label: 'Settings', icon: Settings, count: '' },
+      { id: 'help', label: 'Help', icon: BookOpen, count: '' },
+      { id: 'about', label: 'About', icon: Info, count: '' },
     ],
   },
 ];
@@ -149,7 +168,7 @@ const quickLinks = [
     label: 'Infrastructure',
     meta: 'Roads, bridges, depots',
     color: 'var(--route-gold)',
-    tab: 'explore',
+    tab: 'infrastructure',
   },
 ];
 
@@ -180,7 +199,11 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
   );
 
   useEffect(() => {
-    setUpdatedAt(formatBuildTime(provenance.builtAt, true));
+    const timer = setTimeout(
+      () => setUpdatedAt(formatBuildTime(provenance.builtAt, true)),
+      0,
+    );
+    return () => clearTimeout(timer);
   }, [provenance.builtAt]);
 
   useEffect(() => {
@@ -374,8 +397,89 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
         <main id="main-content" className="main-viewport" tabIndex={-1}>
           {activeTab === 'settings' ? (
             <SettingsWorkspace />
-          ) : activeTab === 'tools' ? (
-            <ToolsWorkspace />
+          ) : ['tools', 'history', 'changelog', 'help'].includes(activeTab) ? (
+            <ToolsWorkspace
+              initialTab={
+                activeTab === 'history'
+                  ? 'history'
+                  : activeTab === 'changelog'
+                    ? 'changelog'
+                    : activeTab === 'help'
+                      ? 'help'
+                      : 'authenticator'
+              }
+            />
+          ) : activeTab === 'status' ? (
+            <StatusWorkspace provenance={provenance} />
+          ) : activeTab === 'media' ? (
+            <SimpleWorkspace
+              eyebrow="Media catalog"
+              title="Media with rights attached."
+              description="The planning inventory contains 16,555 current media objects. Original bytes remain unimported until the source policy and release-backed storage checks pass."
+              cards={[
+                {
+                  id: 'media-catalog',
+                  title: 'Catalog',
+                  body: 'Planning inventory only. Final SHA-1, SHA-256, MIME, dimensions, variants, and exact-tag URLs remain pending.',
+                },
+                {
+                  id: 'media-rights',
+                  title: 'Rights',
+                  body: 'Every future public object requires one creator, attribution, permission basis, obligation, and takedown record.',
+                },
+                {
+                  id: 'media-volumes',
+                  title: 'Volumes',
+                  body: 'Immutable release volumes are limited to 900 objects and 1 GiB. None are published yet.',
+                },
+              ]}
+            />
+          ) : activeTab === 'infrastructure' ? (
+            <SimpleWorkspace
+              eyebrow="Infrastructure"
+              title="Structures, roads, bridges, and depots."
+              description="This destination is ready for imported infrastructure records. Current cards are explicit scope markers, not invented source articles."
+              cards={[
+                {
+                  id: 'infra-rail',
+                  title: 'Railway structures',
+                  body: 'Stations, depots, yards, junctions, and operational structures will come from the stable source manifest.',
+                },
+                {
+                  id: 'infra-road',
+                  title: 'Roads and bridges',
+                  body: 'Road and bridge records remain pending source import and category reconciliation.',
+                },
+                {
+                  id: 'infra-air',
+                  title: 'Air and port connections',
+                  body: 'Airport and container-terminal links will preserve source relationships without guessed destinations.',
+                },
+              ]}
+            />
+          ) : activeTab === 'about' ? (
+            <SimpleWorkspace
+              eyebrow="About this reader"
+              title="Nazca Railway · The Encyclopedia of Los Sengas"
+              description="A static reader and transit atlas, not the original source platform and not a live synchronization service."
+              cards={[
+                {
+                  id: 'about-source',
+                  title: 'Legacy source',
+                  body: 'Fandom remains credited. This repository becomes canonical only at a stable imported cutoff.',
+                },
+                {
+                  id: 'about-browser',
+                  title: 'Browser boundary',
+                  body: 'Visitor settings remain local. The website does not claim native vault, arbitrary executable, or unrestricted file-system powers.',
+                },
+                {
+                  id: 'about-version',
+                  title: `Version ${provenance.version}`,
+                  body: `Build commit ${provenance.commitSha ?? 'unavailable'} · ${provenance.builtAt ?? 'updated time unavailable'}`,
+                },
+              ]}
+            />
           ) : (
             <div className="route-content">
               <p className="eyebrow">
@@ -410,6 +514,7 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
                     key={link.label}
                     type="button"
                     className="quick-card"
+                    aria-label={tabLabel(link.tab, link.label)}
                     onClick={() => setActiveTab(link.tab)}
                   >
                     <span
@@ -479,6 +584,7 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
                           <button
                             type="button"
                             className="recent-item"
+                            aria-label={record.title}
                             onClick={() => openRecord(record)}
                           >
                             <span

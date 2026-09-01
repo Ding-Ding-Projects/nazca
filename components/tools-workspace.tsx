@@ -8,6 +8,8 @@ import {
   type SearchRecord,
 } from '@/components/search-workbench';
 import { useVisitorState } from '@/components/visitor-state-provider';
+import { changelogEntries, releaseCodeName } from '@/data/changelog';
+import { loadPrivateValue, savePrivateValue } from '@/lib/visitor-state';
 import {
   generateTotp,
   loadTotpEntries,
@@ -24,6 +26,8 @@ type ToolTab =
   | 'history'
   | 'notifications'
   | 'exports'
+  | 'changelog'
+  | 'support'
   | 'help';
 
 const toolTabs: Array<{ id: ToolTab; title: string; description: string }> = [
@@ -58,6 +62,18 @@ const toolTabs: Array<{ id: ToolTab; title: string; description: string }> = [
     description: 'Download visitor-owned state in faithful formats.',
   },
   {
+    id: 'changelog',
+    title: 'Changelog',
+    description:
+      'Every development version with exact commit links and date filters.',
+  },
+  {
+    id: 'support',
+    title: 'Support Tickets',
+    description:
+      'A fictional local support desk with an honest browser-storage recovery path.',
+  },
+  {
     id: 'help',
     title: 'Offline help',
     description: 'Browser capability boundaries and recovery.',
@@ -73,7 +89,11 @@ function download(name: string, type: string, content: BlobPart) {
   setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
-export function ToolsWorkspace() {
+export function ToolsWorkspace({
+  initialTab = 'authenticator',
+}: {
+  initialTab?: ToolTab;
+}) {
   const {
     clearNotifications,
     dismissNotification,
@@ -82,7 +102,11 @@ export function ToolsWorkspace() {
     notifications,
     notify,
   } = useVisitorState();
-  const [activeTab, setActiveTab] = useState<ToolTab>('authenticator');
+  const [activeTab, setActiveTab] = useState<ToolTab>(initialTab);
+  useEffect(() => {
+    const timer = setTimeout(() => setActiveTab(initialTab), 0);
+    return () => clearTimeout(timer);
+  }, [initialTab]);
   useEffect(() => {
     const openTool = (event: Event) => {
       const requested = (event as CustomEvent<ToolTab>).detail;
@@ -149,6 +173,8 @@ export function ToolsWorkspace() {
         {activeTab === 'exports' ? (
           <ExportTool exportVisitorData={exportVisitorData} />
         ) : null}
+        {activeTab === 'changelog' ? <ChangelogTool /> : null}
+        {activeTab === 'support' ? <SupportTicketsTool /> : null}
         {activeTab === 'help' ? <OfflineHelp /> : null}
       </div>
     </section>
@@ -166,7 +192,7 @@ function AuthenticatorTool({
   const [account, setAccount] = useState('');
   const [secret, setSecret] = useState('');
   const [status, setStatus] = useState('No authenticator entries loaded.');
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(0);
   const [codes, setCodes] = useState<
     Record<string, { current: string; next: string }>
   >({});
@@ -186,7 +212,11 @@ function AuthenticatorTool({
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
+    const initial = setTimeout(() => setNow(Date.now()), 0);
+    return () => {
+      clearInterval(timer);
+      clearTimeout(initial);
+    };
   }, []);
 
   useEffect(() => {
@@ -209,8 +239,8 @@ function AuthenticatorTool({
   useEffect(() => {
     const entry = entries.find((candidate) => candidate.id === revealedQr);
     if (!entry) {
-      setQrDataUrl('');
-      return;
+      const timer = setTimeout(() => setQrDataUrl(''), 0);
+      return () => clearTimeout(timer);
     }
     QRCode.toDataURL(toOtpAuthUri(entry), {
       errorCorrectionLevel: 'M',
@@ -352,9 +382,7 @@ function AuthenticatorTool({
           Add entry
         </button>
       </div>
-      <p role="status" className="tool-status">
-        {status}
-      </p>
+      <output className="tool-status">{status}</output>
       <div className="totp-grid">
         {entries.map((entry) => {
           const seconds =
@@ -408,9 +436,10 @@ function AuthenticatorTool({
               </div>
               {revealedQr === entry.id && qrDataUrl ? (
                 <figure className="totp-qr">
-                  <img
-                    src={qrDataUrl}
-                    alt={`TOTP pairing QR for ${entry.issuer}, ${entry.account}`}
+                  <object
+                    data={qrDataUrl}
+                    type="image/png"
+                    aria-label={`TOTP pairing QR for ${entry.issuer}, ${entry.account}`}
                   />
                   <figcaption>
                     Scan locally. The manual secret is intentionally not shown
@@ -553,9 +582,7 @@ function ConverterTool({
           Convert locally
         </button>
       </div>
-      <p role="status" className="tool-status">
-        {status}
-      </p>
+      <output className="tool-status">{status}</output>
       <div className="adapter-grid">
         <article>
           <strong>Documents and PDF</strong>
@@ -665,9 +692,7 @@ function OllamaTool({
       <button type="button" className="primary-action" onClick={check}>
         Check local Ollama
       </button>
-      <p role="status" className="tool-status">
-        {status}
-      </p>
+      <output className="tool-status">{status}</output>
       <ul className="model-list">
         {models.map((model) => (
           <li key={model.name}>
@@ -915,6 +940,295 @@ function OfflineHelp() {
           </p>
         </article>
       </div>
+    </section>
+  );
+}
+
+function ChangelogTool() {
+  const [startDate, setStartDate] = useState('2026-08-31');
+  const [endDate, setEndDate] = useState('2026-12-31');
+  const filteredByDate = changelogEntries.filter((entry) => {
+    const date = entry.date.slice(0, 10);
+    return date >= startDate && date <= endDate;
+  });
+  const searchRecords = filteredByDate.map((entry) => ({
+    id: entry.commit,
+    title: `${entry.version} · ${entry.title}`,
+    subtitle: `${entry.category} · ${entry.date}`,
+    text: `${entry.version} ${entry.date} ${entry.category} ${entry.title} ${entry.summary} ${entry.commit}`,
+  }));
+  const exportCurrent = () =>
+    download(
+      'nazca-changelog.md',
+      'text/markdown;charset=utf-8',
+      `# Nazca Railway changelog\n\nRange: ${startDate} through ${endDate}\n\n${filteredByDate
+        .map(
+          (entry) =>
+            `## ${entry.version} · ${entry.title}\n\n${entry.date} · ${entry.category}\n\n${entry.summary}\n\nCommit: https://github.com/Ding-Ding-Projects/nazca/commit/${entry.commit}`,
+        )
+        .join('\n\n')}`,
+    );
+  return (
+    <section aria-labelledby="changelog-title">
+      <h2 id="changelog-title">Changelog</h2>
+      <p className="tool-description">
+        Every recorded development version links to the commit that completed
+        it. No dates or entries are invented to fill gaps.
+      </p>
+      <div className="date-filter-row">
+        <label>
+          Start date
+          <input
+            type="date"
+            value={startDate}
+            onChange={(event) => setStartDate(event.target.value)}
+          />
+        </label>
+        <label>
+          End date
+          <input
+            type="date"
+            value={endDate}
+            onChange={(event) => setEndDate(event.target.value)}
+          />
+        </label>
+        <button type="button" onClick={exportCurrent}>
+          Export current range
+        </button>
+      </div>
+      <SearchWorkbench
+        surfaceId="changelog-search"
+        label="Search changelog"
+        placeholder="Find version, category, or change"
+        records={searchRecords}
+        onActivate={(record) =>
+          document.getElementById(`change-${record.id}`)?.focus()
+        }
+      />
+      <div className="release-code-card">
+        <div>
+          <strong>
+            v0.1.0 code name: {releaseCodeName.en} · {releaseCodeName.zhHant}
+          </strong>
+          <p>
+            The version remains the machine identity. The public dish photo is
+            decoration and comes from the verified catalog release.
+          </p>
+        </div>
+        <a
+          href={releaseCodeName.releaseUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Open catalog release
+        </a>
+      </div>
+      <ol className="history-list">
+        {filteredByDate.toReversed().map((entry) => (
+          <li id={`change-${entry.commit}`} tabIndex={-1} key={entry.commit}>
+            <strong>
+              {entry.version} · {entry.title}
+            </strong>
+            <span>
+              {entry.date} · {entry.category}
+            </span>
+            <p>{entry.summary}</p>
+            <a
+              href={`https://github.com/Ding-Ding-Projects/nazca/commit/${entry.commit}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {entry.commit.slice(0, 8)}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+type SupportTicket = {
+  id: string;
+  number: string;
+  category: string;
+  description: string;
+  severity: string;
+  status: 'Created' | 'Triaged' | 'Resolved';
+  createdAt: string;
+};
+
+function SupportTicketsTool() {
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [category, setCategory] = useState('Locked out');
+  const [description, setDescription] = useState('');
+  const [severity, setSeverity] = useState('Monumental, according to the form');
+  const [status, setStatus] = useState('Nothing has been sent anywhere.');
+
+  useEffect(() => {
+    loadPrivateValue<SupportTicket[]>('support-tickets')
+      .then((records) =>
+        setTickets(Array.isArray(records) ? records.slice(-5000) : []),
+      )
+      .catch(() => setStatus('Local ticket storage is unavailable.'));
+  }, []);
+
+  const persist = (records: SupportTicket[]) => {
+    setTickets(records);
+    savePrivateValue('support-tickets', records).catch(() =>
+      setStatus('The ticket changed in memory but was not stored.'),
+    );
+  };
+
+  const createTicket = () => {
+    if (!description.trim()) {
+      setStatus(
+        'Describe the local problem before creating the fictional ticket.',
+      );
+      return;
+    }
+    const suffix = crypto
+      .getRandomValues(new Uint16Array(1))[0]
+      .toString(16)
+      .toUpperCase()
+      .padStart(4, '0');
+    const ticket: SupportTicket = {
+      id: crypto.randomUUID(),
+      number: `NR-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${suffix}`,
+      category,
+      description: description.trim().slice(0, 2000),
+      severity,
+      status: 'Created',
+      createdAt: new Date().toISOString(),
+    };
+    persist([...tickets, ticket]);
+    setDescription('');
+    setStatus(
+      `${ticket.number} created locally. The desk has solemnly read the manual once.`,
+    );
+  };
+
+  const advance = (id: string) => {
+    persist(
+      tickets.map((ticket) =>
+        ticket.id === id
+          ? {
+              ...ticket,
+              status:
+                ticket.status === 'Created'
+                  ? 'Triaged'
+                  : ticket.status === 'Triaged'
+                    ? 'Resolved'
+                    : 'Resolved',
+            }
+          : ticket,
+      ),
+    );
+  };
+
+  const searchRecords = tickets.map((ticket) => ({
+    id: ticket.id,
+    title: ticket.number,
+    subtitle: `${ticket.category} · ${ticket.status}`,
+    text: `${ticket.number} ${ticket.category} ${ticket.description} ${ticket.severity} ${ticket.status}`,
+  }));
+
+  return (
+    <section aria-labelledby="support-title">
+      <h2 id="support-title">Support Tickets</h2>
+      <p className="support-disclosure">
+        Nothing is sent anywhere. No ticket exists outside this browser, no
+        network request is made, no data is collected, and nobody is reading it.
+      </p>
+      <div className="tool-form-grid">
+        <label>
+          Category
+          <select
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+          >
+            <option>Locked out</option>
+            <option>Browser storage</option>
+            <option>Appearance regret</option>
+            <option>Other local mystery</option>
+          </select>
+        </label>
+        <label>
+          Severity
+          <select
+            value={severity}
+            onChange={(event) => setSeverity(event.target.value)}
+          >
+            <option>Monumental, according to the form</option>
+            <option>Very serious in this tab</option>
+            <option>The kettle can wait</option>
+          </select>
+        </label>
+        <label>
+          Description
+          <textarea
+            value={description}
+            maxLength={2000}
+            onChange={(event) => setDescription(event.target.value)}
+          />
+        </label>
+        <button type="button" className="primary-action" onClick={createTicket}>
+          Create local ticket
+        </button>
+      </div>
+      <output className="tool-status">{status}</output>
+      <div className="release-code-card">
+        <div>
+          <strong>Actual browser recovery</strong>
+          <p>
+            Clear stored data for origin{' '}
+            <code>
+              {typeof location === 'undefined' ? 'this site' : location.origin}
+            </code>
+            . Browsers do not allow a static page to open or delete their
+            internal storage folder.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigator.clipboard.writeText(location.origin)}
+        >
+          Copy origin
+        </button>
+      </div>
+      <SearchWorkbench
+        surfaceId="support-ticket-search"
+        label="Search local tickets"
+        placeholder="Find ticket number, category, or status"
+        records={searchRecords}
+        onActivate={(record) =>
+          document.getElementById(`ticket-${record.id}`)?.focus()
+        }
+      />
+      <ul className="notification-list">
+        {tickets.toReversed().map((ticket) => (
+          <li id={`ticket-${ticket.id}`} tabIndex={-1} key={ticket.id}>
+            <strong>{ticket.number}</strong>
+            <span>
+              {ticket.category} · {ticket.severity} · {ticket.status}
+            </span>
+            <p>{ticket.description}</p>
+            <p>
+              {ticket.status === 'Created'
+                ? 'Canned response: thank you for contacting the desk that exists entirely inside this browser.'
+                : ticket.status === 'Triaged'
+                  ? 'Triage found the documented recovery path. Nobody was paged.'
+                  : 'Resolution: use browser site-data controls when you choose to reset.'}
+            </p>
+            <button
+              type="button"
+              disabled={ticket.status === 'Resolved'}
+              onClick={() => advance(ticket.id)}
+            >
+              Advance status
+            </button>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

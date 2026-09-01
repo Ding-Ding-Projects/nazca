@@ -85,7 +85,11 @@ export function ArticleReader({ provenance }: { provenance: BuildProvenance }) {
   );
 
   useEffect(() => {
-    setUpdatedAt(formatBuildTime(provenance.builtAt, true));
+    const timer = setTimeout(
+      () => setUpdatedAt(formatBuildTime(provenance.builtAt, true)),
+      0,
+    );
+    return () => clearTimeout(timer);
   }, [provenance.builtAt]);
 
   const section =
@@ -117,7 +121,9 @@ export function ArticleReader({ provenance }: { provenance: BuildProvenance }) {
             onActivate={(record) => {
               setActiveSection(record.id);
               requestAnimationFrame(() =>
-                document.getElementById('article-content')?.focus(),
+                document.getElementById('article-content')?.scrollIntoView({
+                  block: 'start',
+                }),
               );
             }}
           />
@@ -137,7 +143,7 @@ export function ArticleReader({ provenance }: { provenance: BuildProvenance }) {
           </nav>
         </aside>
 
-        <article className="article-body" id="article-content" tabIndex={-1}>
+        <article className="article-body" id="article-content">
           <p className="eyebrow">Nazca Railway · Los Sengas Division</p>
           <h1>Nazca Railway</h1>
           <p className="article-subtitle">
@@ -168,11 +174,9 @@ export function ArticleReader({ provenance }: { provenance: BuildProvenance }) {
               The complete importer will replace this verified source sample
               with the pinned table.
             </p>
-            <div
+            <section
               className="table-scroll"
-              role="region"
               aria-label="Selected railway lines"
-              tabIndex={0}
             >
               <table>
                 <caption>Core line sample from the source article</caption>
@@ -201,7 +205,7 @@ export function ArticleReader({ provenance }: { provenance: BuildProvenance }) {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </section>
           </section>
 
           <section id="source" className="article-source-card">

@@ -2,11 +2,8 @@ import { z } from 'zod';
 
 const sha1 = z.string().regex(/^[a-f0-9]{40}$/);
 const sha256 = z.string().regex(/^[a-f0-9]{64}$/);
-const httpsUrl = z
-  .string()
-  .url()
-  .refine((value) => value.startsWith('https://'));
-const isoTime = z.string().datetime({ offset: true });
+const httpsUrl = z.url().refine((value) => value.startsWith('https://'));
+const isoTime = z.iso.datetime({ offset: true });
 const identifier = z.string().min(1).max(512);
 
 export const sourceReferenceSchema = z
@@ -38,9 +35,20 @@ export const corpusSnapshotSchema = z
         rightsUrl: httpsUrl,
         termsUrl: httpsUrl,
         termsSha256: sha256,
+        termsState: z.enum(['verified', 'challenge-user-override']),
+        termsStatus: z.number().int().min(100).max(599),
+        termsContentType: z.string().min(1).max(512).nullable(),
+        termsOverrideReason: z.string().min(1).max(2048).nullable(),
         robotsUrl: httpsUrl,
-        robotsState: z.enum(['allowed', 'blocked', 'challenge', 'unavailable']),
+        robotsState: z.enum([
+          'allowed',
+          'blocked',
+          'challenge',
+          'unavailable',
+          'skipped-user-override',
+        ]),
         robotsSha256: sha256.optional(),
+        robotsSkipReason: z.string().min(1).max(2048).nullable(),
         robotsPolicy: z
           .object({
             userAgentToken: z.string().min(1).max(160),
@@ -64,7 +72,8 @@ export const corpusSnapshotSchema = z
               .min(1)
               .max(128),
           })
-          .strict(),
+          .strict()
+          .nullable(),
       })
       .strict(),
     counts: z

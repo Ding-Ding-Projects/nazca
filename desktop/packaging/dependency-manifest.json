@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "packageManager": "npm",
+  "scope": "desktop",
+  "packages": {
+    "electron-builder-squirrel-windows": {
+      "version": "26.15.3",
+      "reason": "Squirrel.Windows target adapter"
+    }
+  },
+  "signing": {
+    "forceCodeSigning": false,
+    "signAndEditExecutable": false,
+    "certificateAutoDiscovery": false
+  }
+}

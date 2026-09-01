@@ -68,18 +68,18 @@ export function SearchWorkbench({
       );
       worker.addEventListener('error', () => setWorkerState('unavailable'));
       workerRef.current = worker;
-      setWorkerState('ready');
+      setTimeout(() => setWorkerState('ready'), 0);
       return () => worker.terminate();
     } catch {
-      setWorkerState('unavailable');
+      setTimeout(() => setWorkerState('unavailable'), 0);
       return undefined;
     }
   }, []);
 
   useEffect(() => {
     if (mode !== 'regex' || !query) {
-      setResult(null);
-      return;
+      const timer = setTimeout(() => setResult(null), 0);
+      return () => clearTimeout(timer);
     }
     requestId.current += 1;
     workerRef.current?.postMessage({
@@ -132,7 +132,7 @@ export function SearchWorkbench({
       className={`search-workbench${compact ? ' search-workbench-compact' : ''}`}
       data-search-surface={surfaceId}
     >
-      <div className="search-workbench-field" role="search">
+      <search className="search-workbench-field">
         <label
           className={compact ? undefined : 'sr-only'}
           htmlFor={`${surfaceId}-input`}
@@ -163,7 +163,7 @@ export function SearchWorkbench({
             <Search size={18} aria-hidden="true" />
           </button>
         </div>
-      </div>
+      </search>
 
       {builderOpen ? (
         <section
@@ -188,7 +188,8 @@ export function SearchWorkbench({
               <X size={18} aria-hidden="true" />
             </button>
           </div>
-          <div className="regex-mode-row" role="group" aria-label="Search mode">
+          <fieldset className="regex-mode-row">
+            <legend className="sr-only">Search mode</legend>
             <button
               type="button"
               aria-pressed={mode === 'plain'}
@@ -203,7 +204,7 @@ export function SearchWorkbench({
             >
               Regular expression
             </button>
-          </div>
+          </fieldset>
           <div className="field-grid">
             <div className="field">
               <label htmlFor={`${surfaceId}-pattern`}>Pattern</label>
@@ -245,10 +246,10 @@ export function SearchWorkbench({
               but unsupported because RE2 avoids backtracking.
             </p>
           </div>
-          <div
+          <output
             className="regex-explanation"
             id={errorId}
-            role={invalid ? 'alert' : 'status'}
+            aria-live={invalid ? 'assertive' : 'polite'}
           >
             {workerState === 'unavailable'
               ? 'The local RE2 worker is unavailable. Regex mode cannot run, and no unsafe fallback is used.'
@@ -265,12 +266,12 @@ export function SearchWorkbench({
                 {result.unsupported}
               </>
             ) : null}
-          </div>
+          </output>
           {result?.valid && result.hits.length ? (
             <div className="regex-detail-grid">
               <section>
                 <h3>Capture table</h3>
-                <div className="table-scroll" tabIndex={0}>
+                <div className="table-scroll">
                   <table>
                     <thead>
                       <tr>

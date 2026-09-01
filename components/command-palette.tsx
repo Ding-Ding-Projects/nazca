@@ -106,9 +106,9 @@ export function CommandPalette() {
         if (event.target === event.currentTarget) setPaletteOpen(false);
       }}
     >
-      <section
+      <dialog
+        open
         className="command-palette"
-        role="dialog"
         aria-modal="true"
         aria-labelledby="palette-title"
       >
@@ -139,7 +139,7 @@ export function CommandPalette() {
         <p className="palette-hint">
           <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> opens this palette.
         </p>
-      </section>
+      </dialog>
     </div>
   );
 }

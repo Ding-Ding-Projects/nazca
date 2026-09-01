@@ -19,10 +19,30 @@ It also records a terms-page digest before capture.
 
 Challenge HTML, non-200 policy responses, unparseable rules, disallowed paths,
 oversized bodies, repeated throttling, continuation cycles, missing namespaces,
-and source errors stop the current phase.
+and source errors stop the current phase. Every failed request emits a bounded
+receipt with its exact request URL, purpose, phase, attempt, HTTP status, content
+type, retry hint, and SHA-256 of the bounded response when available. Response
+bodies are never included.
 
 The current source returns HTTP 403 HTML for `robots.txt`. The importer exits
 with `ROBOTS_CHALLENGE` and writes no corpus capture.
+
+If the terms page itself returns a challenge, the importer exits with the distinct
+`TERMS_CHALLENGE` code and writes no corpus capture. A normal HTML terms page is
+accepted and its bounded response hash is recorded in the policy receipt.
+
+For the current migration, the project owner explicitly requested an import that
+skips this challenge-blocked endpoint. That path is opt-in through
+`--skip-robots`, records `skipped-user-override`, and never records a false
+`allowed` verdict. Terms validation, pacing, `maxlag`, limits, retries, and source
+hashes remain active.
+
+The project owner then directed the importer to read the entire wiki after the
+separate first-party terms endpoint also returned challenge HTML. The explicitly
+named `--continue-on-terms-challenge` path is valid only with the recorded
+`--skip-robots` owner override. It records the status, content type, bounded
+response hash, `challenge-user-override` state, and owner direction. It never
+records the challenged terms response as verified or allowed.
 
 ## Security and privacy
 

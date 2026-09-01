@@ -10,13 +10,16 @@
 - [x] Add generated build provenance and the social preview.
 - [ ] Publish the primary Sites URL and set the repository homepage.
 - [ ] Deploy the identical GitHub Pages mirror.
+- [x] Add a secure Windows desktop runtime and Squirrel.Windows packaging path.
 
 ## Source corpus
 
 - [x] Add strict record contracts and a planning-only baseline.
 - [x] Stop the importer when the source policy is challenge-blocked.
-- [ ] Add the persisted raw-response cache and resume journal.
-- [ ] Capture page bodies, categories, links, transclusions, citations, and maps.
+- [x] Record the owner-approved `robots.txt` skip and challenged terms receipt.
+- [x] Capture all 3,422 current raw article bodies in 69 resumable batches.
+- [ ] Add the complete persisted raw-response cache and phase journal.
+- [ ] Capture rendered bodies, categories, links, transclusions, citations, and maps.
 - [ ] Capture every accessible text revision and attribution record.
 - [ ] Reconcile T0 with recent changes and publish the stable cutoff manifest.
 - [ ] Generate all canonical routes, redirects, anchors, and broken-link records.

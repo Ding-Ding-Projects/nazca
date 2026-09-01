@@ -13,6 +13,7 @@ quietly disappear.
 
 - [Visitor settings](visitor-settings.md)
 - [Local browser tools](local-tools.md)
+- [Element locks and appearance](locks-and-appearance.md)
 
 ## Configuration
 

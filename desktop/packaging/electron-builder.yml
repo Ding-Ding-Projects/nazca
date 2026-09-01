@@ -1,0 +1,29 @@
+appId: org.dingdingprojects.nazca
+productName: Nazca Railway
+artifactName: Nazca-Railway-${version}-${arch}.${ext}
+asar: true
+compression: maximum
+forceCodeSigning: false
+signAndEditExecutable: false
+directories:
+  app: .
+  output: ../dist/desktop
+  buildResources: packaging/assets
+files:
+  - '**/*'
+  - '!**/{.git,.cache,coverage,dist,out}/**'
+  - '!**/{test,tests,__tests__}/**'
+extraResources:
+  - from: ../dist/client
+    to: site
+    filter:
+      - '**/*'
+win:
+  icon: packaging/assets/nazca.ico
+  target:
+    - target: squirrel
+      arch:
+        - x64
+squirrelWindows:
+  msi: false
+  artifactName: Nazca-Railway-${version}-Setup.exe

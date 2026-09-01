@@ -20,6 +20,10 @@ const WAIT_MS = 300;
 const MAX_ATTEMPTS = 5;
 const MAX_PAGINATION_PAGES = 100_000;
 const TRANSIENT_RENAME_CODES = new Set(['EPERM', 'EACCES', 'EBUSY']);
+const SKIP_ROBOTS = process.argv.includes('--skip-robots');
+const CONTINUE_ON_TERMS_CHALLENGE = process.argv.includes(
+  '--continue-on-terms-challenge',
+);
 
 function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
@@ -29,7 +33,7 @@ function canonicalJson(value) {
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
   if (value && typeof value === 'object') {
     return `{${Object.keys(value)
-      .sort()
+      .sort((left, right) => left.localeCompare(right))
       .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`)
       .join(',')}}`;
   }
@@ -40,12 +44,76 @@ function sleep(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
+/**
+ * Classify a bounded source response without retaining or exposing its body.
+ * This pure boundary is also used by the focused importer tests.
+ */
+export function classifySourceResponse({
+  url = '',
+  purpose = 'source request',
+  status,
+  contentType = '',
+  text = '',
+}) {
+  const challengeText =
+    /enable javascript and cookies|cdn-cgi\/challenge-platform|just a moment/i.test(
+      text,
+    );
+  const challenge =
+    challengeText ||
+    (purpose !== 'terms-of-use' && /text\/html/i.test(contentType)) ||
+    (purpose === 'terms-of-use' &&
+      status === 403 &&
+      /text\/html/i.test(contentType));
+  if (challenge) {
+    return purpose === 'terms-of-use' || url === TERMS
+      ? 'TERMS_CHALLENGE'
+      : 'SOURCE_CHALLENGE';
+  }
+  if (status === 403) return 'SOURCE_FORBIDDEN';
+  if (status === 429 || status === 503) return `SOURCE_RETRYABLE:${status}`;
+  if (!Number.isInteger(status) || status < 200 || status >= 300)
+    return `SOURCE_HTTP:${status}`;
+  return null;
+}
+
+function requestReceipt({
+  url,
+  purpose,
+  phase,
+  attempt,
+  response,
+  responseSha256 = null,
+  retryAfterSeconds = null,
+}) {
+  return {
+    requestUrl: String(url),
+    purpose,
+    phase,
+    attempt,
+    maxAttempts: MAX_ATTEMPTS,
+    httpStatus: response?.status ?? null,
+    contentType: response?.headers.get('content-type') ?? null,
+    responseSha256,
+    retryAfterSeconds,
+  };
+}
+
+function errorWithReceipt(code, receipt, cause) {
+  const error = new Error(code, cause ? { cause } : undefined);
+  error.receipt = receipt;
+  return error;
+}
+
 async function fetchBounded(
   url,
   {
     accept = 'application/json',
     maxBytes = 16 * 1024 * 1024,
     allowForbiddenBody = false,
+    allowTermsChallengeReceipt = false,
+    purpose = 'source request',
+    phase = 'unknown',
   } = {},
 ) {
   let lastError;
@@ -59,29 +127,97 @@ async function fetchBounded(
         signal: controller.signal,
       });
       const retryAfter = Number(response.headers.get('retry-after') ?? 0);
+      const baseReceipt = requestReceipt({
+        url,
+        purpose,
+        phase,
+        attempt,
+        response,
+        retryAfterSeconds: Number.isFinite(retryAfter) ? retryAfter : null,
+      });
       const declaredLength = Number(
         response.headers.get('content-length') ?? 0,
       );
       if (Number.isFinite(declaredLength) && declaredLength > maxBytes) {
-        throw new Error(`RESPONSE_TOO_LARGE:${declaredLength}`);
+        throw errorWithReceipt(
+          `RESPONSE_TOO_LARGE:${declaredLength}`,
+          baseReceipt,
+        );
       }
-      const bytes = await readResponseBounded(response, maxBytes, controller);
-      const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+      let bytes;
+      try {
+        bytes = await readResponseBounded(response, maxBytes, controller);
+      } catch (error) {
+        if (error && typeof error === 'object' && !('receipt' in error))
+          error.receipt = baseReceipt;
+        throw error;
+      }
+      const responseSha256 = sha256(bytes);
+      const receipt = requestReceipt({
+        url,
+        purpose,
+        phase,
+        attempt,
+        response,
+        responseSha256,
+        retryAfterSeconds: Number.isFinite(retryAfter) ? retryAfter : null,
+      });
+      let text;
+      try {
+        text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+      } catch (error) {
+        throw errorWithReceipt('SOURCE_INVALID_UTF8', receipt, error);
+      }
+      const classification = classifySourceResponse({
+        url: String(url),
+        purpose,
+        status: response.status,
+        contentType: receipt.contentType ?? '',
+        text,
+      });
+      if (classification === 'TERMS_CHALLENGE') {
+        if (allowTermsChallengeReceipt)
+          return {
+            response,
+            bytes,
+            text: '',
+            sha256: responseSha256,
+            classification,
+            receipt,
+          };
+        throw errorWithReceipt('TERMS_CHALLENGE', receipt);
+      }
+      if (classification === 'SOURCE_CHALLENGE')
+        throw errorWithReceipt('SOURCE_CHALLENGE', receipt);
       if (response.status === 403 && !allowForbiddenBody)
-        throw new Error('SOURCE_FORBIDDEN');
+        throw errorWithReceipt('SOURCE_FORBIDDEN', receipt);
       if (response.status === 429 || response.status === 503) {
-        throw new Error(`SOURCE_RETRYABLE:${response.status}:${retryAfter}`);
+        throw errorWithReceipt(
+          `SOURCE_RETRYABLE:${response.status}:${retryAfter}`,
+          receipt,
+        );
       }
       if (!response.ok && !(allowForbiddenBody && response.status === 403)) {
-        throw new Error(`SOURCE_HTTP:${response.status}`);
+        throw errorWithReceipt(`SOURCE_HTTP:${response.status}`, receipt);
       }
-      return { response, bytes, text, sha256: sha256(bytes) };
+      return { response, bytes, text, sha256: responseSha256 };
     } catch (error) {
+      if (error && typeof error === 'object' && !('receipt' in error)) {
+        error.receipt = requestReceipt({
+          url,
+          purpose,
+          phase,
+          attempt,
+        });
+      }
       lastError = error;
       const message = error instanceof Error ? error.message : String(error);
       if (
         message === 'SOURCE_FORBIDDEN' ||
-        message.startsWith('RESPONSE_TOO_LARGE')
+        message.startsWith('RESPONSE_TOO_LARGE') ||
+        message === 'TERMS_CHALLENGE' ||
+        message === 'SOURCE_CHALLENGE' ||
+        message === 'SOURCE_INVALID_UTF8'
       )
         throw error;
       const retryable =
@@ -199,18 +335,49 @@ function parseRobotsPolicy(text, userAgentToken, paths) {
   });
   return {
     userAgentToken,
-    matchedAgents: [
-      ...new Set(selected.flatMap((group) => group.agents)),
-    ].sort(),
+    matchedAgents: [...new Set(selected.flatMap((group) => group.agents))].sort(
+      (left, right) => left.localeCompare(right),
+    ),
     decisions,
   };
 }
 
 async function preflightPolicy() {
+  if (SKIP_ROBOTS) {
+    const terms = await fetchBounded(TERMS, {
+      accept: 'text/html',
+      maxBytes: 4 * 1024 * 1024,
+      purpose: 'terms-of-use',
+      phase: 'preflight',
+      allowTermsChallengeReceipt: CONTINUE_ON_TERMS_CHALLENGE,
+    });
+    const termsChallenge = terms.classification === 'TERMS_CHALLENGE';
+    return {
+      robotsUrl: ROBOTS,
+      status: null,
+      contentType: null,
+      responseSha256: null,
+      policy: null,
+      robotsState: 'skipped-user-override',
+      robotsSkipReason:
+        'The current user explicitly requested that this import skip the challenge-blocked robots.txt endpoint.',
+      termsUrl: TERMS,
+      termsSha256: terms.sha256,
+      termsState: termsChallenge ? 'challenge-user-override' : 'verified',
+      termsStatus: terms.response.status,
+      termsContentType: terms.response.headers.get('content-type'),
+      termsOverrideReason: termsChallenge
+        ? 'The current user explicitly directed the importer to read the entire wiki after the first-party terms endpoint returned a challenge response.'
+        : null,
+      checkedAt: new Date().toISOString(),
+    };
+  }
   const robots = await fetchBounded(ROBOTS, {
     accept: 'text/plain',
     maxBytes: 1024 * 1024,
     allowForbiddenBody: true,
+    purpose: 'robots-policy',
+    phase: 'preflight',
   });
   const contentType = robots.response.headers.get('content-type') ?? '';
   const challenge =
@@ -258,6 +425,8 @@ async function preflightPolicy() {
   const terms = await fetchBounded(TERMS, {
     accept: 'text/html',
     maxBytes: 4 * 1024 * 1024,
+    purpose: 'terms-of-use',
+    phase: 'preflight',
   });
   return {
     robotsUrl: ROBOTS,
@@ -265,8 +434,14 @@ async function preflightPolicy() {
     contentType,
     responseSha256: robots.sha256,
     policy,
+    robotsState: 'allowed',
+    robotsSkipReason: null,
     termsUrl: TERMS,
     termsSha256: terms.sha256,
+    termsState: 'verified',
+    termsStatus: terms.response.status,
+    termsContentType: terms.response.headers.get('content-type'),
+    termsOverrideReason: null,
     checkedAt: new Date().toISOString(),
   };
 }
@@ -288,11 +463,42 @@ async function apiRequest(params) {
   let lastError;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
     await sleep(WAIT_MS);
-    const result = await fetchBounded(apiUrl(params));
-    const parsed = JSON.parse(result.text);
+    const requestUrl = apiUrl(params);
+    const result = await fetchBounded(requestUrl, {
+      purpose: `MediaWiki API ${params.list ?? params.action ?? 'query'}`,
+      phase: 'inventory',
+    });
+    let parsed;
+    try {
+      parsed = JSON.parse(result.text);
+    } catch (error) {
+      throw errorWithReceipt(
+        'MEDIAWIKI_INVALID_JSON',
+        requestReceipt({
+          url: requestUrl,
+          purpose: `MediaWiki API ${params.list ?? params.action ?? 'query'}`,
+          phase: 'inventory',
+          attempt,
+          response: result.response,
+          responseSha256: result.sha256,
+        }),
+        error,
+      );
+    }
     if (!parsed.error) return { parsed, rawSha256: result.sha256 };
-    if (parsed.error.code !== 'maxlag')
-      throw new Error(`MEDIAWIKI_API:${parsed.error.code}`);
+    if (parsed.error.code !== 'maxlag') {
+      throw errorWithReceipt(
+        `MEDIAWIKI_API:${parsed.error.code}`,
+        requestReceipt({
+          url: requestUrl,
+          purpose: `MediaWiki API ${params.list ?? params.action ?? 'query'}`,
+          phase: 'inventory',
+          attempt,
+          response: result.response,
+          responseSha256: result.sha256,
+        }),
+      );
+    }
     lastError = new Error('SOURCE_RETRYABLE:503:5');
     if (attempt < MAX_ATTEMPTS) await sleep(attempt * attempt * 1000);
   }
@@ -366,6 +572,26 @@ async function captureInventory() {
     },
     'allpages',
   );
+  const articleCapture = await paginate(
+    {
+      action: 'query',
+      list: 'allpages',
+      apnamespace: '0',
+      apfilterredir: 'nonredirects',
+      aplimit: 'max',
+    },
+    'allpages',
+  );
+  const redirectCapture = await paginate(
+    {
+      action: 'query',
+      list: 'allpages',
+      apnamespace: '0',
+      apfilterredir: 'redirects',
+      aplimit: 'max',
+    },
+    'allpages',
+  );
   const templateCapture = await paginate(
     {
       action: 'query',
@@ -403,14 +629,21 @@ async function captureInventory() {
     'allimages',
   );
   const routes = routeCapture.records;
+  const articles = articleCapture.records;
   const templates = templateCapture.records;
   const modules = moduleCapture.records;
   const maps = mapCapture.records;
   const media = mediaCapture.records;
-  const redirects = routes.filter((route) => route.redirect);
+  const redirects = redirectCapture.records;
+  if (articles.length + redirects.length !== routes.length) {
+    throw new Error(
+      `ROUTE_PARTITION_MISMATCH:${routes.length}:${articles.length}:${redirects.length}`,
+    );
+  }
   const bundleSha256 = {
     siteInfo: sha256(canonicalJson(siteInfo)),
     routes: sha256(canonicalJson(routes)),
+    articles: sha256(canonicalJson(articles)),
     redirects: sha256(canonicalJson(redirects)),
     templates: sha256(canonicalJson(templates)),
     modules: sha256(canonicalJson(modules)),
@@ -420,6 +653,8 @@ async function captureInventory() {
       canonicalJson({
         siteInfo: siteInfoRawSha256,
         routes: routeCapture.pages,
+        articles: articleCapture.pages,
+        redirects: redirectCapture.pages,
         templates: templateCapture.pages,
         modules: moduleCapture.pages,
         maps: mapCapture.pages,
@@ -438,14 +673,19 @@ async function captureInventory() {
       rightsUrl: RIGHTS,
       termsUrl: TERMS,
       termsSha256: policy.termsSha256,
+      termsState: policy.termsState,
+      termsStatus: policy.termsStatus,
+      termsContentType: policy.termsContentType,
+      termsOverrideReason: policy.termsOverrideReason,
       robotsUrl: ROBOTS,
-      robotsState: 'allowed',
+      robotsState: policy.robotsState,
       robotsSha256: policy.responseSha256,
       robotsPolicy: policy.policy,
+      robotsSkipReason: policy.robotsSkipReason,
     },
     counts: {
       totalPages: routes.length,
-      articles: routes.length - redirects.length,
+      articles: articles.length,
       routes: routes.length,
       redirects: redirects.length,
       templates: templates.length,
@@ -476,6 +716,7 @@ async function captureInventory() {
   return {
     snapshot: { ...normalized, manifestSha256 },
     routes,
+    articles,
     redirects,
     templates,
     modules,
@@ -484,6 +725,8 @@ async function captureInventory() {
     rawSiteInfo: siteInfo,
     responsePages: {
       routes: routeCapture.pages,
+      articles: articleCapture.pages,
+      redirects: redirectCapture.pages,
       templates: templateCapture.pages,
       modules: moduleCapture.pages,
       maps: mapCapture.pages,
@@ -533,6 +776,7 @@ async function publishCaptureSet(inventory) {
     const files = {
       'snapshot.json': inventory.snapshot,
       'routes.json': inventory.routes,
+      'articles.json': inventory.articles,
       'redirects.json': inventory.redirects,
       'templates.json': inventory.templates,
       'modules.json': inventory.modules,
@@ -595,4 +839,8 @@ async function main() {
   }
 }
 
-await main();
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))
+)
+  await main();

@@ -10,9 +10,11 @@ searchable routes, readable railway tables, permanent attribution, and no
 advertising rails or source-site runtime code.
 
 > [!IMPORTANT]
-> The complete source import has not run. The source `robots.txt` endpoint
-> currently returns an HTTP 403 HTML challenge. The importer stops before
-> capture until it can read and apply the source policy successfully.
+> The current-page capture is now complete: all 3,422 current article bodies are
+> stored in 69 resumable local batches. Revision history, graph data, rendering,
+> media bytes, and stable-cutoff reconciliation are still in progress. The
+> project owner explicitly directed the importer to record and continue past the
+> challenged `robots.txt` and terms endpoints without calling them verified.
 
 ## Quick links
 
@@ -56,7 +58,8 @@ launcher.
 - Standard Git LFS scan: no pointer or filter declaration
 - Production dependency audit: zero high or critical advisories, one low
   development-tool advisory
-- Source capture: stopped with `ROBOTS_CHALLENGE`, with no corpus files written
+- Source inventory: 3,616 routes, 3,422 articles, and 194 redirects captured
+- Current raw article bodies: 3,422 of 3,422 captured, 9,981,062 bytes
 
 </details>
 
@@ -91,10 +94,11 @@ forbidden.
 <details>
 <summary><strong>Feature and evidence status</strong></summary>
 
-The first shell, article route, source-policy preflight, typed contracts,
-project-path static export, build provenance, and social metadata are real. The
-complete corpus, revision history, media volumes, localization, visitor tools,
-offline documentation, and final verification remain in progress.
+The first shell, article route, source-policy receipts, typed contracts,
+project-path static export, build provenance, social metadata, complete title
+inventory, and every current raw article body are real. Revision history,
+rendered reader records, media volumes, full feature evidence, and final
+verification remain in progress.
 
 See [feature coverage](data/inventories/feature-coverage.json),
 [search coverage](data/inventories/search-surfaces.json), and

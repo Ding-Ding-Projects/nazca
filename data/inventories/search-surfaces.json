@@ -47,6 +47,36 @@
       "state": "partial"
     },
     {
+      "id": "S-015",
+      "route": "/tools/changelog",
+      "owner": "ChangelogTool",
+      "scope": "current date-filtered changelog entries",
+      "fieldId": "changelog-search-input",
+      "builderId": "changelog-search-builder",
+      "stateKey": "search.changelog",
+      "activationTarget": "changelog entry",
+      "focusReturnTarget": "changelog-search-input",
+      "plainTextDefault": true,
+      "anchoredBuilder": true,
+      "documentation": "docs/features/local-tools.md",
+      "state": "partial"
+    },
+    {
+      "id": "S-016",
+      "route": "/tools/support",
+      "owner": "SupportTicketsTool",
+      "scope": "local support tickets",
+      "fieldId": "support-ticket-search-input",
+      "builderId": "support-ticket-search-builder",
+      "stateKey": "search.support-tickets",
+      "activationTarget": "support ticket",
+      "focusReturnTarget": "support-ticket-search-input",
+      "plainTextDefault": true,
+      "anchoredBuilder": true,
+      "documentation": "docs/features/local-tools.md",
+      "state": "partial"
+    },
+    {
       "id": "S-004",
       "route": "every tab strip",
       "owner": "TabStrip",
@@ -124,17 +154,17 @@
     {
       "id": "S-009",
       "route": "every context menu",
-      "owner": "ContextMenuSearch",
+      "owner": "ContextMenuHost with SearchWorkbench",
       "scope": "visible menu items",
-      "fieldId": "context-menu-search",
-      "builderId": "context-menu-regex-builder",
+      "fieldId": "element-context-search-input",
+      "builderId": "element-context-search-builder",
       "stateKey": "search.menu.context",
       "activationTarget": "menu command",
       "focusReturnTarget": "menu opener",
       "plainTextDefault": true,
       "anchoredBuilder": true,
-      "documentation": "docs/features/README.md",
-      "state": "missing"
+      "documentation": "docs/features/locks-and-appearance.md",
+      "state": "partial"
     },
     {
       "id": "S-010",

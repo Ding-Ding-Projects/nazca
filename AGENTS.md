@@ -15,7 +15,9 @@ canonical source first when changing cross-project behavior.
 
 ## Source migration
 
-- Read and apply `robots.txt` and current terms before fetching source content.
+- Read and apply `robots.txt` and current terms before fetching source content,
+  unless the current project owner explicitly authorizes the importer’s recorded
+  `--skip-robots` path for a challenge-blocked endpoint.
 - Stop on challenge pages, disallowed paths, policy changes, repeated throttling,
   or unparseable source responses.
 - Use a descriptive user agent, bounded responses, continuation-cycle checks,

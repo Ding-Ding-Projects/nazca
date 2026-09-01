@@ -4,7 +4,7 @@
 
 - Repository: `Ding-Ding-Projects/nazca`
 - Default branch: `main`
-- Last verified pushed commit: `177e42e071126c2fe1272d74ba097c93f3cc1dbf`
+- Last verified pushed commit: `f5df08d90be60f1b6014ec6a2258ffec81cbe3d1`
 - Tracking issue: https://github.com/Ding-Ding-Projects/nazca/issues/1
 - Rolling progress: https://github.com/Ding-Ding-Projects/nazca/discussions/2
 - Release progress: https://github.com/Ding-Ding-Projects/nazca/discussions/3
@@ -26,12 +26,23 @@
   bounded converter adapters, consent-based Ollama loopback checks, exports, and
   offline browser-boundary help. Several advanced operations remain explicitly
   unavailable and are still release blockers.
+- Local Support Tickets, exact-commit changelog, verified public release code
+  name, 10% startup surprise, and a service-worker cache/update first slice.
+  These surfaces remain partial until localization, bulk operations, and runtime
+  evidence are complete.
 - Nazca Railway article route with section search, bounded regex preview, line
   table, source link, and noncanonical preview disclosure.
 - Typed corpus, page, redirect, revision, map, media, rights, volume, feature,
   search, and visitor-state contracts.
 - Bounded source-policy preflight, continuation-cycle protection, namespace
   resolution, bundle hashes, and staged inventory publication.
+- Authoritative current inventory with 3,616 routes, 3,422 articles, 194
+  redirects, 1,996 templates, 18 modules, 3 maps, and 16,555 media records.
+- Current raw wikitext for all 3,422 articles in 69 resumable local batches,
+  totalling 9,981,062 bytes before JSON framing.
+- Windows desktop runtime source with isolated renderer boundaries, loopback
+  static serving, stable provenance, and an unsigned Squirrel.Windows packaging
+  path. The installer itself remains unbuilt and unverified.
 - Generated build provenance, social preview, Open Graph metadata, standard Git
   LFS prohibition, static-bundle bounds, and GitHub Pages project-path checks.
 
@@ -45,11 +56,13 @@
 - Static bundle checks: 20-file Sites candidate and 25-file Pages mirror
 - Production dependency audit: zero high or critical advisories
 
-## External blocker
+## Source policy receipt
 
-The source `robots.txt` request currently returns HTTP 403 with an HTML challenge.
-The importer exits with `ROBOTS_CHALLENGE` before source capture. Do not work
-around this boundary. Retry only when a normal policy document is readable.
+The project owner explicitly directed the importer to skip the challenged
+`robots.txt` endpoint and then to continue reading the wiki after the separate
+first-party terms endpoint also returned challenge HTML. The importer records
+both owner overrides, hashes the bounded terms response, and never labels either
+response as allowed or verified. The MediaWiki API capture is proceeding.
 
 ## Next safe work
 
@@ -63,6 +76,8 @@ around this boundary. Retry only when a normal policy document is readable.
 
 ## Honesty boundary
 
-The current article is a structured preview fixture, not the final migrated
-source record. No full corpus, revision archive, media volume, public deployment,
-release, or runtime capture has been completed yet.
+The current article route is still a structured preview fixture. All current raw
+article bodies are captured locally, but they are not yet transformed into
+reader records or preserved in a release-backed archive. No full revision
+archive, media volume, public deployment, release, installer, or runtime capture
+has been completed yet.

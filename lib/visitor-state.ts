@@ -49,7 +49,7 @@ export const visitorSettingsSchema = z
         oneThingAtATime: z.boolean(),
         momentum: z.boolean(),
         nextAction: z.string().max(240).nullable(),
-        momentumSnoozedUntil: z.string().datetime({ offset: true }).nullable(),
+        momentumSnoozedUntil: z.iso.datetime({ offset: true }).nullable(),
       })
       .strict(),
     schedules: z.array(scheduleSchema).max(128),
@@ -61,7 +61,7 @@ export const visitorStateSchema = z
     recordType: z.literal('VisitorStateV1'),
     schemaVersion: z.literal('1.0.0'),
     revision: z.number().int().nonnegative(),
-    updatedAt: z.string().datetime({ offset: true }),
+    updatedAt: z.iso.datetime({ offset: true }),
     settings: visitorSettingsSchema,
   })
   .strict();
@@ -251,11 +251,11 @@ const notificationArraySchema = z
   .array(
     z
       .object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         kind: z.enum(['info', 'success', 'warning', 'error']),
         title: z.string().min(1).max(160),
         body: z.string().max(2048),
-        createdAt: z.string().datetime({ offset: true }),
+        createdAt: z.iso.datetime({ offset: true }),
         dismissed: z.boolean(),
       })
       .strict(),
@@ -266,11 +266,11 @@ const historyArraySchema = z
   .array(
     z
       .object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         sequence: z.number().int().nonnegative(),
         action: z.string().min(1).max(160),
         target: z.string().min(1).max(240),
-        timestamp: z.string().datetime({ offset: true }),
+        timestamp: z.iso.datetime({ offset: true }),
         summary: z.string().max(2048),
       })
       .strict(),
