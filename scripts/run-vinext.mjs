@@ -10,9 +10,11 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const VINEXT = path.join(ROOT, 'node_modules', 'vinext', 'dist', 'cli.js');
 const command = process.argv[2] ?? 'build';
 const pages = process.argv.includes('--pages');
+const staticOnly = process.argv.includes('--static');
+const staticExport = pages || staticOnly;
 const forwarded = process.argv
   .slice(3)
-  .filter((argument) => argument !== '--pages');
+  .filter((argument) => argument !== '--pages' && argument !== '--static');
 
 function git(...arguments_) {
   try {
@@ -41,7 +43,11 @@ async function writeProvenance() {
     timezone: 'UTC',
     commitSha,
     dirty,
-    deployment: pages ? 'github-pages-mirror' : 'sites-primary-candidate',
+    deployment: pages
+      ? 'github-pages-mirror'
+      : staticOnly
+        ? 'offline-static-bundle'
+        : 'sites-primary-candidate',
   };
   await mkdir(path.join(ROOT, 'public'), { recursive: true });
   await writeFile(
@@ -66,9 +72,9 @@ const child = spawn(process.execPath, [VINEXT, command, ...forwarded], {
     NEXT_PUBLIC_BUILD_COMMIT_SHA: provenance.commitSha ?? '',
     NEXT_PUBLIC_BUILD_DIRTY: String(provenance.dirty),
     NEXT_PUBLIC_BUILD_DEPLOYMENT: provenance.deployment,
+    ...(staticExport ? { STATIC_EXPORT: '1' } : {}),
     ...(pages
       ? {
-          STATIC_EXPORT: '1',
           PAGES_BASE_PATH: '/nazca',
           NEXT_PUBLIC_BASE_PATH: '/nazca',
         }
