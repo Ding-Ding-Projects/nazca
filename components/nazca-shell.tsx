@@ -1,8 +1,10 @@
 'use client';
 
 import {
+  Bell,
   Building2,
   Clock3,
+  Command,
   Compass,
   History,
   Home,
@@ -23,6 +25,7 @@ import {
   type SearchRecord,
 } from '@/components/search-workbench';
 import { SettingsWorkspace } from '@/components/settings-workspace';
+import { ToolsWorkspace } from '@/components/tools-workspace';
 import { useVisitorState } from '@/components/visitor-state-provider';
 import { labels, localize } from '@/lib/i18n';
 import { formatBuildTime, type BuildProvenance } from '@/lib/provenance';
@@ -163,7 +166,8 @@ const searchRecords: SearchRecord[] = records.map((record) => ({
 
 export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
   const router = useRouter();
-  const { state, text, updateSettings } = useVisitorState();
+  const { notifications, setPaletteOpen, state, text, updateSettings } =
+    useVisitorState();
   const settings = state.settings;
   const languageMode = settings.schoolMode.enabled
     ? 'en'
@@ -180,14 +184,21 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
   }, [provenance.builtAt]);
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'f') {
-        event.preventDefault();
-        document.getElementById('global-atlas-search-input')?.focus();
+    const navigate = (event: Event) => {
+      const destination = (event as CustomEvent<string>).detail;
+      setActiveTab(destination === 'notifications' ? 'tools' : destination);
+      if (destination === 'notifications') {
+        setTimeout(
+          () =>
+            window.dispatchEvent(
+              new CustomEvent('nazca:open-tool', { detail: 'notifications' }),
+            ),
+          0,
+        );
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('nazca:navigate', navigate);
+    return () => window.removeEventListener('nazca:navigate', navigate);
   }, []);
 
   const selectedLabel =
@@ -270,6 +281,36 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
           <button
             className="icon-button"
             type="button"
+            aria-label={L('Open command palette', '開啟指令面板')}
+            onClick={() => setPaletteOpen(true)}
+          >
+            <Command size={19} aria-hidden="true" />
+          </button>
+          <button
+            className="icon-button notification-button"
+            type="button"
+            aria-label={L('Open notifications', '開啟通知')}
+            onClick={() => {
+              setActiveTab('tools');
+              setTimeout(
+                () =>
+                  window.dispatchEvent(
+                    new CustomEvent('nazca:open-tool', {
+                      detail: 'notifications',
+                    }),
+                  ),
+                0,
+              );
+            }}
+          >
+            <Bell size={19} aria-hidden="true" />
+            {notifications.some((notification) => !notification.dismissed) ? (
+              <span className="notification-badge" aria-hidden="true" />
+            ) : null}
+          </button>
+          <button
+            className="icon-button"
+            type="button"
             aria-label={
               settings.theme === 'dark'
                 ? L('Use light theme', '用淺色主題')
@@ -333,6 +374,8 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
         <main id="main-content" className="main-viewport" tabIndex={-1}>
           {activeTab === 'settings' ? (
             <SettingsWorkspace />
+          ) : activeTab === 'tools' ? (
+            <ToolsWorkspace />
           ) : (
             <div className="route-content">
               <p className="eyebrow">

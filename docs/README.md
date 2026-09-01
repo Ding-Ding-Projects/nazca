@@ -25,4 +25,5 @@
 
 - [Universal feature status](features/README.md)
 - [Visitor settings](features/visitor-settings.md)
+- [Local browser tools](features/local-tools.md)
 - [Verification and evidence](verification/README.md)

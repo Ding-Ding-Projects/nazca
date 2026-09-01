@@ -1050,6 +1050,265 @@ input:focus-visible,
   width: min(100%, 76rem);
   margin-inline: auto;
 }
+.tools-workspace {
+  width: min(100%, 76rem);
+  margin-inline: auto;
+}
+.tool-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-block: 1rem;
+  overflow-x: auto;
+  padding-block-end: 0.25rem;
+}
+.tool-tabs button {
+  min-height: 2.75rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--outline);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  padding-inline: 0.9rem;
+  cursor: pointer;
+}
+.tool-tabs button[aria-current='page'] {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+  font-weight: 800;
+}
+.tool-panel {
+  min-width: 0;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  box-shadow: var(--shadow-card);
+}
+.tool-panel h2 {
+  margin: 0;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+}
+.tool-description,
+.tool-status {
+  max-width: 76ch;
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+.tool-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-block: 1rem;
+}
+.tool-form-grid label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  font-weight: 750;
+}
+.tool-form-grid input,
+.tool-form-grid select {
+  min-width: 0;
+  min-height: 2.75rem;
+  border: 1px solid var(--outline);
+  border-radius: 0.7rem;
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding-inline: 0.7rem;
+}
+.tool-actions,
+.tool-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.tool-actions button,
+.tool-heading-row button,
+.notification-list button {
+  min-height: 2.5rem;
+  border: 1px solid var(--outline);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding-inline: 0.8rem;
+  cursor: pointer;
+}
+.adapter-grid,
+.totp-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-block-start: 1rem;
+}
+.adapter-grid article,
+.totp-card {
+  min-width: 0;
+  border: 1px solid var(--outline);
+  border-radius: 0.8rem;
+  background: var(--surface-soft);
+  padding: 0.9rem;
+}
+.adapter-grid p,
+.totp-card p {
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+.totp-card h3 {
+  margin: 0;
+}
+.totp-card > output {
+  display: block;
+  margin-block: 0.8rem;
+  color: var(--primary-strong);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: clamp(1.7rem, 5vw, 2.7rem);
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+.totp-qr {
+  margin: 0.8rem 0 0;
+}
+.totp-qr img {
+  width: min(100%, 16rem);
+  height: auto;
+  border: 0.5rem solid white;
+}
+.totp-qr figcaption {
+  max-width: 36ch;
+  margin-block-start: 0.35rem;
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+}
+.model-list,
+.history-list,
+.notification-list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.model-list li,
+.history-list li,
+.notification-list li {
+  border: 1px solid var(--outline);
+  border-radius: 0.8rem;
+  background: var(--surface-soft);
+  padding: 0.8rem;
+}
+.model-list strong,
+.model-list span,
+.history-list strong,
+.history-list span,
+.notification-list strong,
+.notification-list span {
+  display: block;
+}
+.model-list span,
+.history-list span,
+.notification-list span {
+  margin-block-start: 0.25rem;
+  color: var(--ink-muted);
+  font-size: 0.72rem;
+}
+.history-list p,
+.notification-list p {
+  margin-block-end: 0;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+}
+.notification-button {
+  position: relative;
+}
+.notification-badge {
+  position: absolute;
+  inset-block-start: 0.35rem;
+  inset-inline-end: 0.35rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--route-red);
+}
+.notification-stack {
+  position: fixed;
+  z-index: 120;
+  inset-inline-end: 1rem;
+  inset-block-end: 1rem;
+  width: min(24rem, calc(100vw - 2rem));
+  display: grid;
+  gap: 0.55rem;
+}
+.notification-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  border: 1px solid var(--outline-strong);
+  border-inline-start: 0.35rem solid var(--primary);
+  border-radius: 0.8rem;
+  background: var(--surface);
+  padding: 0.8rem;
+  box-shadow: var(--shadow-float);
+}
+.notification-warning {
+  border-inline-start-color: var(--warning);
+}
+.notification-error {
+  border-inline-start-color: var(--route-red);
+}
+.notification-card p {
+  margin: 0.3rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+.notification-card button {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.palette-backdrop {
+  position: fixed;
+  z-index: 150;
+  inset: 0;
+  display: grid;
+  place-items: start center;
+  overflow: auto;
+  background: rgb(4 15 18 / 58%);
+  padding: min(10dvh, 5rem) 1rem 1rem;
+}
+.command-palette {
+  width: min(48rem, 100%);
+  max-height: 80dvh;
+  overflow: auto;
+  border: 1px solid var(--outline-strong);
+  border-radius: 1.25rem;
+  background: var(--surface);
+  padding: 1rem;
+  box-shadow: var(--shadow-float);
+}
+.palette-hint {
+  margin-block-end: 0;
+  color: var(--ink-muted);
+  font-size: 0.72rem;
+}
+.palette-hint kbd {
+  border: 1px solid var(--outline);
+  border-radius: 0.35rem;
+  background: var(--surface-soft);
+  padding: 0.15rem 0.35rem;
+}
 .workspace-title {
   max-width: 22ch;
   margin: 0;
@@ -1384,6 +1643,11 @@ input:focus-visible,
   .setting-row {
     grid-template-columns: 1fr;
     align-items: stretch;
+  }
+  .tool-form-grid,
+  .adapter-grid,
+  .totp-grid {
+    grid-template-columns: 1fr;
   }
   .setting-actions,
   .schedule-editor {

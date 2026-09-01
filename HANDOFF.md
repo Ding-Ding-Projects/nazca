@@ -4,7 +4,7 @@
 
 - Repository: `Ding-Ding-Projects/nazca`
 - Default branch: `main`
-- Last verified pushed commit: `1053bf92b3bc0dd6595065268281598cc5009404`
+- Last verified pushed commit: `177e42e071126c2fe1272d74ba097c93f3cc1dbf`
 - Tracking issue: https://github.com/Ding-Ding-Projects/nazca/issues/1
 - Rolling progress: https://github.com/Ding-Ding-Projects/nazca/discussions/2
 - Release progress: https://github.com/Ding-Ding-Projects/nazca/discussions/3
@@ -21,6 +21,11 @@
   renamed School mode, narrator voice settings, schedules, and five attention
   controls. These settings are functional first slices, not release-complete
   implementations of every related feature contract.
+- Shared Tools workspace with command palette, persistent notifications,
+  redacted local history, RFC 6238 authenticator, local QR read and creation,
+  bounded converter adapters, consent-based Ollama loopback checks, exports, and
+  offline browser-boundary help. Several advanced operations remain explicitly
+  unavailable and are still release blockers.
 - Nazca Railway article route with section search, bounded regex preview, line
   table, source link, and noncanonical preview disclosure.
 - Typed corpus, page, redirect, revision, map, media, rights, volume, feature,

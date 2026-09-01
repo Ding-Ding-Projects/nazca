@@ -1,12 +1,25 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   clearVocabulary,
   defaultVisitorState,
+  loadHistory,
+  loadNotifications,
   loadVisitorState,
   loadVocabulary,
   saveVisitorState,
+  saveHistory,
+  saveNotifications,
+  type HistoryRecord,
+  type NotificationRecord,
   type VisitorSettings,
   type VisitorState,
   type VocabularyEntry,
@@ -21,6 +34,16 @@ type VisitorContextValue = {
   setVocabulary: (entries: VocabularyEntry[]) => void;
   clearVocabularyState: () => Promise<void>;
   text: (value: string) => string;
+  notifications: NotificationRecord[];
+  history: HistoryRecord[];
+  paletteOpen: boolean;
+  setPaletteOpen: (open: boolean) => void;
+  notify: (
+    record: Omit<NotificationRecord, 'id' | 'createdAt' | 'dismissed'>,
+  ) => void;
+  dismissNotification: (id: string) => void;
+  clearNotifications: () => void;
+  exportVisitorData: () => string;
 };
 
 const VisitorContext = createContext<VisitorContextValue | null>(null);
@@ -34,16 +57,43 @@ export function VisitorStateProvider({
   const [ready, setReady] = useState(false);
   const [storageError, setStorageError] = useState<string | null>(null);
   const [vocabulary, setVocabularyState] = useState<VocabularyEntry[]>([]);
+  const [notifications, setNotifications] = useState<NotificationRecord[]>([]);
+  const [history, setHistory] = useState<HistoryRecord[]>([]);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const stateRef = useRef(state);
+  const historyRef = useRef(history);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  useEffect(() => {
+    historyRef.current = history;
+  }, [history]);
 
   useEffect(() => {
     let active = true;
-    Promise.all([loadVisitorState(), loadVocabulary()])
-      .then(([loadedState, loadedVocabulary]) => {
-        if (!active) return;
-        setState(loadedState);
-        setVocabularyState(loadedVocabulary);
-        setReady(true);
-      })
+    Promise.all([
+      loadVisitorState(),
+      loadVocabulary(),
+      loadNotifications(),
+      loadHistory(),
+    ])
+      .then(
+        ([
+          loadedState,
+          loadedVocabulary,
+          loadedNotifications,
+          loadedHistory,
+        ]) => {
+          if (!active) return;
+          setState(loadedState);
+          setVocabularyState(loadedVocabulary);
+          setNotifications(loadedNotifications);
+          setHistory(loadedHistory);
+          setReady(true);
+        },
+      )
       .catch((error) => {
         if (!active) return;
         setStorageError(
@@ -59,6 +109,7 @@ export function VisitorStateProvider({
   }, []);
 
   useEffect(() => {
+    if (!('BroadcastChannel' in window)) return undefined;
     const channel = new BroadcastChannel('nazca-visitor-state');
     channel.addEventListener(
       'message',
@@ -104,30 +155,75 @@ export function VisitorStateProvider({
   ]);
 
   const updateSettings = (patch: Partial<VisitorSettings>) => {
-    setState((current) => {
-      const next = {
-        ...current,
-        revision: current.revision + 1,
-        updatedAt: new Date().toISOString(),
-        settings: { ...current.settings, ...patch },
-      };
-      saveVisitorState(next).catch((error) =>
-        setStorageError(
-          error instanceof Error
-            ? error.message
-            : 'The settings change was not saved.',
-        ),
-      );
+    const current = stateRef.current;
+    const next = {
+      ...current,
+      revision: current.revision + 1,
+      updatedAt: new Date().toISOString(),
+      settings: { ...current.settings, ...patch },
+    };
+    stateRef.current = next;
+    setState(next);
+    saveVisitorState(next).catch((error) =>
+      setStorageError(
+        error instanceof Error
+          ? error.message
+          : 'The settings change was not saved.',
+      ),
+    );
+    if ('BroadcastChannel' in window) {
       const channel = new BroadcastChannel('nazca-visitor-state');
       channel.postMessage({ revision: next.revision });
       channel.close();
-      return next;
-    });
+    }
+    const event: HistoryRecord = {
+      id: crypto.randomUUID(),
+      sequence: historyRef.current.length
+        ? historyRef.current.at(-1)!.sequence + 1
+        : 1,
+      action: 'settings changed',
+      target: Object.keys(patch).join(', '),
+      timestamp: next.updatedAt,
+      summary: `Updated ${Object.keys(patch).join(', ')}. Sensitive values are omitted.`,
+    };
+    const updatedHistory = [...historyRef.current, event].slice(-20_000);
+    historyRef.current = updatedHistory;
+    setHistory(updatedHistory);
+    saveHistory(updatedHistory).catch(() => undefined);
   };
 
   const clearVocabularyState = async () => {
     await clearVocabulary();
     setVocabularyState([]);
+  };
+
+  const notify: VisitorContextValue['notify'] = (record) => {
+    const created: NotificationRecord = {
+      ...record,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      dismissed: false,
+    };
+    setNotifications((records) => {
+      const updated = [...records, created].slice(-10_000);
+      saveNotifications(updated).catch(() => undefined);
+      return updated;
+    });
+  };
+
+  const dismissNotification = (id: string) => {
+    setNotifications((records) => {
+      const updated = records.map((record) =>
+        record.id === id ? { ...record, dismissed: true } : record,
+      );
+      saveNotifications(updated).catch(() => undefined);
+      return updated;
+    });
+  };
+
+  const clearNotifications = () => {
+    setNotifications([]);
+    saveNotifications([]).catch(() => undefined);
   };
 
   const value = useMemo<VisitorContextValue>(
@@ -139,6 +235,31 @@ export function VisitorStateProvider({
       updateSettings,
       setVocabulary: setVocabularyState,
       clearVocabularyState,
+      notifications,
+      history,
+      paletteOpen,
+      setPaletteOpen,
+      notify,
+      dismissNotification,
+      clearNotifications,
+      exportVisitorData() {
+        return JSON.stringify(
+          {
+            schemaVersion: '1.0.0',
+            exportedAt: new Date().toISOString(),
+            state,
+            notifications,
+            history,
+            omitted: [
+              'personal vocabulary',
+              'local credentials',
+              'authenticator secrets',
+            ],
+          },
+          null,
+          2,
+        );
+      },
       text(value) {
         if (state.settings.schoolMode.enabled || !vocabulary.length)
           return value;
@@ -148,7 +269,15 @@ export function VisitorStateProvider({
         );
       },
     }),
-    [ready, state, storageError, vocabulary],
+    [
+      history,
+      notifications,
+      paletteOpen,
+      ready,
+      state,
+      storageError,
+      vocabulary,
+    ],
   );
 
   return (

@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { VisitorStateProvider } from '@/components/visitor-state-provider';
+import { CommandPalette } from '@/components/command-palette';
+import { NotificationToasts } from '@/components/notification-center';
 import './globals.css';
 
 const deploymentOrigin =
@@ -56,7 +58,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <VisitorStateProvider>{children}</VisitorStateProvider>
+        <VisitorStateProvider>
+          {children}
+          <CommandPalette />
+          <NotificationToasts />
+        </VisitorStateProvider>
       </body>
     </html>
   );

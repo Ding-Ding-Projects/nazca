@@ -34,17 +34,17 @@
     {
       "id": "S-003",
       "route": "global",
-      "owner": "CommandPalette",
+      "owner": "CommandPalette with SearchWorkbench",
       "scope": "all commands, routes, settings, articles, and elements",
-      "fieldId": "palette-search",
-      "builderId": "palette-regex-builder",
+      "fieldId": "command-palette-search-input",
+      "builderId": "command-palette-search-builder",
       "stateKey": "search.palette",
       "activationTarget": "exact registered element",
       "focusReturnTarget": "palette-opener",
       "plainTextDefault": true,
       "anchoredBuilder": true,
-      "documentation": "docs/features/README.md",
-      "state": "missing"
+      "documentation": "docs/features/local-tools.md",
+      "state": "partial"
     },
     {
       "id": "S-004",
@@ -154,7 +154,7 @@
     {
       "id": "S-011",
       "route": "/notifications",
-      "owner": "NotificationCenter",
+      "owner": "Tools Notification center with SearchWorkbench",
       "scope": "local notifications",
       "fieldId": "notification-search",
       "builderId": "notification-regex-builder",
@@ -163,13 +163,13 @@
       "focusReturnTarget": "notification-search",
       "plainTextDefault": true,
       "anchoredBuilder": true,
-      "documentation": "docs/features/README.md",
-      "state": "missing"
+      "documentation": "docs/features/local-tools.md",
+      "state": "partial"
     },
     {
       "id": "S-012",
       "route": "/history",
-      "owner": "HistoryBrowser",
+      "owner": "Tools History browser with SearchWorkbench",
       "scope": "local history entries",
       "fieldId": "history-search",
       "builderId": "history-regex-builder",
@@ -178,8 +178,38 @@
       "focusReturnTarget": "history-search",
       "plainTextDefault": true,
       "anchoredBuilder": true,
-      "documentation": "docs/features/README.md",
-      "state": "missing"
+      "documentation": "docs/features/local-tools.md",
+      "state": "partial"
+    },
+    {
+      "id": "S-013",
+      "route": "/tools",
+      "owner": "ToolsWorkspace",
+      "scope": "local tool destinations",
+      "fieldId": "tools-catalog-search-input",
+      "builderId": "tools-catalog-search-builder",
+      "stateKey": "search.tools.catalog",
+      "activationTarget": "tool tab",
+      "focusReturnTarget": "tools-catalog-search-input",
+      "plainTextDefault": true,
+      "anchoredBuilder": true,
+      "documentation": "docs/features/local-tools.md",
+      "state": "partial"
+    },
+    {
+      "id": "S-014",
+      "route": "/tools/authenticator",
+      "owner": "AuthenticatorTool",
+      "scope": "local authenticator issuer and account metadata",
+      "fieldId": "authenticator-search-input",
+      "builderId": "authenticator-search-builder",
+      "stateKey": "search.authenticator",
+      "activationTarget": "authenticator entry",
+      "focusReturnTarget": "authenticator-search-input",
+      "plainTextDefault": true,
+      "anchoredBuilder": true,
+      "documentation": "docs/features/local-tools.md",
+      "state": "partial"
     }
   ]
 }

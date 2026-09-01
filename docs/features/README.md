@@ -12,6 +12,7 @@ Rows marked `missing` or `partial` are release blockers, not future ideas that c
 quietly disappear.
 
 - [Visitor settings](visitor-settings.md)
+- [Local browser tools](local-tools.md)
 
 ## Configuration
 

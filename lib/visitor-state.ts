@@ -107,6 +107,22 @@ export const defaultVisitorState: VisitorState = {
 };
 
 export type VocabularyEntry = { from: string; to: string };
+export type NotificationRecord = {
+  id: string;
+  kind: 'info' | 'success' | 'warning' | 'error';
+  title: string;
+  body: string;
+  createdAt: string;
+  dismissed: boolean;
+};
+export type HistoryRecord = {
+  id: string;
+  sequence: number;
+  action: string;
+  target: string;
+  timestamp: string;
+  summary: string;
+};
 const vocabularySchema = z
   .object({
     schemaVersion: z.literal('1.0.0'),
@@ -210,6 +226,80 @@ export async function loadVocabulary() {
 export function clearVocabulary() {
   return transact<undefined>(PRIVATE_STORE, 'readwrite', (store) =>
     store.delete('vocabulary'),
+  );
+}
+
+export function loadPrivateValue<T>(key: string) {
+  return transact<T | undefined>(PRIVATE_STORE, 'readonly', (store) =>
+    store.get(key),
+  );
+}
+
+export function savePrivateValue<T>(key: string, value: T) {
+  return transact<IDBValidKey>(PRIVATE_STORE, 'readwrite', (store) =>
+    store.put(value, key),
+  );
+}
+
+export function deletePrivateValue(key: string) {
+  return transact<undefined>(PRIVATE_STORE, 'readwrite', (store) =>
+    store.delete(key),
+  );
+}
+
+const notificationArraySchema = z
+  .array(
+    z
+      .object({
+        id: z.string().uuid(),
+        kind: z.enum(['info', 'success', 'warning', 'error']),
+        title: z.string().min(1).max(160),
+        body: z.string().max(2048),
+        createdAt: z.string().datetime({ offset: true }),
+        dismissed: z.boolean(),
+      })
+      .strict(),
+  )
+  .max(10_000);
+
+const historyArraySchema = z
+  .array(
+    z
+      .object({
+        id: z.string().uuid(),
+        sequence: z.number().int().nonnegative(),
+        action: z.string().min(1).max(160),
+        target: z.string().min(1).max(240),
+        timestamp: z.string().datetime({ offset: true }),
+        summary: z.string().max(2048),
+      })
+      .strict(),
+  )
+  .max(20_000);
+
+export async function loadNotifications() {
+  const raw = await transact<unknown>(STATE_STORE, 'readonly', (store) =>
+    store.get('notifications'),
+  );
+  return raw === undefined ? [] : notificationArraySchema.parse(raw);
+}
+
+export function saveNotifications(records: NotificationRecord[]) {
+  return transact<IDBValidKey>(STATE_STORE, 'readwrite', (store) =>
+    store.put(notificationArraySchema.parse(records), 'notifications'),
+  );
+}
+
+export async function loadHistory() {
+  const raw = await transact<unknown>(STATE_STORE, 'readonly', (store) =>
+    store.get('history'),
+  );
+  return raw === undefined ? [] : historyArraySchema.parse(raw);
+}
+
+export function saveHistory(records: HistoryRecord[]) {
+  return transact<IDBValidKey>(STATE_STORE, 'readwrite', (store) =>
+    store.put(historyArraySchema.parse(records), 'history'),
   );
 }
 
