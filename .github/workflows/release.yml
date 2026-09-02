@@ -1,0 +1,72 @@
+name: Build and publish Pages
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-pages:
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    runs-on: windows-2025
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Install project packages
+        shell: pwsh
+        run: npm ci --audit=false
+
+      - name: Build the Pages bundle
+        shell: pwsh
+        run: |
+          $log = Join-Path $env:RUNNER_TEMP 'nazca-pages-build.log'
+          & node scripts/run-vinext.mjs build --pages 2>&1 | Tee-Object -FilePath $log
+          $exitCode = $LASTEXITCODE
+          "BUILD_EXIT=$exitCode" | Add-Content -LiteralPath $log
+          if ($exitCode -ne 0) { exit $exitCode }
+
+      - name: Upload the Pages bundle
+        if: ${{ always() }}
+        uses: actions/upload-pages-artifact@v3
+        continue-on-error: true
+        with:
+          path: dist/client
+
+      - name: Upload build evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: nazca-pages-build-${{ github.run_id }}
+          path: |
+            dist/client/**
+            ${{ runner.temp }}/nazca-pages-build.log
+          if-no-files-found: warn
+          retention-days: 7
+
+  deploy-pages:
+    if: needs.build-pages.result == 'success' && (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch')
+    needs: build-pages
+    runs-on: windows-2025
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

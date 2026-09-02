@@ -9,6 +9,8 @@ The Encyclopedia of Los Sengas. It is designed as a modern transit atlas with
 searchable routes, readable railway tables, permanent attribution, and no
 advertising rails or source-site runtime code.
 
+Published website: https://ding-ding-projects.github.io/nazca/
+
 > [!IMPORTANT]
 > Candidate A now contains a fresh current snapshot: 3,422 article bodies and
 > 194 redirects captured in resumable 50-page batches, with 3,422 sanitized
