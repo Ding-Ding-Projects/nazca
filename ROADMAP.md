@@ -21,6 +21,7 @@
 - [x] Compile 3,422 sanitized article records into 54 fixed-size shards with a compact search index.
 - [x] Generate static routes for 3,616 current namespace-0 titles, including explicit redirect states.
 - [x] Add a deterministic cold-build validator for current corpus counts, hashes, routes, and forbidden raw fields.
+- [x] Capture exact-oldid rendered article HTML in 69 resumable batches and record its manifest hash.
 - [ ] Add the complete persisted raw-response cache and phase journal.
 - [ ] Capture rendered bodies, categories, links, transclusions, citations, and maps.
 - [ ] Capture every accessible text revision and attribution record.
@@ -57,6 +58,6 @@
 - [ ] Add focused local tests and deliberate red-then-green regressions.
 - [ ] Register and use the required isolated headless verification route.
 - [ ] Capture all required screens, states, widths, languages, themes, and scales.
-- [ ] Add the build-only GitHub Actions release and Pages workflow.
+- [x] Add the build-only GitHub Actions release and Pages workflow; first remote release run remains pending.
 - [ ] Publish one unique non-draft v0.1.0 release and verify all assets.
 - [ ] Publish the repository wiki, final handoff, and release announcement.

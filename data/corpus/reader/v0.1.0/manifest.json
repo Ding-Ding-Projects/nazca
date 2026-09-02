@@ -4,7 +4,7 @@
   "release": "0.1.0",
   "captureWindow": {
     "startedAt": "2026-09-01T21:38:30.510Z",
-    "finishedAt": "2026-09-02T22:57:55.723Z"
+    "finishedAt": "2026-09-02T22:49:57.836Z"
   },
   "source": {
     "apiUrl": "https://enlossengas.fandom.com/api.php",
@@ -3997,7 +3997,7 @@
   "archive": {
     "name": "nazca-current-corpus-0.1.0.zip",
     "bytes": 60662581,
-    "sha256": "761e98533ec0defb7c8caebe7eb4a100970de3587e8ccf34cf5e3fcb4642b29d",
+    "sha256": "3ba23406f379664b36ec53170940f2093f441fe00125ee03e8fb8afd98badf7a",
     "manifestSha256": "e1a3d0d1c95892e349de4ed64dba0831bbf93f5963867b72869b06ef2c6d0d57"
   },
   "deferredScope": [
@@ -4007,6 +4007,6 @@
     "template and module closure",
     "stable cutoff reconciliation"
   ],
-  "generatedAt": "2026-09-02T22:57:55.773Z",
-  "manifestSha256": "1cfc18eb8bfb0f9acd33bd4b20d63fcb95aab4aa00df7339e8364f5d6559d3a0"
+  "generatedAt": "2026-09-02T23:24:00.590Z",
+  "manifestSha256": "3d7c2de4c7d2015ddef14683cb3bab70210e8c16e4be1d997e63c5e2db3be09b"
 }

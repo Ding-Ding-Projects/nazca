@@ -14,9 +14,14 @@ atomic rename retries, and resumable journals. The capture is intentionally
 not a stable reconciliation.
 
 Run the current pipeline with `npm run import:inventory:owner-override`, then
-`npm run import:current-pages`, `npm run import:current-redirects`, and
-`npm run compile:current-corpus`. The ignored capture stays outside ordinary
-Git. The compiler emits `data/corpus/reader/v0.1.0/` and an external
+`npm run import:current-pages`, `npm run import:current-redirects`,
+`npm run import:current-rendered`, and `npm run compile:current-corpus`. The
+rendered phase requests each captured revision by exact `oldid`, verifies the
+returned page and revision IDs, and stores bounded resumable batches only in
+the ignored capture. The current rendered capture has 3,422 pages in 69
+batches with manifest SHA-256
+`603528b6695d97da351d49d9e4155ef75ddfc221a90d80421448652ada9c3822`.
+The compiler emits `data/corpus/reader/v0.1.0/` and an external
 `nazca-current-corpus-0.1.0.zip` raw archive with per-file bytes and SHA-256
 records.
 

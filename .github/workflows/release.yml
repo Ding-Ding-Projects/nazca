@@ -1,4 +1,4 @@
-name: Build and publish Pages
+name: Build and publish Pages and release
 
 on:
   push:
@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -70,3 +72,234 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  build-release:
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    runs-on: windows-2025
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install root packages from the lockfile
+        shell: pwsh
+        run: npm ci --audit=false
+
+      - name: Build the root-path offline reader
+        shell: pwsh
+        run: |
+          $log = Join-Path $env:RUNNER_TEMP 'nazca-release-build.log'
+          & node scripts/run-vinext.mjs build --static 2>&1 | Tee-Object -FilePath $log
+          $exitCode = $LASTEXITCODE
+          "BUILD_EXIT=$exitCode" | Add-Content -LiteralPath $log
+          if ($exitCode -ne 0) { exit $exitCode }
+
+      - name: Package the offline reader
+        shell: pwsh
+        run: powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/package-offline-bundle.ps1
+
+      - name: Install desktop packages from the lockfile
+        shell: pwsh
+        run: npm --prefix desktop ci --audit=false
+
+      - name: Build the unsigned Squirrel.Windows installer
+        shell: pwsh
+        run: |
+          $log = Join-Path $env:RUNNER_TEMP 'nazca-installer-build.log'
+          & node scripts/desktop/package-squirrel.mjs 2>&1 | Tee-Object -FilePath $log
+          $exitCode = $LASTEXITCODE
+          "PACKAGE_EXIT=$exitCode" | Add-Content -LiteralPath $log
+          if ($exitCode -ne 0) { exit $exitCode }
+
+      - name: Assemble and hash release assets
+        shell: pwsh
+        run: |
+          $workspace = [IO.Path]::GetFullPath($env:GITHUB_WORKSPACE)
+          $stage = [IO.Path]::GetFullPath((Join-Path $workspace 'release-staging'))
+          $expectedStage = [IO.Path]::GetFullPath((Join-Path $workspace 'release-staging'))
+          if ($stage -ne $expectedStage -or -not $stage.StartsWith($workspace + [IO.Path]::DirectorySeparatorChar)) { throw "Unsafe release staging path: $stage" }
+          if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
+          New-Item -ItemType Directory -Path $stage -Force | Out-Null
+          $static = Join-Path $env:GITHUB_WORKSPACE 'outputs\nazca-railway-static-0.1.0.zip'
+          $squirrel = Join-Path $env:GITHUB_WORKSPACE 'dist\desktop\squirrel-windows'
+          $setup = Get-ChildItem -LiteralPath $squirrel -File | Where-Object { $_.Name -match '(?i)setup\.exe$' } | Select-Object -First 1
+          $releases = Get-ChildItem -LiteralPath $squirrel -File | Where-Object { $_.Name -ceq 'RELEASES' } | Select-Object -First 1
+          $full = Get-ChildItem -LiteralPath $squirrel -File | Where-Object { $_.Name -match '(?i)\.nupkg$' -and $_.Name -notmatch '(?i)\.delta\.nupkg$' } | Select-Object -First 1
+          if (-not (Test-Path -LiteralPath $static -PathType Leaf)) { throw "Static bundle is missing: $static" }
+          if (-not $setup -or -not $releases -or -not $full) { throw 'Squirrel.Windows outputs are incomplete.' }
+          Copy-Item -LiteralPath $static -Destination (Join-Path $stage 'nazca-railway-static-0.1.0.zip')
+          Copy-Item -LiteralPath $setup.FullName -Destination (Join-Path $stage 'Nazca-Railway-0.1.0-Setup.exe')
+          Copy-Item -LiteralPath $releases.FullName -Destination (Join-Path $stage 'RELEASES')
+          Copy-Item -LiteralPath $full.FullName -Destination (Join-Path $stage $full.Name)
+          Get-ChildItem -LiteralPath $squirrel -File -Filter '*.delta.nupkg' | ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $stage $_.Name) }
+          Copy-Item -LiteralPath (Join-Path $squirrel 'release-manifest.json') -Destination (Join-Path $stage 'desktop-release-manifest.json')
+          Copy-Item -LiteralPath (Join-Path $env:GITHUB_WORKSPACE 'data\corpus\reader\v0.1.0\manifest.json') -Destination (Join-Path $stage 'corpus-manifest.json')
+          & node scripts/count-lines.mjs --json | Set-Content -LiteralPath (Join-Path $stage 'line-count-report.json') -Encoding utf8
+          $desktopManifest = Get-Content -Raw (Join-Path $stage 'desktop-release-manifest.json') | ConvertFrom-Json
+          $combined = [ordered]@{ schemaVersion = 1; sourceCommit = (git rev-parse HEAD); version = '0.1.0'; staticBundle = 'nazca-railway-static-0.1.0.zip'; desktopManifest = 'desktop-release-manifest.json'; desktopFiles = $desktopManifest.files; generatedAt = (Get-Date).ToUniversalTime().ToString('o') }
+          $combined | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $stage 'combined-release-manifest.json') -Encoding utf8
+          $sumLines = Get-ChildItem -LiteralPath $stage -File | Sort-Object Name | ForEach-Object { $hash = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(); "$hash  $($_.Name)" }
+          $sumLines | Set-Content -LiteralPath (Join-Path $stage 'SHA256SUMS.txt') -Encoding ascii
+          foreach ($file in Get-ChildItem -LiteralPath $stage -File) { if ($file.Length -le 0) { throw "Release asset is empty: $($file.Name)" } }
+
+      - name: Upload safe release outputs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: nazca-release-assets-${{ github.run_id }}
+          path: |
+            release-staging/**
+            ${{ runner.temp }}/nazca-release-build.log
+            ${{ runner.temp }}/nazca-installer-build.log
+          if-no-files-found: warn
+          retention-days: 7
+
+  publish-release:
+    if: needs.build-release.result == 'success' && needs.deploy-pages.result == 'success' && (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch')
+    needs: [build-release, deploy-pages]
+    runs-on: windows-2025
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.ORG_TOKEN || secrets.GITHUB_TOKEN }}
+      EXPECTED_SHA: ${{ github.sha }}
+      REPOSITORY: ${{ github.repository }}
+    steps:
+      - name: Download generated release outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: nazca-release-assets-${{ github.run_id }}
+          path: release-staging
+
+      - name: Locate the existing v0.1.0 draft
+        id: draft
+        shell: pwsh
+        run: |
+          $releases = gh api "repos/$env:REPOSITORY/releases?per_page=100" | ConvertFrom-Json
+          $drafts = @($releases | Where-Object { $_.draft -and $_.tag_name -eq 'v0.1.0' })
+          if ($drafts.Count -ne 1) { throw "Expected exactly one numeric v0.1.0 draft, found $($drafts.Count)." }
+          "release_id=$($drafts[0].id)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Verify generated assets and preserve corpus assets
+        shell: pwsh
+        env:
+          RELEASE_ID: ${{ steps.draft.outputs.release_id }}
+        run: |
+          $stage = Join-Path $env:GITHUB_WORKSPACE 'release-staging'
+          foreach ($file in Get-ChildItem -LiteralPath $stage -File) { if ($file.Length -le 0) { throw "Generated asset is empty: $($file.Name)" } }
+          $release = gh api "repos/$env:REPOSITORY/releases/$env:RELEASE_ID" | ConvertFrom-Json
+          if (-not $release.target_commitish) { throw 'The v0.1.0 draft has no target commit.' }
+          $draftTarget = gh api "repos/$env:REPOSITORY/commits/$($release.target_commitish)" --jq .sha
+          if ($draftTarget.Trim() -ne $env:EXPECTED_SHA) { throw "Draft target $($draftTarget.Trim()) does not match $env:EXPECTED_SHA." }
+          $checksums = @{}
+          foreach ($line in Get-Content -LiteralPath (Join-Path $stage 'SHA256SUMS.txt')) { if ($line -match '^([0-9a-fA-F]{64})\s{2}(.+)$') { $checksums[$matches[2]] = $matches[1].ToLowerInvariant() } }
+          foreach ($file in Get-ChildItem -LiteralPath $stage -File | Where-Object Name -ne 'SHA256SUMS.txt') { $actual = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant(); if ($checksums[$file.Name] -ne $actual) { throw "SHA-256 mismatch for generated asset: $($file.Name)" } }
+          $names = @($release.assets | ForEach-Object name)
+          if (-not ($names -contains 'nazca-current-corpus-0.1.0.zip')) { throw 'Pre-uploaded raw corpus archive is missing from the draft.' }
+          if (-not ($names | Where-Object { $_ -match '(?i)current-corpus.*(sha256|checksum)' })) { throw 'Pre-uploaded raw corpus checksum is missing from the draft.' }
+          if (-not ($names | Where-Object { $_ -match '(?i)archive-manifest' })) { throw 'Pre-uploaded corpus archive manifest is missing from the draft.' }
+          $corpus = Get-Content -Raw (Join-Path $stage 'corpus-manifest.json') | ConvertFrom-Json
+          $raw = @($release.assets | Where-Object name -eq $corpus.archive.name) | Select-Object -First 1
+          if (-not $raw -or $raw.size -ne $corpus.archive.bytes) { throw 'Pre-uploaded raw corpus archive size does not match the tracked manifest.' }
+          $rawPath = Join-Path $env:RUNNER_TEMP 'nazca-current-corpus-0.1.0.zip'
+          gh api "repos/$env:REPOSITORY/releases/assets/$($raw.id)" -H 'Accept: application/octet-stream' --output $rawPath
+          $rawHash = (Get-FileHash -LiteralPath $rawPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($rawHash -ne $corpus.archive.sha256) { throw "Pre-uploaded raw corpus archive SHA-256 $rawHash does not match the tracked manifest." }
+          $checksumAsset = @($release.assets | Where-Object { $_.name -match '(?i)current-corpus.*(sha256|checksum)' }) | Select-Object -First 1
+          $checksumPath = Join-Path $env:RUNNER_TEMP 'nazca-current-corpus.sha256'
+          gh api "repos/$env:REPOSITORY/releases/assets/$($checksumAsset.id)" -H 'Accept: application/octet-stream' --output $checksumPath
+          if (-not ((Get-Content -Raw $checksumPath).Contains($corpus.archive.sha256))) { throw 'Pre-uploaded raw corpus checksum does not contain the tracked archive SHA-256.' }
+          $archiveAsset = @($release.assets | Where-Object { $_.name -match '(?i)archive-manifest' }) | Select-Object -First 1
+          $archiveManifestPath = Join-Path $env:RUNNER_TEMP 'nazca-archive-manifest.json'
+          gh api "repos/$env:REPOSITORY/releases/assets/$($archiveAsset.id)" -H 'Accept: application/octet-stream' --output $archiveManifestPath
+          $archiveManifest = Get-Content -Raw $archiveManifestPath | ConvertFrom-Json
+          if ($archiveManifest.archive -ne $corpus.archive.name -or $archiveManifest.articlePages -ne $corpus.counts.articles -or $archiveManifest.redirectPages -ne $corpus.counts.redirects) { throw 'Pre-uploaded archive manifest does not match the tracked corpus manifest.' }
+
+      - name: Upload generated release assets without replacing corpus assets
+        shell: pwsh
+        env:
+          RELEASE_ID: ${{ steps.draft.outputs.release_id }}
+        run: |
+          $stage = Join-Path $env:GITHUB_WORKSPACE 'release-staging'
+          $release = gh api "repos/$env:REPOSITORY/releases/$env:RELEASE_ID" | ConvertFrom-Json
+          $existing = @($release.assets)
+          $files = Get-ChildItem -LiteralPath $stage -File
+          if (-not $files) { throw 'No generated release assets were assembled.' }
+          foreach ($file in $files) {
+            $prior = $existing | Where-Object name -eq $file.Name
+            if ($prior) {
+              if ($prior.size -ne $file.Length) { throw "Existing release asset has a different size: $($file.Name)" }
+              continue
+            }
+            $assetName = [Uri]::EscapeDataString($file.Name)
+            gh api --method POST "https://uploads.github.com/repos/$env:REPOSITORY/releases/$env:RELEASE_ID/assets?name=$assetName" --input $file.FullName -H 'Content-Type: application/octet-stream' | Out-Null
+          }
+
+      - name: Verify uploaded assets against local SHA-256 records
+        shell: pwsh
+        env:
+          RELEASE_ID: ${{ steps.draft.outputs.release_id }}
+        run: |
+          $stage = Join-Path $env:GITHUB_WORKSPACE 'release-staging'
+          $release = gh api "repos/$env:REPOSITORY/releases/$env:RELEASE_ID" | ConvertFrom-Json
+          $checksums = @{}
+          foreach ($line in Get-Content -LiteralPath (Join-Path $stage 'SHA256SUMS.txt')) { if ($line -match '^([0-9a-fA-F]{64})\s{2}(.+)$') { $checksums[$matches[2]] = $matches[1].ToLowerInvariant() } }
+          foreach ($file in Get-ChildItem -LiteralPath $stage -File | Where-Object Name -ne 'release-notes.md') {
+            $asset = $release.assets | Where-Object name -eq $file.Name
+            if (-not $asset -or $asset.size -le 0) { throw "Uploaded asset is missing or empty: $($file.Name)" }
+            $download = Join-Path $env:RUNNER_TEMP ("uploaded-" + $file.Name)
+            gh api "repos/$env:REPOSITORY/releases/assets/$($asset.id)" -H 'Accept: application/octet-stream' --output $download
+            $actual = (Get-FileHash -LiteralPath $download -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($checksums[$file.Name] -ne $actual) { throw "Uploaded asset SHA-256 mismatch: $($file.Name)" }
+          }
+
+      - name: Publish the existing draft
+        shell: pwsh
+        env:
+          RELEASE_ID: ${{ steps.draft.outputs.release_id }}
+        run: gh api --method PATCH "repos/$env:REPOSITORY/releases/$env:RELEASE_ID" -F draft=false | Out-Null
+
+      - name: Add exact timing and release evidence by numeric ID
+        shell: pwsh
+        env:
+          RELEASE_ID: ${{ steps.draft.outputs.release_id }}
+        run: |
+          $release = gh api "repos/$env:REPOSITORY/releases/$env:RELEASE_ID" | ConvertFrom-Json
+          if ($release.draft -or -not $release.published_at) { throw 'Published release has no verified publication timestamp.' }
+          $run = gh api "repos/$env:REPOSITORY/actions/runs/${{ github.run_id }}" | ConvertFrom-Json
+          $started = [DateTimeOffset]::Parse($run.run_started_at).ToUniversalTime()
+          $completed = [DateTimeOffset]::Parse($release.published_at).ToUniversalTime()
+          $duration = $completed - $started
+          $body = [string]$release.body
+          $body += "`n`n## Verified delivery`n`n- Workflow started: $($started.ToString('o'))`n- Workflow completed: $($completed.ToString('o'))`n- Workflow duration: $($duration.ToString('hh\:mm\:ss'))`n- Source commit: $env:EXPECTED_SHA`n- Checks run by this workflow: none. This build-only workflow does not run tests, lint, type checks, static analysis, accessibility checks, security checks, reviews, or screenshots.`n- Code name: Classic Har Gow · 蝦餃. Photo: https://github.com/Ding-Ding-Projects/dim-sum-photos/releases/download/catalog-v1/hk-dish-0001-classic-har-gow.png"
+          $stage = Join-Path $env:GITHUB_WORKSPACE 'release-staging'
+          $notesPath = Join-Path $stage 'release-notes.md'
+          $body | Set-Content -LiteralPath $notesPath -Encoding utf8
+          gh api --method PATCH "repos/$env:REPOSITORY/releases/$env:RELEASE_ID" -F "body=@$notesPath" | Out-Null
+
+      - name: Verify published tag, target, assets, and timing
+        shell: pwsh
+        env:
+          RELEASE_ID: ${{ steps.draft.outputs.release_id }}
+        run: |
+          $release = gh api "repos/$env:REPOSITORY/releases/$env:RELEASE_ID" | ConvertFrom-Json
+          if ($release.draft -or $release.tag_name -ne 'v0.1.0') { throw 'Published release is not the expected non-draft v0.1.0 record.' }
+          $tagSha = gh api "repos/$env:REPOSITORY/commits/v0.1.0" --jq .sha
+          if ($tagSha.Trim() -ne $env:EXPECTED_SHA) { throw "v0.1.0 targets $($tagSha.Trim()), expected $env:EXPECTED_SHA." }
+          $assets = @($release.assets)
+          $required = @('nazca-railway-static-0.1.0.zip', 'Nazca-Railway-0.1.0-Setup.exe', 'RELEASES', 'desktop-release-manifest.json', 'combined-release-manifest.json', 'SHA256SUMS.txt', 'line-count-report.json')
+          foreach ($name in $required) { $asset = $assets | Where-Object name -eq $name; if (-not $asset -or $asset.size -le 0) { throw "Required release asset is missing or empty: $name" } }
+          if (-not ($assets | Where-Object { $_.name -match '(?i)\.nupkg$' -and $_.name -notmatch '(?i)\.delta\.nupkg$' })) { throw 'Full nupkg is missing.' }
+          $delta = @($assets | Where-Object { $_.name -match '(?i)\.delta\.nupkg$' })
+          Write-Host "Generated delta nupkg count: $($delta.Count)"
+          if (-not ($assets | Where-Object name -eq 'nazca-current-corpus-0.1.0.zip')) { throw 'Raw corpus archive was not preserved.' }
+          if (-not ($assets | Where-Object { $_.name -match '(?i)current-corpus.*(sha256|checksum)' })) { throw 'Raw corpus checksum was not preserved.' }
+          if (-not ($assets | Where-Object { $_.name -match '(?i)archive-manifest' })) { throw 'Raw corpus archive manifest was not preserved.' }

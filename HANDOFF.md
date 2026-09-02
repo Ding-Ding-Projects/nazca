@@ -4,7 +4,7 @@
 
 - Repository: `Ding-Ding-Projects/nazca`
 - Default branch: `main`
-- Last verified pushed commit: `f5df08d90be60f1b6014ec6a2258ffec81cbe3d1`
+- Last verified pushed commit: `99f6ce6ed6eb45c223fd97cdbddefd9e793bea82`
 - Tracking issue: https://github.com/Ding-Ding-Projects/nazca/issues/1
 - Rolling progress: https://github.com/Ding-Ding-Projects/nazca/discussions/2
 - Release progress: https://github.com/Ding-Ding-Projects/nazca/discussions/3
@@ -42,6 +42,16 @@
   local batches, with source-policy receipts and response hashes.
 - Generated reader data in `data/corpus/reader/v0.1.0/`: 54 article shards,
   sorted route and redirect registries, compact search index, and strict manifest.
+- Exact-oldid rendered capture in 69 resumable batches for all 3,422 current
+  articles. The tracked rendered-capture manifest hash is
+  `603528b6695d97da351d49d9e4155ef75ddfc221a90d80421448652ada9c3822`.
+- The external raw archive is 60,662,581 bytes with SHA-256
+  `3ba23406f379664b36ec53170940f2093f441fe00125ee03e8fb8afd98badf7a`.
+- Build-only release and Pages workflow is committed. It runs no tests, lint,
+  type checks, static analysis, accessibility checks, security checks, reviews,
+  or screenshots. Its first remote release run remains pending.
+- The GitHub Wiki is intentionally uninitialized. The configured Sites project
+  is unavailable in the current connector workspace, so no Sites URL is claimed.
 - Windows desktop runtime source with isolated renderer boundaries, loopback
   static serving, stable provenance, and an unsigned Squirrel.Windows packaging
   path. The installer itself remains unbuilt and unverified.
@@ -73,13 +83,14 @@ response as allowed or verified. The MediaWiki API capture is proceeding.
 3. Implement strict visitor-state storage and the shared search workbench.
 4. Add media rights, staging, volume, and round-trip verification tools before
    downloading any source media.
-5. Add build-only GitHub Actions release and Pages publication.
+5. Run the build-only GitHub Actions release and Pages publication workflow.
 6. Register the isolated headless verification route and capture the built UI.
 
 ## Honesty boundary
 
 The current reader is generated from the fresh non-reconciled snapshot. The raw
 corpus remains outside Git and is packaged as `nazca-current-corpus-0.1.0.zip`.
-No public deployment, release publication, installer verification, or runtime
-capture is claimed in Candidate A. Historical revisions, media, maps, template
-and module closure, and stable reconciliation remain open.
+The public Pages URL is `https://ding-ding-projects.github.io/nazca/`. A fresh
+workflow run, release publication, installer verification, and runtime capture
+are not claimed here. Historical revisions, media, maps, template and module
+closure, and stable reconciliation remain open.

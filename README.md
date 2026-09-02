@@ -11,6 +11,17 @@ advertising rails or source-site runtime code.
 
 Published website: https://ding-ding-projects.github.io/nazca/
 
+The current reader contains 3,422 exact-revision rendered article records, 194
+redirects, 3,616 routes, and 54 shards. The rendered-capture manifest is
+`603528b6695d97da351d49d9e4155ef75ddfc221a90d80421448652ada9c3822`, and the
+external raw archive is 60,662,581 bytes with SHA-256
+`3ba23406f379664b36ec53170940f2093f441fe00125ee03e8fb8afd98badf7a`.
+
+The build-only release workflow deliberately runs no tests, lint, type checks,
+static analysis, accessibility checks, security checks, reviews, or screenshots.
+The configured Sites project is unavailable in the current connector workspace,
+so no Sites URL is claimed. The GitHub Wiki is intentionally uninitialized.
+
 > [!IMPORTANT]
 > Candidate A now contains a fresh current snapshot: 3,422 article bodies and
 > 194 redirects captured in resumable 50-page batches, with 3,422 sanitized
@@ -100,9 +111,10 @@ forbidden.
 
 The first shell, article route, source-policy receipts, typed contracts,
 project-path static export, build provenance, social metadata, complete title
-inventory, and every current raw article body are real. Revision history,
-rendered reader records, media volumes, full feature evidence, and final
-verification remain in progress.
+inventory, and every current raw article body are real. Revision history, media
+volumes, full feature evidence, and final verification remain in progress. The
+rendered reader records are generated from exact source revisions and their
+external capture manifest is recorded above.
 
 See [feature coverage](data/inventories/feature-coverage.json),
 [search coverage](data/inventories/search-surfaces.json), and

@@ -77,4 +77,22 @@ export const changelogEntries: ChangelogEntry[] = [
       'Added the command palette, notifications, redacted history, authenticator, converter, loopback model checks, exports, and offline help.',
     commit: 'f5df08d90be60f1b6014ec6a2258ffec81cbe3d1',
   },
+  {
+    version: '0.1.0-dev.7',
+    date: '2026-09-02T19:00:52-04:00',
+    category: 'Reader',
+    title: 'Exact-revision rendered reader corpus',
+    summary:
+      'Compiled 3,422 current article records from exact-revision rendered HTML with semantic tables, safe links, and deferred media metadata.',
+    commit: 'b10334bd5c8d4d312a65ca5c14f26ba2ff09a237',
+  },
+  {
+    version: '0.1.0-dev.8',
+    date: '2026-09-02T19:01:07-04:00',
+    category: 'Reader',
+    title: 'Truthful atlas destinations',
+    summary:
+      'Made each left navigation destination render its own truthful surface, with generated article records opening their exact reader routes.',
+    commit: '99f6ce6ed6eb45c223fd97cdbddefd9e793bea82',
+  },
 ];

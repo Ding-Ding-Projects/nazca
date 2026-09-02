@@ -10,7 +10,8 @@ route loader and returns an article, redirect, or missing result.
 
 ## Current status
 
-Article bodies are compiled at import time into safe semantic HTML. Source
+Article bodies are compiled at import time from exact-revision rendered HTML
+responses into safe semantic HTML. Source
 anchors are page-prefixed, links resolve locally only for captured titles, and
 unknown links remain explicit external source links. Scripts, forms, styles,
 embeds, and remote media are removed. Referenced media file titles remain in an

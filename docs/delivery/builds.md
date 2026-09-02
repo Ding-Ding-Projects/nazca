@@ -20,6 +20,13 @@ installer. `build.bat /s` builds the reader; `build-installer.bat /s` builds the
 reader and invokes the existing Squirrel packaging helper after installing the
 pinned desktop packaging dependencies. Code signing remains disabled.
 
+The build-only release workflow uses the root and desktop lockfiles, builds the
+root-path reader, packages unsigned Squirrel.Windows outputs, and prepares the
+static ZIP, setup executable, `RELEASES`, the full and any generated delta nupkg
+files, desktop and combined manifests, `SHA256SUMS.txt`, and the committed
+line-count report. It intentionally runs no tests, lint, type checks, static
+analysis, accessibility checks, security checks, reviews, or screenshots.
+
 All three root scripts accept `/s`, `--silent`, or `SILENT=1`.
 
 ## Failure modes

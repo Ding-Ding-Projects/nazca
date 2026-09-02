@@ -1,7 +1,7 @@
 {
   "recordType": "CorpusCaptureSummaryV1",
   "schemaVersion": "1.0.0",
-  "capturedAt": "2026-09-02T22:57:55.773Z",
+  "capturedAt": "2026-09-02T23:24:00.590Z",
   "stable": false,
   "source": "https://enlossengas.fandom.com/api.php",
   "inventory": {
@@ -19,7 +19,7 @@
     "captured": 3422,
     "rawWikitextBytes": 9981062,
     "batches": 54,
-    "manifestSha256": "1cfc18eb8bfb0f9acd33bd4b20d63fcb95aab4aa00df7339e8364f5d6559d3a0",
+    "manifestSha256": "3d7c2de4c7d2015ddef14683cb3bab70210e8c16e4be1d997e63c5e2db3be09b",
     "renderedManifestSha256": "603528b6695d97da351d49d9e4155ef75ddfc221a90d80421448652ada9c3822"
   },
   "policyReceipts": {
