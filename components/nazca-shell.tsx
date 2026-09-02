@@ -194,6 +194,58 @@ const searchRecords: SearchRecord[] = records.map((record) => ({
   text: recordText(record),
 }));
 
+function CorpusDestination({
+  eyebrow,
+  title,
+  description,
+  records: destinationRecords,
+  onOpen,
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+  records: CorpusSearchRecord[];
+  onOpen: (record: CorpusSearchRecord) => void;
+}) {
+  return (
+    <div className="route-content">
+      <p className="eyebrow">{eyebrow}</p>
+      <h1 className="page-title">{title}</h1>
+      <p className="lede">{description}</p>
+      {destinationRecords.length ? (
+        <ul className="recent-list destination-record-list">
+          {destinationRecords.slice(0, 80).map((record) => (
+            <li key={record.id}>
+              <button
+                type="button"
+                className="recent-item"
+                aria-label={`Open ${record.displayTitle || record.title}`}
+                onClick={() => onOpen(record)}
+              >
+                <span className="route-dot" aria-hidden="true" />
+                <span>
+                  <strong>{record.displayTitle || record.title}</strong>
+                  <span>
+                    {record.categories.slice(0, 3).join(' · ') || 'Article'}
+                  </span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <section className="content-card" aria-label="No records available">
+          <h2>No records in this destination yet</h2>
+          <p>
+            The current generated index has no matching records. The source
+            boundary remains visible instead of recycling the Home content.
+          </p>
+        </section>
+      )}
+    </div>
+  );
+}
+
 export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: BuildProvenance; corpusSearch?: CorpusSearchRecord[] }) {
   const router = useRouter();
   const { notifications, setPaletteOpen, state, text, updateSettings } =
@@ -281,6 +333,19 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
     );
     if (record) openRecord(record);
   };
+
+  const openCorpusRecord = (record: CorpusSearchRecord) => {
+    router.push(publicPath(record.route));
+  };
+  const destinationRecords = (destination: string) =>
+    corpusSearch.filter((record) => {
+      const text = `${record.title} ${record.displayTitle} ${record.categories.join(' ')}`.toLocaleLowerCase();
+      if (destination === 'stations') return text.includes('station');
+      if (destination === 'lines') return text.includes('line') || text.includes('railway');
+      if (destination === 'places') return text.includes('district') || text.includes('island') || text.includes('bay');
+      if (destination === 'streetcars') return text.includes('tram') || text.includes('streetcar') || text.includes('light rail');
+      return true;
+    });
 
   return (
     <div
@@ -438,6 +503,37 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
             />
           ) : activeTab === 'status' ? (
             <StatusWorkspace provenance={provenance} />
+          ) : ['explore', 'stations', 'lines', 'places', 'streetcars'].includes(activeTab) ? (
+            <CorpusDestination
+              eyebrow={tabLabel(activeTab, selectedLabel)}
+              title={tabLabel(activeTab, selectedLabel)}
+              description={
+                activeTab === 'explore'
+                  ? 'Browse the generated current reader index. Every result opens its exact static article route.'
+                  : 'Browse records from the generated current reader index. Selecting a record opens its exact static article route.'
+              }
+              records={destinationRecords(activeTab)}
+              onOpen={openCorpusRecord}
+            />
+          ) : activeTab === 'maps' ? (
+            <SimpleWorkspace
+              eyebrow="Maps"
+              title="Map records are retained, rendering is deferred."
+              description="The current source inventory includes three map records. Interactive map rendering remains pending stable source reconciliation."
+              cards={[
+                { id: 'map-inventory', title: 'Three source map records', body: 'The inventory is available for later reconciliation. No map image or guessed geometry is presented here.' },
+                { id: 'map-status', title: 'Current status', body: 'Map rendering is deferred until source policy and stable cutoff checks complete.' },
+              ]}
+            />
+          ) : activeTab === 'timeline' ? (
+            <SimpleWorkspace
+              eyebrow="Timeline"
+              title="Timeline records are not in this snapshot."
+              description="Historical revision history is explicitly deferred, so this destination reports the boundary instead of repeating Home content."
+              cards={[
+                { id: 'timeline-status', title: 'Historical revisions deferred', body: 'No timeline records are fabricated from the current-only capture.' },
+              ]}
+            />
           ) : activeTab === 'media' ? (
             <SimpleWorkspace
               eyebrow="Media catalog"
