@@ -17,12 +17,15 @@
 - [x] Add strict record contracts and a planning-only baseline.
 - [x] Stop the importer when the source policy is challenge-blocked.
 - [x] Record the owner-approved `robots.txt` skip and challenged terms receipt.
-- [x] Capture all 3,422 current raw article bodies in 69 resumable batches.
+- [x] Capture all 3,422 current article bodies and 194 redirects in resumable 50-page batches.
+- [x] Compile 3,422 sanitized article records into 54 fixed-size shards with a compact search index.
+- [x] Generate static routes for 3,616 current namespace-0 titles, including explicit redirect states.
+- [x] Add a deterministic cold-build validator for current corpus counts, hashes, routes, and forbidden raw fields.
 - [ ] Add the complete persisted raw-response cache and phase journal.
 - [ ] Capture rendered bodies, categories, links, transclusions, citations, and maps.
 - [ ] Capture every accessible text revision and attribution record.
 - [ ] Reconcile T0 with recent changes and publish the stable cutoff manifest.
-- [ ] Generate all canonical routes, redirects, anchors, and broken-link records.
+- [ ] Generate the reconciled canonical routes, redirects, anchors, and broken-link records.
 
 ## Media
 

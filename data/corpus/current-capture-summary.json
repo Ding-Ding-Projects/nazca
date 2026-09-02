@@ -1,42 +1,42 @@
 {
   "recordType": "CorpusCaptureSummaryV1",
   "schemaVersion": "1.0.0",
-  "capturedAt": "2026-09-01T04:33:47.425Z",
+  "capturedAt": "2026-09-01T21:54:34.661Z",
   "stable": false,
   "source": "https://enlossengas.fandom.com/api.php",
   "inventory": {
-    "manifestSha256": "3f8ec0be797f346b67d57206eafbca7dbc40030e4325c06b449d04ac1f0a5f5c",
+    "manifestSha256": "9518d9254c650422e590454d08ab7ac4b28e7a37db231e0674c267ef013c3693",
     "routes": 3616,
     "articles": 3422,
     "redirects": 194,
     "templates": 1996,
     "modules": 18,
     "maps": 3,
-    "media": 16555,
-    "mediaBytes": 5706615419
+    "media": 16557,
+    "mediaBytes": 5706802435
   },
   "currentPages": {
-    "manifestSha256": "68d8eb295c95b571b44d1b5e1fd43409a8c381780b14ae05a525ecca1e2efa9b",
     "captured": 3422,
     "rawWikitextBytes": 9981062,
-    "batches": 69
+    "batches": 54,
+    "manifestSha256": "2c5cf50d05df87058b01303523a9619bee86e7510bcfa4be500450640b2e5f23"
   },
   "policyReceipts": {
-    "robotsState": "skipped-user-override",
-    "termsState": "challenge-user-override"
+    "termsSha256": "e80a48a00e5d2e1baec24be83a6f0fedc32373f480a8c8cc052919290d964e63",
+    "robotsSha256": null,
+    "termsOverrideReason": "The current user explicitly directed the importer to read the entire wiki after the first-party terms endpoint returned a challenge response.",
+    "robotsSkipReason": "The current user explicitly requested that this import skip the challenge-blocked robots.txt endpoint."
   },
   "storage": {
     "currentCapture": "ignored local resumable capture",
-    "releaseArchive": "pending",
+    "releaseArchive": "nazca-current-corpus-0.1.0.zip",
     "ordinaryGitContainsRawCorpus": false
   },
   "remaining": [
-    "rendered HTML and structured page records",
-    "redirect targets and graph edges",
-    "complete accessible revision history",
+    "historical revisions",
+    "media bytes",
+    "maps",
     "template and module closure",
-    "map payloads",
-    "stable cutoff reconciliation",
-    "release-backed raw archive"
+    "stable cutoff reconciliation"
   ]
 }

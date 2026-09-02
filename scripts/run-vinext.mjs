@@ -25,6 +25,11 @@ const forwarded = process.argv
   .slice(3)
   .filter((argument) => argument !== '--pages' && argument !== '--static');
 
+execFileSync(process.execPath, [path.join(ROOT, 'scripts', 'check-current-corpus.mjs')], {
+  cwd: ROOT,
+  stdio: 'inherit',
+});
+
 function git(...arguments_) {
   try {
     return execFileSync('git', arguments_, {

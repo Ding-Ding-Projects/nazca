@@ -59,6 +59,17 @@ type AtlasTabGroup = {
   items: readonly AtlasTab[];
 };
 
+type CorpusSearchRecord = {
+  id: string;
+  pageId: number;
+  title: string;
+  displayTitle: string;
+  aliases: string[];
+  categories: string[];
+  excerpt: string;
+  route: string;
+};
+
 const records: AtlasRecord[] = [
   {
     id: 'nazca',
@@ -183,7 +194,7 @@ const searchRecords: SearchRecord[] = records.map((record) => ({
   text: recordText(record),
 }));
 
-export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
+export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: BuildProvenance; corpusSearch?: CorpusSearchRecord[] }) {
   const router = useRouter();
   const { notifications, setPaletteOpen, state, text, updateSettings } =
     useVisitorState();
@@ -249,6 +260,11 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
   };
 
   const activateSearchRecord = (searchRecord: SearchRecord) => {
+    const corpusRecord = corpusSearch.find((candidate) => candidate.id === searchRecord.id);
+    if (corpusRecord) {
+      router.push(publicPath(corpusRecord.route));
+      return;
+    }
     const record = records.find(
       (candidate) => candidate.id === searchRecord.id,
     );
@@ -288,7 +304,7 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
             surfaceId="global-atlas-search"
             label="Search the encyclopedia"
             placeholder="Search stations, lines, places, and articles"
-            records={searchRecords}
+            records={corpusSearch.length ? corpusSearch.map((record) => ({ id: record.id, title: record.displayTitle || record.title, subtitle: record.categories.slice(0, 3).join(' · ') || 'Article', text: `${record.title} ${record.displayTitle} ${record.aliases.join(' ')} ${record.categories.join(' ')} ${record.excerpt}` })) : searchRecords}
             onActivate={activateSearchRecord}
           />
         </div>

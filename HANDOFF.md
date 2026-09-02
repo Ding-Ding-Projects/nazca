@@ -12,7 +12,7 @@
 ## Implemented
 
 - Modern transit-atlas shell with responsive light and dark presentation.
-- Global search over the first local fixture records.
+- Global search over the generated current title, alias, category, and excerpt index.
 - Shared RE2/WASM worker workbench for the global and article search fields,
   including explicit dialect limits, captures, replacement preview, timing,
   zero-width handling, and bounded output.
@@ -30,16 +30,18 @@
   name, 10% startup surprise, and a service-worker cache/update first slice.
   These surfaces remain partial until localization, bulk operations, and runtime
   evidence are complete.
-- Nazca Railway article route with section search, bounded regex preview, line
-  table, source link, and noncanonical preview disclosure.
+- Generated current article and redirect routes with section search, bounded regex
+  preview, safe HTML, exact source attribution, and deferred-state disclosure.
 - Typed corpus, page, redirect, revision, map, media, rights, volume, feature,
   search, and visitor-state contracts.
 - Bounded source-policy preflight, continuation-cycle protection, namespace
   resolution, bundle hashes, and staged inventory publication.
-- Authoritative current inventory with 3,616 routes, 3,422 articles, 194
-  redirects, 1,996 templates, 18 modules, 3 maps, and 16,555 media records.
-- Current raw wikitext for all 3,422 articles in 69 resumable local batches,
-  totalling 9,981,062 bytes before JSON framing.
+- Fresh current inventory with 3,616 routes, 3,422 articles, 194 redirects,
+  1,996 templates, 18 modules, 3 maps, and 16,557 media records.
+- Current raw wikitext for all 3,422 articles and redirect metadata in resumable
+  local batches, with source-policy receipts and response hashes.
+- Generated reader data in `data/corpus/reader/v0.1.0/`: 54 article shards,
+  sorted route and redirect registries, compact search index, and strict manifest.
 - Windows desktop runtime source with isolated renderer boundaries, loopback
   static serving, stable provenance, and an unsigned Squirrel.Windows packaging
   path. The installer itself remains unbuilt and unverified.
@@ -76,8 +78,8 @@ response as allowed or verified. The MediaWiki API capture is proceeding.
 
 ## Honesty boundary
 
-The current article route is still a structured preview fixture. All current raw
-article bodies are captured locally, but they are not yet transformed into
-reader records or preserved in a release-backed archive. No full revision
-archive, media volume, public deployment, release, installer, or runtime capture
-has been completed yet.
+The current reader is generated from the fresh non-reconciled snapshot. The raw
+corpus remains outside Git and is packaged as `nazca-current-corpus-0.1.0.zip`.
+No public deployment, release publication, installer verification, or runtime
+capture is claimed in Candidate A. Historical revisions, media, maps, template
+and module closure, and stable reconciliation remain open.

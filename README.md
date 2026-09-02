@@ -10,11 +10,12 @@ searchable routes, readable railway tables, permanent attribution, and no
 advertising rails or source-site runtime code.
 
 > [!IMPORTANT]
-> The current-page capture is now complete: all 3,422 current article bodies are
-> stored in 69 resumable local batches. Revision history, graph data, rendering,
-> media bytes, and stable-cutoff reconciliation are still in progress. The
-> project owner explicitly directed the importer to record and continue past the
-> challenged `robots.txt` and terms endpoints without calling them verified.
+> Candidate A now contains a fresh current snapshot: 3,422 article bodies and
+> 194 redirects captured in resumable 50-page batches, with 3,422 sanitized
+> static reader records and 3,616 generated routes. Historical revisions, media
+> bytes, maps, and stable-cutoff reconciliation remain explicitly deferred. The
+> owner-authorized importer records the challenged `robots.txt` and terms
+> responses as policy receipts without calling them verified.
 
 ## Quick links
 
@@ -42,9 +43,9 @@ build.bat /s
 build-installer.bat /s
 ```
 
-`build-installer.bat` produces an offline static website ZIP. It is not a native
-installer. The archive includes a loopback-only Node server and a `start.bat`
-launcher.
+`build-installer.bat` builds the unsigned Squirrel.Windows installer through the
+existing desktop packaging helper. The offline static website ZIP remains a
+separate `npm run build:offline` and `npm run package:offline` path.
 
 <details>
 <summary><strong>Current verified baseline</strong></summary>
@@ -59,7 +60,8 @@ launcher.
 - Production dependency audit: zero high or critical advisories, one low
   development-tool advisory
 - Source inventory: 3,616 routes, 3,422 articles, and 194 redirects captured
-- Current raw article bodies: 3,422 of 3,422 captured, 9,981,062 bytes
+- Current snapshot: 3,422 articles, 194 redirects, 3,616 routes, 54 reader shards
+- Raw archive: `nazca-current-corpus-0.1.0.zip` is retained outside ordinary Git
 
 </details>
 

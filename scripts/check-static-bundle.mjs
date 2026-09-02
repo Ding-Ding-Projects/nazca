@@ -62,6 +62,25 @@ for (const workerEngine of workerEngines) {
 }
 
 if (pages) {
+  const readerRoot = path.join(ROOT, 'data', 'corpus', 'reader', 'v0.1.0');
+  const readerManifest = JSON.parse(
+    await readFile(path.join(readerRoot, 'manifest.json'), 'utf8'),
+  );
+  const readerRoutes = JSON.parse(
+    await readFile(path.join(readerRoot, readerManifest.routes.registry), 'utf8'),
+  );
+  const renderedRoutes = files.filter(
+    (file) => file.startsWith(`${path.join(CLIENT, 'wiki')}${path.sep}`) && file.endsWith('.html'),
+  );
+  if (renderedRoutes.length !== readerRoutes.length) {
+    throw new Error(
+      `GitHub Pages output rendered ${renderedRoutes.length} wiki routes, expected ${readerRoutes.length}.`,
+    );
+  }
+  for (const route of readerRoutes) {
+    const output = path.join(CLIENT, `${route.route.slice(1)}.html`);
+    if (!files.includes(output)) throw new Error(`GitHub Pages output is missing ${route.route}.`);
+  }
   const rootAssets = await stat(path.join(CLIENT, '_next', 'static'));
   if (!rootAssets.isDirectory()) {
     throw new Error('GitHub Pages output is missing root _next assets.');
@@ -76,16 +95,14 @@ if (pages) {
       throw error;
   }
   const home = await readFile(path.join(CLIENT, 'index.html'), 'utf8');
-  const article = await readFile(
-    path.join(CLIENT, 'wiki', 'Nazca_Railway_(Los_Sengas_Division).html'),
-    'utf8',
-  );
+  const sampleRoute = readerRoutes.find((entry) => entry.title === 'Nazca Railway (Los Sengas Division)')?.route ?? readerRoutes[0]?.route;
+  const article = await readFile(path.join(CLIENT, `${sampleRoute.slice(1)}.html`), 'utf8');
   for (const [label, value] of [
     ['home asset prefix', home.includes('/nazca/_next/')],
     ['article asset prefix', article.includes('/nazca/_next/')],
     ['article home path', article.includes('href="/nazca"')],
-    ['article title', article.includes('Nazca Railway')],
-    ['article transport family', article.includes('Streetcars and light rail')],
+    ['article title', article.includes(sampleRoute ? (readerRoutes.find((entry) => entry.route === sampleRoute)?.title ?? '') : '')],
+    ['article current-snapshot marker', article.includes('current source snapshot')],
     [
       'Open Graph image',
       article.includes(

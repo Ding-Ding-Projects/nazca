@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Windows desktop shell for the Nazca Railway static reader",
+  "author": "Ding-Ding-Projects",
   "type": "module",
   "main": "src/main.mjs",
   "scripts": {
@@ -26,7 +27,6 @@
     "asar": true,
     "compression": "maximum",
     "forceCodeSigning": false,
-    "signAndEditExecutable": false,
     "directories": {
       "app": ".",
       "output": "../dist/desktop",
@@ -44,6 +44,8 @@
       }
     ],
     "win": {
+      "signExecutable": false,
+      "signAndEditExecutable": false,
       "target": [
         {
           "target": "squirrel",
