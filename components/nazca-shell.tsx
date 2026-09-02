@@ -244,6 +244,17 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
   };
 
   const openRecord = (record: AtlasRecord) => {
+    if (record.kind === 'Article') {
+      const corpusRecord = corpusSearch.find(
+        (candidate) =>
+          candidate.title === record.title ||
+          candidate.displayTitle === record.title,
+      );
+      if (corpusRecord) {
+        router.push(publicPath(corpusRecord.route));
+        return;
+      }
+    }
     if (record.id === 'nazca') {
       router.push(publicPath('/wiki/Nazca_Railway_(Los_Sengas_Division)'));
       return;

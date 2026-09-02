@@ -784,6 +784,8 @@ input:focus-visible,
   position: sticky;
   inset-block-start: 0;
   z-index: 40;
+  box-sizing: border-box;
+  min-width: 0;
   min-height: 4rem;
   display: flex;
   align-items: center;
@@ -795,6 +797,8 @@ input:focus-visible,
   backdrop-filter: blur(18px);
 }
 .article-back {
+  min-width: 0;
+  flex: 1 1 auto;
   min-height: 2.75rem;
   display: inline-flex;
   align-items: center;
@@ -809,9 +813,15 @@ input:focus-visible,
   background: var(--primary-soft);
 }
 .article-version {
+  min-width: 0;
+  max-width: 48%;
+  flex: 0 1 auto;
   color: var(--ink-muted);
   font-size: 0.75rem;
   font-weight: 650;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  text-align: end;
 }
 .article-layout {
   width: min(100%, 88rem);
@@ -1889,7 +1899,7 @@ input:focus-visible,
     align-items: flex-start;
   }
   .article-version {
-    max-width: 11rem;
+    max-width: min(11rem, 48vw);
     text-align: end;
   }
   .article-layout {
