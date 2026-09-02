@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/lucide-static@0.436.0/font/lucide.css">
+<style>
+  body { margin: 0; background: #f4f7f8; }
+  a { color: #0b5560; }
+  a:hover { color: #116c79; }
+  .scroll::-webkit-scrollbar { width: 9px; height: 9px; }
+  .scroll::-webkit-scrollbar-thumb { background: rgb(23 33 38 / 20%); border-radius: 9px; }
+  .scroll::-webkit-scrollbar-track { background: transparent; }
+</style>
+</helmet>
+
+<div style="--canvas:#f4f7f8;--surface:#ffffff;--surface-soft:#eef3f4;--ink:#141d21;--ink-soft:#4c5b62;--ink-muted:#71838a;--outline:#d9e2e5;--outline-soft:#e8eef0;--hair:#c9d5d9;--primary:#116c79;--primary-strong:#0b5560;--primary-soft:#dceff1;--on-primary:#ffffff;--panel:#0e3a41;--panel-ink:#e6f4f5;--warning:#9b6418;--route-red:#d04b4b;--route-blue:#2f72b7;--route-green:#2d8a64;--route-gold:#b88718;--desk:#dfe6e8;font-family:Barlow, 'Segoe UI', system-ui, sans-serif">
+<div style="{{ themeVars }}">
+
+<div style="position:fixed;z-index:900;inset-inline-end:16px;inset-block-end:16px;display:flex;gap:5px;align-items:center;border:1px solid var(--hair);border-radius:999px;background:var(--surface);padding:5px;box-shadow:0 10px 30px rgb(20 29 33 / 18%);font-family:'IBM Plex Mono', monospace;font-size:10.5px">
+  <button type="button" onClick="{{ setDesktop }}" style="border:0;border-radius:999px;background:{{ deskChipBg }};color:{{ deskChipInk }};padding:6px 10px;font:inherit;cursor:pointer">DESKTOP</button>
+  <button type="button" onClick="{{ setPhone }}" style="border:0;border-radius:999px;background:{{ phoneChipBg }};color:{{ phoneChipInk }};padding:6px 10px;font:inherit;cursor:pointer">PHONE</button>
+  <span style="width:1px;height:16px;background:var(--hair)"></span>
+  <button type="button" onClick="{{ toggleTheme }}" style="display:grid;place-items:center;width:28px;height:28px;border:0;border-radius:999px;background:transparent;color:var(--ink-soft);cursor:pointer"><i class="{{ themeIcon }}" style="font-size:15px"></i></button>
+</div>
+
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="Reader shell" style="min-height:100dvh;background:var(--canvas);color:var(--ink);display:grid;grid-template-rows:auto auto minmax(0,1fr)">
+
+  <header style="display:grid;grid-template-columns:minmax(0,auto) minmax(14rem,34rem) auto;align-items:center;gap:20px;background:var(--surface);padding:11px 20px">
+    <button type="button" onClick="{{ goHome }}" style="display:flex;align-items:center;gap:10px;border:0;background:transparent;color:inherit;cursor:pointer;font:inherit;text-align:start">
+      <span style="display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--panel);color:var(--panel-ink);font-family:'Barlow Semi Condensed',sans-serif;font-size:13px;font-weight:700">NR</span>
+      <span style="display:grid;gap:1px;min-width:0">
+        <strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:0.01em">Los Sengas Atlas</strong>
+        <span style="font-size:11.5px;color:var(--ink-muted);letter-spacing:0.02em">The Encyclopedia of Los Sengas</span>
+      </span>
+    </button>
+    <div style="display:flex;align-items:center;gap:8px;border:1px solid var(--outline);border-radius:999px;background:var(--surface-soft);height:36px;padding-inline:14px">
+      <i class="icon-search" style="font-size:15px;color:var(--ink-muted)"></i>
+      <input value="{{ query }}" onInput="{{ onQuery }}" placeholder="Search 3,422 articles, stations and lines" style="min-width:0;flex:1;border:0;background:transparent;color:var(--ink);font:inherit;font-size:13.5px;outline:none">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-muted);border:1px solid var(--outline);border-radius:4px;padding:1px 5px">⌘K</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:flex-end;gap:12px">
+      <span style="display:grid;gap:0;justify-items:end;font-size:11px;line-height:1.25;color:var(--ink-muted)"><span style="font-family:'IBM Plex Mono',monospace">v0.1.0 · rev 132458</span><span>captured 31 Aug 2026</span></span>
+      <span style="width:1px;height:22px;background:var(--outline)"></span>
+      <button type="button" style="display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:9px;background:transparent;color:var(--ink-soft);cursor:pointer" style-hover="background:var(--surface-soft);color:var(--ink)"><i class="icon-command" style="font-size:17px"></i></button>
+      <button type="button" style="position:relative;display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:9px;background:transparent;color:var(--ink-soft);cursor:pointer" style-hover="background:var(--surface-soft);color:var(--ink)"><i class="icon-bell" style="font-size:17px"></i><span style="position:absolute;inset-block-start:6px;inset-inline-end:6px;width:7px;height:7px;border:2px solid var(--surface);border-radius:50%;background:var(--route-red)"></span></button>
+      <button type="button" onClick="{{ toggleTheme }}" style="display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:9px;background:transparent;color:var(--ink-soft);cursor:pointer" style-hover="background:var(--surface-soft);color:var(--ink)"><i class="{{ themeIcon }}" style="font-size:17px"></i></button>
+    </div>
+  </header>
+
+  <div style="height:5px;display:flex"><span style="flex:1;background:var(--route-blue)"></span><span style="flex:1;background:var(--route-green)"></span><span style="flex:1;background:var(--route-gold)"></span><span style="flex:1;background:var(--route-red)"></span></div>
+
+  <div style="min-height:0;display:grid;grid-template-columns:236px minmax(0,1fr)">
+
+    <nav class="scroll" style="min-height:0;overflow:auto;border-inline-end:1px solid var(--outline);background:var(--surface);padding:16px 12px 28px">
+      <p style="margin:0 0 8px 8px;font-family:'Barlow Semi Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.14em;color:var(--ink-muted)">READER</p>
+      <div style="display:grid;gap:2px">
+        <button type="button" onClick="{{ goHome }}" style="display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:36px;border:0;border-inline-start:3px solid {{ homeBar }};border-radius:0 8px 8px 0;background:{{ homeBg }};color:{{ homeInk }};padding:6px 10px;text-align:start;font:inherit;font-size:13.5px;cursor:pointer" style-hover="background:var(--surface-soft)"><i class="icon-house" style="font-size:16px"></i><span>Home</span></button>
+        <button type="button" onClick="{{ goList }}" style="display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:36px;border:0;border-inline-start:3px solid {{ listBar }};border-radius:0 8px 8px 0;background:{{ listBg }};color:{{ listInk }};padding:6px 10px;text-align:start;font:inherit;font-size:13.5px;cursor:pointer" style-hover="background:var(--surface-soft)"><i class="icon-train-front" style="font-size:16px"></i><span>Stations</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-muted)">1.2k</span></button>
+        <button type="button" style="display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:36px;border:0;border-inline-start:3px solid transparent;border-radius:0 8px 8px 0;background:transparent;color:var(--ink-soft);padding:6px 10px;text-align:start;font:inherit;font-size:13.5px;cursor:pointer" style-hover="background:var(--surface-soft)"><i class="icon-layers-3" style="font-size:16px"></i><span>Lines</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-muted)">156</span></button>
+        <button type="button" style="display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:36px;border:0;border-inline-start:3px solid transparent;border-radius:0 8px 8px 0;background:transparent;color:var(--ink-soft);padding:6px 10px;text-align:start;font:inherit;font-size:13.5px;cursor:pointer" style-hover="background:var(--surface-soft)"><i class="icon-building-2" style="font-size:16px"></i><span>Places</span></button>
+        <button type="button" style="display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:36px;border:0;border-inline-start:3px solid transparent;border-radius:0 8px 8px 0;background:transparent;color:var(--ink-soft);padding:6px 10px;text-align:start;font:inherit;font-size:13.5px;cursor:pointer" style-hover="background:var(--surface-soft)"><i class="icon-landmark" style="font-size:16px"></i><span>Infrastructure</span></button>
+      </div>
+      <p style="margin:18px 0 8px 8px;font-family:'Barlow Semi Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.14em;color:var(--ink-muted)">ATLAS</p>
+      <div style="display:grid;gap:2px">
+        <button type="button" style="display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:36px;border:0;border-inline-start:3px solid transparent;border-radius:0 8px 8px 0;background:transparent;color:var(--ink-soft);padding:6px 10px;text-align:start;font:inherit;font-size:13.5px;cursor:pointer" style-hover="background:var(--surface-soft)"><i class="icon-map" style="font-size:16px"></i><span>Maps</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-muted)">3</span></button>
+        <button type="button" style="display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:36px;border:0;border-inline-start:3px solid transparent;border-radius:0 8px 8px 0;background:transparent;color:var(--ink-soft);padding:6px 10px;text-align:start;font:inherit;font-size:13.5px;cursor:pointer" style-hover="background:var(--surface-soft)"><i class="icon-clock-3" style="font-size:16px"></i><span>Timeline</span></button>
+        <button type="button" onClick="{{ goStub }}" style="display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:36px;border:0;border-inline-start:3px solid {{ stubBar }};border-radius:0 8px 8px 0;background:{{ stubBg }};color:{{ stubInk }};padding:6px 10px;text-align:start;font:inherit;font-size:13.5px;cursor:pointer" style-hover="background:var(--surface-soft)"><i class="icon-calendar-days" style="font-size:16px"></i><span>Years</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-muted)">16</span></button>
+        <button type="button" style="display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:36px;border:0;border-inline-start:3px solid transparent;border-radius:0 8px 8px 0;background:transparent;color:var(--ink-soft);padding:6px 10px;text-align:start;font:inherit;font-size:13.5px;cursor:pointer" style-hover="background:var(--surface-soft)"><i class="icon-image" style="font-size:16px"></i><span>Media</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-muted)">16.5k</span></button>
+      </div>
+      <p style="margin:18px 0 8px 8px;font-family:'Barlow Semi Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.14em;color:var(--ink-muted)">RESEARCH</p>
+      <div style="display:grid;gap:2px">
+        <button type="button" style="display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:36px;border:0;border-inline-start:3px solid transparent;border-radius:0 8px 8px 0;background:transparent;color:var(--ink-soft);padding:6px 10px;text-align:start;font:inherit;font-size:13.5px;cursor:pointer" style-hover="background:var(--surface-soft)"><i class="icon-scroll-text" style="font-size:16px"></i><span>Changelog</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-muted)">6</span></button>
+        <button type="button" style="display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:36px;border:0;border-inline-start:3px solid transparent;border-radius:0 8px 8px 0;background:transparent;color:var(--ink-soft);padding:6px 10px;text-align:start;font:inherit;font-size:13.5px;cursor:pointer" style-hover="background:var(--surface-soft)"><i class="icon-circle-gauge" style="font-size:16px"></i><span>Status</span></button>
+        <button type="button" style="display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:36px;border:0;border-inline-start:3px solid transparent;border-radius:0 8px 8px 0;background:transparent;color:var(--ink-soft);padding:6px 10px;text-align:start;font:inherit;font-size:13.5px;cursor:pointer" style-hover="background:var(--surface-soft)"><i class="icon-wrench" style="font-size:16px"></i><span>Tools</span></button>
+        <button type="button" style="display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:36px;border:0;border-inline-start:3px solid transparent;border-radius:0 8px 8px 0;background:transparent;color:var(--ink-soft);padding:6px 10px;text-align:start;font:inherit;font-size:13.5px;cursor:pointer" style-hover="background:var(--surface-soft)"><i class="icon-settings" style="font-size:16px"></i><span>Settings</span></button>
+        <button type="button" onClick="{{ goNotFound }}" style="display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:36px;border:0;border-inline-start:3px solid {{ nfBar }};border-radius:0 8px 8px 0;background:{{ nfBg }};color:{{ nfInk }};padding:6px 10px;text-align:start;font:inherit;font-size:13.5px;cursor:pointer" style-hover="background:var(--surface-soft)"><i class="icon-circle-help" style="font-size:16px"></i><span>Missing page</span></button>
+      </div>
+
+      <sc-if value="{{ isReading }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-block-start:20px;padding-block-start:14px;border-block-start:1px solid var(--outline)">
+        <p style="margin:0 0 10px 8px;font-family:'Barlow Semi Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.14em;color:var(--ink-muted)">ON THIS PAGE</p>
+        <div style="display:grid;gap:0;padding-inline-start:8px;font-size:13px">
+          <a href="#s-businesses" style="display:flex;align-items:center;gap:10px;padding:5px 0;color:var(--ink);text-decoration:none;font-weight:600"><span style="width:9px;height:9px;border-radius:50%;background:var(--route-blue)"></span>Businesses</a>
+          <a href="#s-standard" style="display:flex;align-items:center;gap:10px;padding:5px 0;color:var(--ink-soft);text-decoration:none"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--hair)"></span>Standard Railway System</a>
+          <a href="#s-veloduct" style="display:flex;align-items:center;gap:10px;padding:5px 0;color:var(--ink-soft);text-decoration:none"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--hair)"></span>Veloduct System</a>
+          <a href="#s-shuttle" style="display:flex;align-items:center;gap:10px;padding:5px 0;color:var(--ink-soft);text-decoration:none"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--hair)"></span>The Shuttle</a>
+          <a href="#s-lrt" style="display:flex;align-items:center;gap:10px;padding:5px 0;color:var(--ink-soft);text-decoration:none"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--hair)"></span>Local Rapid Transit</a>
+          <a href="#s-slt" style="display:flex;align-items:center;gap:10px;padding:5px 0;color:var(--ink-soft);text-decoration:none"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--hair)"></span>Sava Light Transit</a>
+          <a href="#s-stock" style="display:flex;align-items:center;gap:10px;padding:5px 0;color:var(--ink-soft);text-decoration:none"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--hair)"></span>Rolling Stocks</a>
+          <a href="#s-bases" style="display:flex;align-items:center;gap:10px;padding:5px 0;color:var(--ink-soft);text-decoration:none"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--hair)"></span>Train Bases</a>
+          <a href="#s-structures" style="display:flex;align-items:center;gap:10px;padding:5px 0;color:var(--ink-soft);text-decoration:none"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--hair)"></span>Structures</a>
+          <a href="#s-shops" style="display:flex;align-items:center;gap:10px;padding:5px 0;color:var(--ink-soft);text-decoration:none"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--hair)"></span>NR Shops, Inns, Lounges</a>
+          <a href="#s-incidents" style="display:flex;align-items:center;gap:10px;padding:5px 0;color:var(--ink-soft);text-decoration:none"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--hair)"></span>Incidents</a>
+          <a href="#s-future" style="display:flex;align-items:center;gap:10px;padding:5px 0;color:var(--ink-soft);text-decoration:none"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--hair)"></span>Future Development</a>
+        </div>
+      </div>
+      </sc-if>
+    </nav>
+
+    <main class="scroll" style="min-width:0;min-height:0;overflow:auto">
+
+      <!-- ══════════ HOME ══════════ -->
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:32px 32px 56px;max-width:1240px">
+        <p style="margin:0 0 8px;display:flex;align-items:center;gap:9px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12.5px;font-weight:700;letter-spacing:0.12em;color:var(--primary)"><span style="width:22px;height:3px;background:var(--primary)"></span>STATIC READER · CURRENT SNAPSHOT</p>
+        <h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:46px;font-weight:700;line-height:1.02;letter-spacing:-0.01em;max-width:22ch">The Encyclopedia of Los Sengas</h1>
+        <p style="margin:12px 0 0;font-size:17px;line-height:1.6;color:var(--ink-soft);max-width:64ch">A clarity-first reader for the Los Sengas transport encyclopedia: searchable routes, readable railway tables, permanent attribution, and no advertising rails.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-block:24px">
+          <button type="button" onClick="{{ goList }}" style="display:grid;gap:10px;border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:14px;text-align:start;color:inherit;font:inherit;cursor:pointer" style-hover="border-color:var(--hair)"><span style="display:flex;align-items:center;justify-content:space-between"><span style="width:10px;height:10px;border-radius:50%;background:var(--route-blue)"></span><i class="icon-arrow-up-right" style="font-size:15px;color:var(--ink-muted)"></i></span><span><strong style="display:block;font-family:'Barlow Semi Condensed',sans-serif;font-size:18px;font-weight:700">Stations</strong><span style="font-size:12.5px;color:var(--ink-muted)">1,222 indexed titles</span></span></button>
+          <button type="button" style="display:grid;gap:10px;border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:14px;text-align:start;color:inherit;font:inherit;cursor:pointer" style-hover="border-color:var(--hair)"><span style="display:flex;align-items:center;justify-content:space-between"><span style="width:10px;height:10px;border-radius:50%;background:var(--route-red)"></span><i class="icon-arrow-up-right" style="font-size:15px;color:var(--ink-muted)"></i></span><span><strong style="display:block;font-family:'Barlow Semi Condensed',sans-serif;font-size:18px;font-weight:700">Lines</strong><span style="font-size:12.5px;color:var(--ink-muted)">156 line records</span></span></button>
+          <button type="button" style="display:grid;gap:10px;border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:14px;text-align:start;color:inherit;font:inherit;cursor:pointer" style-hover="border-color:var(--hair)"><span style="display:flex;align-items:center;justify-content:space-between"><span style="width:10px;height:10px;border-radius:50%;background:var(--route-green)"></span><i class="icon-arrow-up-right" style="font-size:15px;color:var(--ink-muted)"></i></span><span><strong style="display:block;font-family:'Barlow Semi Condensed',sans-serif;font-size:18px;font-weight:700">Places</strong><span style="font-size:12.5px;color:var(--ink-muted)">Districts and islands</span></span></button>
+          <button type="button" style="display:grid;gap:10px;border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:14px;text-align:start;color:inherit;font:inherit;cursor:pointer" style-hover="border-color:var(--hair)"><span style="display:flex;align-items:center;justify-content:space-between"><span style="width:10px;height:10px;border-radius:50%;background:var(--route-gold)"></span><i class="icon-arrow-up-right" style="font-size:15px;color:var(--ink-muted)"></i></span><span><strong style="display:block;font-family:'Barlow Semi Condensed',sans-serif;font-size:18px;font-weight:700">Infrastructure</strong><span style="font-size:12.5px;color:var(--ink-muted)">Depots, bridges, tunnels</span></span></button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,0.85fr);gap:16px;align-items:start">
+          <div style="display:grid;gap:16px">
+            <section style="border:1px solid var(--outline);border-radius:12px;background:var(--surface);overflow:hidden">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:14px 16px 0">
+                <h2 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:20px;font-weight:700">Start with a useful record</h2>
+                <span style="font-size:12px;color:var(--ink-muted)">6 of 3,422</span>
+              </div>
+              <div style="display:grid;margin-block-start:10px">
+                <button type="button" onClick="{{ goArticle }}" style="display:grid;grid-template-columns:12px minmax(0,1fr) auto;align-items:center;gap:12px;border:0;border-block-start:1px solid var(--outline-soft);background:transparent;color:inherit;padding:11px 16px;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)"><span style="width:10px;height:10px;border-radius:50%;background:var(--route-blue)"></span><span><strong style="display:block;font-size:14.5px;font-weight:600">Nazca Railway (Los Sengas Division)</strong><span style="font-size:12.5px;color:var(--ink-muted)">Article · railway systems, rolling stock, structures, incidents</span></span><i class="icon-chevron-right" style="font-size:16px;color:var(--ink-muted)"></i></button>
+                <button type="button" onClick="{{ goStation }}" style="display:grid;grid-template-columns:12px minmax(0,1fr) auto;align-items:center;gap:12px;border:0;border-block-start:1px solid var(--outline-soft);background:transparent;color:inherit;padding:11px 16px;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)"><span style="width:10px;height:10px;border-radius:50%;background:var(--route-green)"></span><span><strong style="display:block;font-size:14.5px;font-weight:600">Kapa Channel Station</strong><span style="font-size:12.5px;color:var(--ink-muted)">Station · 61 shops, 4 restaurants, premium lounge</span></span><i class="icon-chevron-right" style="font-size:16px;color:var(--ink-muted)"></i></button>
+                <button type="button" style="display:grid;grid-template-columns:12px minmax(0,1fr) auto;align-items:center;gap:12px;border:0;border-block-start:1px solid var(--outline-soft);background:transparent;color:inherit;padding:11px 16px;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)"><span style="width:10px;height:10px;border-radius:50%;background:var(--route-red)"></span><span><strong style="display:block;font-size:14.5px;font-weight:600">Local Rapid Transit</strong><span style="font-size:12.5px;color:var(--ink-muted)">Article · regional rail across Los Sengas</span></span><i class="icon-chevron-right" style="font-size:16px;color:var(--ink-muted)"></i></button>
+                <button type="button" style="display:grid;grid-template-columns:12px minmax(0,1fr) auto;align-items:center;gap:12px;border:0;border-block-start:1px solid var(--outline-soft);background:transparent;color:inherit;padding:11px 16px;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)"><span style="width:10px;height:10px;border-radius:50%;background:var(--route-gold)"></span><span><strong style="display:block;font-size:14.5px;font-weight:600">Metropolis Terminal</strong><span style="font-size:12.5px;color:var(--ink-muted)">Station · interchange of the six core lines</span></span><i class="icon-chevron-right" style="font-size:16px;color:var(--ink-muted)"></i></button>
+                <button type="button" onClick="{{ goStub }}" style="display:grid;grid-template-columns:12px minmax(0,1fr) auto;align-items:center;gap:12px;border:0;border-block-start:1px solid var(--outline-soft);background:transparent;color:inherit;padding:11px 16px;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)"><span style="width:10px;height:10px;border-radius:50%;border:2px solid var(--hair)"></span><span><strong style="display:block;font-size:14.5px;font-weight:600">2011</strong><span style="font-size:12.5px;color:var(--ink-muted)">Year · the founding of Project Nazca</span></span><i class="icon-chevron-right" style="font-size:16px;color:var(--ink-muted)"></i></button>
+                <button type="button" onClick="{{ goRedirect }}" style="display:grid;grid-template-columns:12px minmax(0,1fr) auto;align-items:center;gap:12px;border:0;border-block-start:1px solid var(--outline-soft);background:transparent;color:inherit;padding:11px 16px;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)"><span style="width:10px;height:10px;border-radius:50%;border:2px solid var(--hair)"></span><span><strong style="display:block;font-size:14.5px;font-weight:600">Nazca Railway Los Sengas Division</strong><span style="font-size:12.5px;color:var(--ink-muted)">Redirect · one of 194 captured redirects</span></span><i class="icon-chevron-right" style="font-size:16px;color:var(--ink-muted)"></i></button>
+              </div>
+            </section>
+
+            <section style="border:1px solid var(--outline);border-radius:12px;background:var(--surface);padding:16px">
+              <h2 style="margin:0 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:20px;font-weight:700">Pinned corpus baseline</h2>
+              <div style="height:3px;width:48px;background:var(--route-green);margin-block-end:14px"></div>
+              <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px">
+                <div style="display:grid;gap:2px;border-radius:8px;background:var(--surface-soft);padding:10px 12px"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:22px;font-weight:700">3,422</strong><span style="font-size:11.5px;color:var(--ink-muted)">articles</span></div>
+                <div style="display:grid;gap:2px;border-radius:8px;background:var(--surface-soft);padding:10px 12px"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:22px;font-weight:700">194</strong><span style="font-size:11.5px;color:var(--ink-muted)">redirects</span></div>
+                <div style="display:grid;gap:2px;border-radius:8px;background:var(--surface-soft);padding:10px 12px"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:22px;font-weight:700">3,616</strong><span style="font-size:11.5px;color:var(--ink-muted)">routes</span></div>
+                <div style="display:grid;gap:2px;border-radius:8px;background:var(--surface-soft);padding:10px 12px"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:22px;font-weight:700">54</strong><span style="font-size:11.5px;color:var(--ink-muted)">reader shards</span></div>
+                <div style="display:grid;gap:2px;border-radius:8px;background:var(--surface-soft);padding:10px 12px"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:22px;font-weight:700">16,555</strong><span style="font-size:11.5px;color:var(--warning)">media deferred</span></div>
+              </div>
+              <p style="margin:12px 0 0;font-size:13px;line-height:1.6;color:var(--ink-muted)">The importer recaptures and reconciles one stable cutoff before this repository becomes canonical. Historical revisions, media bytes and maps remain outside the current snapshot.</p>
+            </section>
+          </div>
+
+          <div style="display:grid;gap:12px">
+            <section style="border:1px solid var(--outline);border-radius:12px;background:var(--surface);overflow:hidden">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 16px 10px">
+                <div><h2 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:18px;font-weight:700">Network map</h2><p style="margin:2px 0 0;font-size:12.5px;color:var(--ink-muted)">3 source map records held back</p></div>
+                <i class="icon-map" style="font-size:18px;color:var(--ink-muted)"></i>
+              </div>
+              <div style="height:210px;display:grid;place-items:center;background:repeating-linear-gradient(135deg, var(--surface-soft) 0 8px, var(--surface) 8px 16px);border-block-start:1px solid var(--outline)">
+                <span style="border:1px solid var(--outline);border-radius:6px;background:var(--surface);padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-muted)">network map · drop the route diagram here</span>
+              </div>
+            </section>
+            <section style="border:1px solid var(--outline);border-radius:12px;background:var(--surface);padding:16px">
+              <h2 style="margin:0 0 10px;font-family:'Barlow Semi Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:0.02em">Source provenance</h2>
+              <div style="display:grid;gap:0;font-size:13px">
+                <div style="display:flex;justify-content:space-between;gap:10px;padding-block:7px;border-block-end:1px solid var(--outline-soft)"><span style="color:var(--ink-muted)">Source</span><span>enlossengas.fandom.com</span></div>
+                <div style="display:flex;justify-content:space-between;gap:10px;padding-block:7px;border-block-end:1px solid var(--outline-soft)"><span style="color:var(--ink-muted)">Text licence</span><span>CC BY-SA</span></div>
+                <div style="display:flex;justify-content:space-between;gap:10px;padding-block:7px;border-block-end:1px solid var(--outline-soft)"><span style="color:var(--ink-muted)">Capture</span><span>31 Aug 2026</span></div>
+                <div style="display:flex;justify-content:space-between;gap:10px;padding-block:7px"><span style="color:var(--ink-muted)">Final cutoff</span><span style="color:var(--warning)">pending import</span></div>
+              </div>
+            </section>
+            <section style="border:1px solid var(--outline);border-radius:12px;background:var(--surface);padding:16px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-soft)">
+              <span style="width:9px;height:9px;border-radius:50%;background:var(--warning);flex:0 0 auto"></span>Running · first atlas slice
+            </section>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ══════════ ARTICLE ══════════ -->
+      <sc-if value="{{ isArticle }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 316px;gap:26px;padding:28px 32px 64px">
+        <article style="min-width:0">
+          <nav style="display:flex;align-items:center;gap:7px;margin-block-end:14px;font-size:12.5px;color:var(--ink-muted)">
+            <button type="button" onClick="{{ goHome }}" style="border:0;background:transparent;color:var(--ink-muted);padding:0;font:inherit;cursor:pointer" style-hover="color:var(--primary)">Atlas</button><i class="icon-chevron-right" style="font-size:13px"></i>
+            <span>Rail operators</span><i class="icon-chevron-right" style="font-size:13px"></i>
+            <span style="color:var(--ink)">Los Sengas Division</span>
+          </nav>
+          <p style="margin:0 0 6px;display:flex;align-items:center;gap:9px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12.5px;font-weight:700;letter-spacing:0.12em;color:var(--primary)"><span style="width:22px;height:3px;background:var(--primary)"></span>DIVISION · RAIL OPERATOR</p>
+          <h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:44px;font-weight:700;line-height:1.02;letter-spacing:-0.01em">Nazca Railway<br>Los Sengas Division</h1>
+          <p style="margin:8px 0 0;font-size:15.5px;color:var(--ink-soft)">納斯卡鐵路 (洛聖加分部) · formerly Metropolis Division · established <a href="#s-businesses" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">15 March 2015</a></p>
+
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-block:16px">
+            <span style="display:flex;align-items:center;gap:6px;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:4px 11px;font-size:12.5px"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-blue)"></span>Standard Railway · 43</span>
+            <span style="display:flex;align-items:center;gap:6px;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:4px 11px;font-size:12.5px"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-green)"></span>Veloduct · 10</span>
+            <span style="display:flex;align-items:center;gap:6px;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:4px 11px;font-size:12.5px"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-gold)"></span>Shuttle · 9</span>
+            <span style="display:flex;align-items:center;gap:6px;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:4px 11px;font-size:12.5px"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-red)"></span>LRT · 3 systems</span>
+            <span style="display:flex;align-items:center;gap:6px;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:4px 11px;font-size:12.5px;color:var(--ink-muted)"><i class="icon-image-off" style="font-size:13px"></i>5 media deferred</span>
+          </div>
+
+          <p style="margin:0;font-size:16.5px;line-height:1.64;max-width:68ch">Development of this division begun on <a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">March 10</a> the same year, and it is currently the largest rail transport operator in <a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">Los Sengas</a>. Rail networks under this flagship are scattered all across the territory, and this division also assisted in multiple infrastructural projects, including but not limited to the <a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">Metro-Vector-Paw Container Terminals</a> and <a href="#" style="color:var(--ink-muted);text-decoration:none;border-block-end:1px dotted var(--ink-muted)">Mayler Airport</a>.</p>
+
+          <h2 id="s-businesses" style="margin:34px 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700;scroll-margin-block-start:20px">Businesses</h2>
+          <div style="height:3px;width:56px;background:var(--route-blue);margin-block-end:14px"></div>
+          <p style="margin:0 0 14px;font-size:15.5px;line-height:1.6;color:var(--ink-soft);max-width:68ch">In Los Sengas, Nazca Railway is responsible for the construction and management of the following railway systems.</p>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+            <div style="display:flex;align-items:center;gap:11px;border:1px solid var(--outline);border-radius:9px;background:var(--surface);padding:10px 13px"><span style="display:grid;place-items:center;width:26px;height:26px;border-radius:7px;background:var(--route-blue);color:#fff;flex:0 0 auto"><i class="icon-train-front" style="font-size:15px"></i></span><span style="font-size:14px"><a href="#" style="color:var(--ink);text-decoration:none;font-weight:600">Standard Railway</a><br><span style="color:var(--ink-muted);font-size:12.5px">high-capacity heavy rail · 43 lines</span></span></div>
+            <div style="display:flex;align-items:center;gap:11px;border:1px solid var(--outline);border-radius:9px;background:var(--surface);padding:10px 13px"><span style="display:grid;place-items:center;width:26px;height:26px;border-radius:7px;background:var(--route-blue);color:#fff;flex:0 0 auto;opacity:.72"><i class="icon-train-track" style="font-size:15px"></i></span><span style="font-size:14px"><a href="#" style="color:var(--ink);text-decoration:none;font-weight:600">Sub-Standard Railway</a><br><span style="color:var(--ink-muted);font-size:12.5px">medium-capacity · 3 lines</span></span></div>
+            <div style="display:flex;align-items:center;gap:11px;border:1px solid var(--outline);border-radius:9px;background:var(--surface);padding:10px 13px"><span style="display:grid;place-items:center;width:26px;height:26px;border-radius:7px;background:var(--route-green);color:#fff;flex:0 0 auto"><i class="icon-tram-front" style="font-size:15px"></i></span><span style="font-size:14px"><a href="#" style="color:var(--ink);text-decoration:none;font-weight:600">Veloduct</a><br><span style="color:var(--ink-muted);font-size:12.5px">commuter rail · 10 routes</span></span></div>
+            <div style="display:flex;align-items:center;gap:11px;border:1px solid var(--outline);border-radius:9px;background:var(--surface);padding:10px 13px"><span style="display:grid;place-items:center;width:26px;height:26px;border-radius:7px;background:var(--route-red);color:#fff;flex:0 0 auto"><i class="icon-git-fork" style="font-size:15px"></i></span><span style="font-size:14px"><a href="#" style="color:var(--ink);text-decoration:none;font-weight:600">Local Rapid Transit</a><br><span style="color:var(--ink-muted);font-size:12.5px">regional rail · 3 systems</span></span></div>
+            <div style="display:flex;align-items:center;gap:11px;border:1px solid var(--outline);border-radius:9px;background:var(--surface);padding:10px 13px"><span style="display:grid;place-items:center;width:26px;height:26px;border-radius:7px;background:var(--route-gold);color:#fff;flex:0 0 auto"><i class="icon-move-right" style="font-size:15px"></i></span><span style="font-size:14px"><a href="#" style="color:var(--ink);text-decoration:none;font-weight:600">The Shuttle</a><br><span style="color:var(--ink-muted);font-size:12.5px">personal rapid transit · 9 links</span></span></div>
+            <div style="display:flex;align-items:center;gap:11px;border:1px solid var(--outline);border-radius:9px;background:var(--surface-soft);padding:10px 13px"><span style="display:grid;place-items:center;width:26px;height:26px;border-radius:7px;border:1px dashed var(--hair);color:var(--ink-muted);flex:0 0 auto"><i class="icon-plane" style="font-size:14px"></i></span><span style="font-size:14px;color:var(--ink-muted)">Hub Railway · airport rail<br><span style="font-size:11.5px;border:1px solid var(--outline);border-radius:3px;padding:0 4px">PROPOSED</span></span></div>
+            <div style="display:flex;align-items:center;gap:11px;border:1px solid var(--outline);border-radius:9px;background:var(--surface-soft);padding:10px 13px"><span style="display:grid;place-items:center;width:26px;height:26px;border-radius:7px;border:1px dashed var(--hair);color:var(--ink-muted);flex:0 0 auto"><i class="icon-route" style="font-size:14px"></i></span><span style="font-size:14px;color:var(--ink-muted)">Linker Railway · intercity<br><span style="font-size:11.5px;border:1px solid var(--outline);border-radius:3px;padding:0 4px">PROPOSED</span></span></div>
+            <div style="display:flex;align-items:center;gap:11px;border:1px solid var(--outline);border-radius:9px;background:var(--surface-soft);padding:10px 13px"><span style="display:grid;place-items:center;width:26px;height:26px;border-radius:7px;border:1px dashed var(--hair);color:var(--ink-muted);flex:0 0 auto"><i class="icon-tram-front" style="font-size:14px"></i></span><span style="font-size:14px;color:var(--ink-muted)"><span style="text-decoration:line-through">Sava Light Transit</span><br><span style="font-size:12.5px">light rail · formerly a subsidiary</span></span></div>
+          </div>
+
+          <h2 id="s-standard" style="margin:34px 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700;scroll-margin-block-start:20px">Standard Railway System</h2>
+          <div style="height:3px;width:56px;background:var(--route-blue);margin-block-end:14px"></div>
+          <p style="margin:0 0 14px;font-size:15.5px;line-height:1.6;color:var(--ink-soft);max-width:68ch">43 lines to Standard Railway standard — one express line, five branch lines and thirty-seven main lines — plus three lines to Sub-Standard Railway standard, connecting across Los Sengas.</p>
+          <div style="border:1px solid var(--outline);border-radius:10px;background:var(--surface);overflow:hidden">
+            <div style="display:grid;grid-template-columns:54px minmax(0,1fr) 104px 104px 50px 62px 62px;gap:8px;padding:9px 14px;background:var(--panel);color:var(--panel-ink);font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:600;letter-spacing:0.08em"><span>LINE</span><span>CHARACTERISTIC</span><span>OPENED</span><span>LATEST EXT.</span><span style="text-align:end">STN</span><span style="text-align:end">KM</span><span style="text-align:end">MIN</span></div>
+            <div style="padding:5px 14px;background:var(--surface-soft);border-block-end:1px solid var(--outline-soft);font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:600;letter-spacing:0.1em;color:var(--ink-muted)">MAIN LINES</div>
+            <sc-for list="{{ mainLines }}" as="row" hint-placeholder-count="6">
+              <div style="display:grid;grid-template-columns:54px minmax(0,1fr) 104px 104px 50px 62px 62px;gap:8px;padding:9px 14px;border-block-end:1px solid var(--outline-soft);align-items:center;font-size:13.5px">
+                <span style="display:inline-grid;place-items:center;width:30px;height:22px;border-radius:5px;background:{{ row.color }};color:#fff;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px">{{ row.no }}</span>
+                <span style="color:var(--ink-soft)">{{ row.characteristic }}</span>
+                <span style="color:var(--ink-soft)">{{ row.opened }}</span>
+                <span style="color:var(--ink-soft)">{{ row.extended }}</span>
+                <span style="text-align:end;font-variant-numeric:tabular-nums">{{ row.stations }}</span>
+                <span style="text-align:end;font-variant-numeric:tabular-nums">{{ row.km }}</span>
+                <span style="text-align:end;font-variant-numeric:tabular-nums;color:var(--ink-soft)">{{ row.min }}</span>
+              </div>
+            </sc-for>
+            <button type="button" onClick="{{ toggleRows }}" style="width:100%;border:0;background:transparent;color:var(--primary);padding:11px 14px;font-family:'Barlow Semi Condensed',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer" style-hover="background:var(--surface-soft)">{{ rowsLabel }}</button>
+          </div>
+          <p style="margin:10px 0 0;font-size:13px;line-height:1.6;color:var(--ink-muted);max-width:80ch">Lines are listed in numerical order, but the numbers increase by order of planning rather than construction. Numbers absent from the table are planned lines with no physical form yet. Core lines are the first six to pass through <a href="#" style="color:var(--ink-soft)">Metropolis Terminal</a>; auxiliary lines assist them; district lines serve named districts; strategic lines strengthen connections around the terminal.</p>
+
+          <h2 id="s-veloduct" style="margin:34px 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700;scroll-margin-block-start:20px">Veloduct System</h2>
+          <div style="height:3px;width:56px;background:var(--route-green);margin-block-end:14px"></div>
+          <p style="margin:0 0 14px;font-size:15.5px;line-height:1.6;color:var(--ink-soft);max-width:68ch">Ten commuter railway lines named “Veloducts”. Since Season 3 Episode 16 they are no longer drawn as independent route maps — they appear inside the Standard Railway route map instead. Routes are lettered by order of planning, mostly following the NATO alphabet.</p>
+          <div style="border:1px solid var(--outline);border-radius:10px;background:var(--surface);overflow:hidden">
+            <div style="display:grid;grid-template-columns:54px 118px 118px minmax(0,1fr) 50px 62px 62px;gap:8px;padding:9px 14px;background:var(--panel);color:var(--panel-ink);font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:600;letter-spacing:0.08em"><span>LINE</span><span>OPENED</span><span>LATEST EXT.</span><span>TERMINI</span><span style="text-align:end">STN</span><span style="text-align:end">KM</span><span style="text-align:end">MIN</span></div>
+            <sc-for list="{{ veloducts }}" as="row" hint-placeholder-count="5">
+              <div style="display:grid;grid-template-columns:54px 118px 118px minmax(0,1fr) 50px 62px 62px;gap:8px;padding:9px 14px;border-block-end:1px solid var(--outline-soft);align-items:center;font-size:13.5px">
+                <span style="display:inline-grid;place-items:center;width:30px;height:22px;border-radius:5px;background:var(--route-green);color:#fff;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px">{{ row.no }}</span>
+                <span style="color:var(--ink-soft)">{{ row.opened }}</span>
+                <span style="color:var(--ink-soft)">{{ row.extended }}</span>
+                <span style="color:var(--ink-muted)">{{ row.termini }}</span>
+                <span style="text-align:end;font-variant-numeric:tabular-nums">{{ row.stations }}</span>
+                <span style="text-align:end;font-variant-numeric:tabular-nums">{{ row.km }}</span>
+                <span style="text-align:end;font-variant-numeric:tabular-nums;color:var(--ink-soft)">{{ row.min }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <h2 id="s-shuttle" style="margin:34px 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700;scroll-margin-block-start:20px">The Shuttle</h2>
+          <div style="height:3px;width:56px;background:var(--route-gold);margin-block-end:14px"></div>
+          <p style="margin:0 0 14px;font-size:15.5px;line-height:1.6;color:var(--ink-soft);max-width:68ch">Nine point-to-point personal rapid transit links. Termini and destinations were empty in the captured source table; opening and extension dates are preserved below.</p>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+            <div style="display:grid;gap:3px;border:1px solid var(--outline);border-radius:9px;background:var(--surface);padding:11px 13px"><span style="display:flex;align-items:center;gap:7px;font-family:'Barlow Semi Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.06em;color:var(--route-gold)"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-gold)"></span>LINK 1</span><span style="font-size:13.5px">opened 20 Oct 2018</span><span style="font-size:12.5px;color:var(--ink-muted)">extended 6 Nov 2021</span></div>
+            <div style="display:grid;gap:3px;border:1px solid var(--outline);border-radius:9px;background:var(--surface);padding:11px 13px"><span style="display:flex;align-items:center;gap:7px;font-family:'Barlow Semi Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.06em;color:var(--route-gold)"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-gold)"></span>LINK 2</span><span style="font-size:13.5px">opened 20 Oct 2018</span><span style="font-size:12.5px;color:var(--ink-muted)">extended 8 May 2020</span></div>
+            <div style="display:grid;gap:3px;border:1px solid var(--outline);border-radius:9px;background:var(--surface);padding:11px 13px"><span style="display:flex;align-items:center;gap:7px;font-family:'Barlow Semi Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.06em;color:var(--route-gold)"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-gold)"></span>LINK 3</span><span style="font-size:13.5px">opened 10 Jun 2019</span><span style="font-size:12.5px;color:var(--ink-muted)">extended 5 May 2020</span></div>
+            <div style="display:grid;gap:3px;border:1px solid var(--outline);border-radius:9px;background:var(--surface);padding:11px 13px"><span style="display:flex;align-items:center;gap:7px;font-family:'Barlow Semi Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.06em;color:var(--route-gold)"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-gold)"></span>LINK 4</span><span style="font-size:13.5px">opened 2 Jul 2019</span><span style="font-size:12.5px;color:var(--ink-muted)">extended 5 May 2020</span></div>
+            <div style="display:grid;gap:3px;border:1px solid var(--outline);border-radius:9px;background:var(--surface);padding:11px 13px"><span style="display:flex;align-items:center;gap:7px;font-family:'Barlow Semi Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.06em;color:var(--route-gold)"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-gold)"></span>LINK 5</span><span style="font-size:13.5px">opened 5 May 2020</span><span style="font-size:12.5px;color:var(--ink-muted)">extended 5 May 2020</span></div>
+            <div style="display:grid;gap:3px;border:1px solid var(--outline);border-radius:9px;background:var(--surface);padding:11px 13px"><span style="display:flex;align-items:center;gap:7px;font-family:'Barlow Semi Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.06em;color:var(--route-gold)"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-gold)"></span>LINK 6</span><span style="font-size:13.5px">opened 8 May 2020</span><span style="font-size:12.5px;color:var(--ink-muted)">extended 6 Nov 2021</span></div>
+            <div style="display:grid;gap:3px;border:1px solid var(--outline);border-radius:9px;background:var(--surface);padding:11px 13px"><span style="display:flex;align-items:center;gap:7px;font-family:'Barlow Semi Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.06em;color:var(--route-gold)"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-gold)"></span>LINK 7</span><span style="font-size:13.5px">opened 11 May 2020</span><span style="font-size:12.5px;color:var(--ink-muted)">extended 6 Nov 2021</span></div>
+            <div style="display:grid;gap:3px;border:1px solid var(--outline);border-radius:9px;background:var(--surface);padding:11px 13px"><span style="display:flex;align-items:center;gap:7px;font-family:'Barlow Semi Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.06em;color:var(--route-gold)"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-gold)"></span>LINK 8</span><span style="font-size:13.5px">opened 31 Oct 2021</span><span style="font-size:12.5px;color:var(--ink-muted)">extended 31 Oct 2021</span></div>
+            <div style="display:grid;gap:3px;border:1px solid var(--outline);border-radius:9px;background:var(--surface);padding:11px 13px"><span style="display:flex;align-items:center;gap:7px;font-family:'Barlow Semi Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.06em;color:var(--route-gold)"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-gold)"></span>LINK 9</span><span style="font-size:13.5px">opened 6 Nov 2021</span><span style="font-size:12.5px;color:var(--ink-muted)">extended 6 Nov 2021</span></div>
+          </div>
+
+          <h2 id="s-lrt" style="margin:34px 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700;scroll-margin-block-start:20px">Local Rapid Transit System</h2>
+          <div style="height:3px;width:56px;background:var(--route-red);margin-block-end:14px"></div>
+          <p style="margin:0 0 14px;font-size:15.5px;line-height:1.6;color:var(--ink-soft);max-width:68ch">Three Local Rapid Transit systems: two lines at <a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">Shore Tip</a>, three at <a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">Sexterade</a>, and one at <a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">Peckern North</a>.</p>
+          <div style="border:1px solid var(--outline);border-radius:10px;background:var(--surface);overflow:hidden">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 118px 118px 128px 50px 62px 62px;gap:8px;padding:9px 14px;background:var(--panel);color:var(--panel-ink);font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:600;letter-spacing:0.08em"><span>SYSTEM</span><span>OPENED</span><span>LATEST EXT.</span><span>DISTRICTS</span><span style="text-align:end">STN</span><span style="text-align:end">KM</span><span style="text-align:end">MIN</span></div>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 118px 118px 128px 50px 62px 62px;gap:8px;padding:9px 14px;border-block-end:1px solid var(--outline-soft);align-items:center;font-size:13.5px"><span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-red)"></span>Shore Tip · line 1</span><span style="color:var(--ink-soft)">6 Sep 2020</span><span style="color:var(--ink-soft)">16 Sep 2020</span><span style="color:var(--ink-muted)">Internal Sea</span><span style="text-align:end">7</span><span style="text-align:end">3.24</span><span style="text-align:end;color:var(--ink-soft)">5.94</span></div>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 118px 118px 128px 50px 62px 62px;gap:8px;padding:9px 14px;border-block-end:1px solid var(--outline-soft);align-items:center;font-size:13.5px;background:var(--surface-soft)"><span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-red)"></span>Shore Tip · line 2</span><span style="color:var(--ink-soft)">18 Sep 2020</span><span style="color:var(--ink-soft)">29 Sep 2020</span><span style="color:var(--ink-muted)">Shore Tip</span><span style="text-align:end">10</span><span style="text-align:end">4.42</span><span style="text-align:end;color:var(--ink-soft)">8.28</span></div>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 118px 118px 128px 50px 62px 62px;gap:8px;padding:9px 14px;border-block-end:1px solid var(--outline-soft);align-items:center;font-size:13.5px"><span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-gold)"></span>Sexterade · line 1</span><span style="color:var(--ink-soft)">3 Apr 2021</span><span style="color:var(--ink-soft)">25 Apr 2021</span><span style="color:var(--ink-muted)">22nd</span><span style="text-align:end">8</span><span style="text-align:end">4.555</span><span style="text-align:end;color:var(--ink-soft)">7.59</span></div>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 118px 118px 128px 50px 62px 62px;gap:8px;padding:9px 14px;border-block-end:1px solid var(--outline-soft);align-items:center;font-size:13.5px;background:var(--surface-soft)"><span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-gold)"></span>Sexterade · line 2</span><span style="color:var(--ink-soft)">1 May 2021</span><span style="color:var(--ink-soft)">7 May 2021</span><span style="color:var(--ink-muted)">22nd</span><span style="text-align:end">6</span><span style="text-align:end">2.665</span><span style="text-align:end;color:var(--ink-soft)">4.93</span></div>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 118px 118px 128px 50px 62px 62px;gap:8px;padding:9px 14px;border-block-end:1px solid var(--outline-soft);align-items:center;font-size:13.5px"><span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-gold)"></span>Sexterade · line 3</span><span style="color:var(--ink-soft)">19 Mar 2021</span><span style="color:var(--ink-soft)">10 Apr 2021</span><span style="color:var(--ink-muted)">22nd</span><span style="text-align:end">9</span><span style="text-align:end">4.18</span><span style="text-align:end;color:var(--ink-soft)">7.84</span></div>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 118px 118px 128px 50px 62px 62px;gap:8px;padding:9px 14px;align-items:center;font-size:13.5px;background:var(--surface-soft)"><span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-green)"></span>Peckern North</span><span style="color:var(--ink-soft)">10 Apr 2024</span><span style="color:var(--ink-soft)">28 Jun 2024</span><span style="color:var(--ink-muted)">Peckern North, Dansein, Tin Shek</span><span style="text-align:end">18</span><span style="text-align:end">8.94</span><span style="text-align:end;color:var(--ink-soft)">16.44</span></div>
+          </div>
+
+          <h2 id="s-slt" style="margin:34px 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700;scroll-margin-block-start:20px">Sava Light Transit (SLT) System</h2>
+          <div style="height:3px;width:56px;background:var(--hair);margin-block-end:14px"></div>
+          <p style="margin:0;font-size:15.5px;line-height:1.6;color:var(--ink-soft);max-width:68ch">SLTs are also named “in-district” railways and were operated by <a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">Sava Light Transit</a> as a subsidiary in Los Sengas. While it used to be part of Nazca Railway, it now operates independently.</p>
+
+          <h2 id="s-stock" style="margin:34px 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700;scroll-margin-block-start:20px">Rolling Stocks</h2>
+          <div style="height:3px;width:56px;background:var(--route-blue);margin-block-end:14px"></div>
+          <div style="display:grid;gap:0;max-width:76ch">
+            <div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:baseline;padding-block:10px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="font-family:'Barlow Semi Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--ink);text-decoration:none">N-Stock</a><span style="font-size:14.5px;color:var(--ink-soft)">Standard Railways and occasionally Veloducts</span></div>
+            <div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:baseline;padding-block:10px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="font-family:'Barlow Semi Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--ink);text-decoration:none">V-Stock</a><span style="font-size:14.5px;color:var(--ink-soft)">Used exclusively by Veloducts</span></div>
+            <div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:baseline;padding-block:10px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="font-family:'Barlow Semi Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--ink);text-decoration:none">H-Stock</a><span style="font-size:14.5px;color:var(--ink-soft)">Proposed stock for Hub Railways</span></div>
+            <div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:baseline;padding-block:10px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="font-family:'Barlow Semi Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--ink);text-decoration:none">L-Tram</a><span style="font-size:14.5px;color:var(--ink-soft)">Used by SLT, with a high undercarriage design</span></div>
+            <div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:baseline;padding-block:10px"><a href="#" style="font-family:'Barlow Semi Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--ink);text-decoration:none">Nick-train</a><span style="font-size:14.5px;color:var(--ink-soft)">Inspection train, also used to test new routes</span></div>
+          </div>
+
+          <h2 id="s-bases" style="margin:34px 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700;scroll-margin-block-start:20px">Train Bases</h2>
+          <div style="height:3px;width:56px;background:var(--route-gold);margin-block-end:14px"></div>
+          <p style="margin:0 0 14px;font-size:15.5px;line-height:1.6;color:var(--ink-soft);max-width:68ch">Los Sengas houses seven completed depots and two under planning, plus ten stabling sidings and train yards.</p>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+            <div>
+              <p style="margin:0 0 8px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;color:var(--ink-muted)">DEPOTS · BY COMPLETION</p>
+              <div style="display:grid;gap:0;font-size:14px">
+                <span style="padding-block:7px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Katadelphia Depot</a> <span style="color:var(--ink-muted)">· east–west lines</span></span>
+                <span style="padding-block:7px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Miner Bay Depot</a></span>
+                <span style="padding-block:7px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Sayler Depot</a></span>
+                <span style="padding-block:7px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Vector Bay Depot</a></span>
+                <span style="padding-block:7px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Lei Wah Depot</a></span>
+                <span style="padding-block:7px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Centopia Depot</a></span>
+                <span style="padding-block:7px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Diamond Bay Depot</a></span>
+                <span style="padding-block:7px;border-block-end:1px solid var(--outline-soft);color:var(--ink-muted)">Lean Forest Depot · proposed</span>
+                <span style="padding-block:7px;color:var(--ink-muted)">Dusty Depot · proposed, Veloduct</span>
+              </div>
+            </div>
+            <div>
+              <p style="margin:0 0 8px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;color:var(--ink-muted)">STABLING SIDINGS AND YARDS</p>
+              <div style="display:grid;gap:0;font-size:14px">
+                <span style="padding-block:7px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Heeled Island</a></span>
+                <span style="padding-block:7px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Internal Sea East</a></span>
+                <span style="padding-block:7px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Quarter Basin</a></span>
+                <span style="padding-block:7px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Spade Valley</a></span>
+                <span style="padding-block:7px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Compahills</a></span>
+                <span style="padding-block:7px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Pingsing</a></span>
+                <span style="padding-block:7px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Vanilla Bay</a></span>
+                <span style="padding-block:7px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Whitecliff Village</a></span>
+                <span style="padding-block:7px;color:var(--ink-muted)">+ Intus Occident, Wisely South, Sava North, Borderers Park</span>
+              </div>
+            </div>
+          </div>
+
+          <h2 id="s-structures" style="margin:34px 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700;scroll-margin-block-start:20px">Structures and diagrams</h2>
+          <div style="height:3px;width:56px;background:var(--route-green);margin-block-end:14px"></div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+            <div style="border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:14px">
+              <div style="display:flex;gap:22px;margin-block-end:10px">
+                <span style="display:grid;gap:2px"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700">121</strong><span style="font-size:12px;color:var(--ink-muted)">immersed tunnels</span></span>
+                <span style="display:grid;gap:2px"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700">8</strong><span style="font-size:12px;color:var(--ink-muted)">large-scale bridges</span></span>
+              </div>
+              <p style="margin:0;font-size:13.5px;color:var(--ink-soft)">See <a href="#" style="color:var(--ink)">List of Bridges</a> and <a href="#" style="color:var(--ink)">List of Tunnels</a>.</p>
+            </div>
+            <div style="border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:14px">
+              <p style="margin:0 0 8px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;color:var(--ink-muted)">TRACK DIAGRAMS</p>
+              <div style="display:grid;gap:5px;font-size:13.5px">
+                <span style="display:flex;justify-content:space-between;gap:10px"><span>Season 1</span><a href="#" style="color:var(--primary);text-decoration:none">external image ↗</a></span>
+                <span style="display:flex;justify-content:space-between;gap:10px;color:var(--ink-muted)"><span>Season 2</span><span>not available</span></span>
+                <span style="display:flex;justify-content:space-between;gap:10px"><span>Season 3 · Interlude 1</span><a href="#" style="color:var(--primary);text-decoration:none">external image ↗</a></span>
+                <span style="display:flex;justify-content:space-between;gap:10px"><span>Season 3 · Ep 18 Ch 13</span><a href="#" style="color:var(--primary);text-decoration:none">external image ↗</a></span>
+                <span style="display:flex;justify-content:space-between;gap:10px"><span>Season 3 · Ep 19 Ch 7</span><a href="#" style="color:var(--primary);text-decoration:none">external image ↗</a></span>
+              </div>
+            </div>
+          </div>
+
+          <h2 id="s-shops" style="margin:34px 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700;scroll-margin-block-start:20px">NR Shops, Inns and Lounges</h2>
+          <div style="height:3px;width:56px;background:var(--route-red);margin-block-end:14px"></div>
+          <p style="margin:0 0 14px;font-size:15.5px;line-height:1.6;color:var(--ink-soft);max-width:68ch">NR Shops is a complimentary service at 65 stations in the division, ordered by appearance. Two NR Inns and two NR Premium Lounges also operate; lounges are free to use, unlike the airport lounges they are modelled on.</p>
+          <div style="border:1px solid var(--outline);border-radius:10px;background:var(--surface);overflow:hidden;margin-block-end:12px">
+            <div style="display:grid;grid-template-columns:48px minmax(0,1fr) 80px;gap:8px;padding:9px 14px;background:var(--panel);color:var(--panel-ink);font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:600;letter-spacing:0.08em"><span>#</span><span>STATION</span><span style="text-align:end">SHOPS</span></div>
+            <div style="display:grid;grid-template-columns:48px minmax(0,1fr) 80px;gap:8px;padding:8px 14px;border-block-end:1px solid var(--outline-soft);font-size:13.5px"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-muted)">01</span><a href="#" style="color:var(--ink);text-decoration:none">Zootuary Station</a><span style="text-align:end;font-variant-numeric:tabular-nums">22</span></div>
+            <div style="display:grid;grid-template-columns:48px minmax(0,1fr) 80px;gap:8px;padding:8px 14px;border-block-end:1px solid var(--outline-soft);font-size:13.5px;background:var(--surface-soft)"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-muted)">03</span><a href="#" style="color:var(--ink);text-decoration:none">North Mountain Station</a><span style="text-align:end;font-variant-numeric:tabular-nums">60</span></div>
+            <div style="display:grid;grid-template-columns:48px minmax(0,1fr) 80px;gap:8px;padding:8px 14px;border-block-end:1px solid var(--outline-soft);font-size:13.5px"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-muted)">50</span><a href="#" style="color:var(--ink);text-decoration:none">Misty Mount Station</a><span style="text-align:end;font-variant-numeric:tabular-nums">56</span></div>
+            <div style="display:grid;grid-template-columns:48px minmax(0,1fr) 80px;gap:8px;padding:8px 14px;border-block-end:1px solid var(--outline-soft);font-size:13.5px;background:var(--surface-soft)"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-muted)">52</span><button type="button" onClick="{{ goStation }}" style="border:0;background:transparent;padding:0;font:inherit;color:var(--ink);text-align:start;cursor:pointer" style-hover="color:var(--primary)">Kapa Channel Station</button><span style="text-align:end;font-variant-numeric:tabular-nums">61</span></div>
+            <div style="display:grid;grid-template-columns:48px minmax(0,1fr) 80px;gap:8px;padding:8px 14px;border-block-end:1px solid var(--outline-soft);font-size:13.5px"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-muted)">68</span><a href="#" style="color:var(--ink);text-decoration:none">Spring Point Gateway</a><span style="text-align:end;font-variant-numeric:tabular-nums">55</span></div>
+            <button type="button" onClick="{{ goList }}" style="width:100%;border:0;background:transparent;color:var(--primary);padding:11px 14px;font-family:'Barlow Semi Condensed',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer" style-hover="background:var(--surface-soft)">OPEN THE FULL SHOPS TABLE · 72 ROWS</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+            <div style="border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:14px">
+              <p style="margin:0 0 8px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;color:var(--ink-muted)">NR INNS · 2</p>
+              <div style="display:grid;gap:6px;font-size:14px"><span><a href="#" style="color:var(--ink);text-decoration:none">Greenrock Hill Station</a> <span style="color:var(--ink-muted)">· The Pioneer’s Inn</span></span><span><a href="#" style="color:var(--ink);text-decoration:none">Nail Bight Checkpoint</a> <span style="color:var(--ink-muted)">· The Rusty’s Inn</span></span></div>
+            </div>
+            <div style="border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:14px">
+              <p style="margin:0 0 8px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;color:var(--ink-muted)">PREMIUM LOUNGES · 2</p>
+              <div style="display:grid;gap:6px;font-size:14px"><span><a href="#" style="color:var(--ink);text-decoration:none">Centopia</a> <span style="color:var(--ink-muted)">· Centopia Premium Lounge</span></span><span><button type="button" onClick="{{ goStation }}" style="border:0;background:transparent;padding:0;font:inherit;color:var(--ink);cursor:pointer">Kapa Channel Station</button> <span style="color:var(--ink-muted)">· Kapa Channel Premium Lounge</span></span></div>
+            </div>
+          </div>
+
+          <h2 id="s-incidents" style="margin:34px 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700;scroll-margin-block-start:20px">Incidents</h2>
+          <div style="height:3px;width:56px;background:var(--route-red);margin-block-end:14px"></div>
+          <div style="display:grid;gap:10px">
+            <div style="display:grid;grid-template-columns:88px minmax(0,1fr);gap:16px;border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:14px">
+              <span style="display:grid;gap:2px;padding-inline-end:14px;border-inline-end:1px solid var(--outline-soft)"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:19px;font-weight:700">29 Apr</strong><span style="font-size:12px;color:var(--ink-muted)">2017</span></span>
+              <span><strong style="display:block;font-size:15px;font-weight:600;margin-block-end:4px"><a href="#" style="color:var(--ink);text-decoration:none">Upper Rover Station</a> destruction incident</strong><span style="font-size:14px;line-height:1.6;color:var(--ink-soft)">Misuse of administrator commands nearly destroyed the station. Emergency repair works followed backup blueprints and restoration completed the next day. The incident later inspired the station’s characteristic.</span></span>
+            </div>
+            <div style="display:grid;grid-template-columns:88px minmax(0,1fr);gap:16px;border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:14px">
+              <span style="display:grid;gap:2px;padding-inline-end:14px;border-inline-end:1px solid var(--outline-soft)"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:19px;font-weight:700">7 Jul</strong><span style="font-size:12px;color:var(--ink-muted)">2018 · 21:50</span></span>
+              <span><strong style="display:block;font-size:15px;font-weight:600;margin-block-end:4px"><a href="#" style="color:var(--ink);text-decoration:none">Glacier Station</a> destruction incident</strong><span style="font-size:14px;line-height:1.6;color:var(--ink-soft)">The station closed for over three hours; the line then running only to <a href="#" style="color:var(--ink-soft)">Ingress Flatland Station</a> was put out of service and another line terminated at <a href="#" style="color:var(--ink-soft)">Spike End Station</a>. A public notice followed twenty minutes after the accident, restoration completed at 1am, and the administrator involved issued a letter of apology.</span></span>
+            </div>
+          </div>
+
+          <h2 id="s-future" style="margin:34px 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700;scroll-margin-block-start:20px">Future Development</h2>
+          <div style="height:3px;width:56px;background:var(--route-blue);margin-block-end:14px"></div>
+          <p style="margin:0 0 12px;font-size:15.5px;line-height:1.6;color:var(--ink-soft);max-width:68ch">Nazca Railway will build more stations and lines, and enhance existing services, in the process of becoming the largest Minecraft railway system in the world.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <a href="#" style="border:1px solid var(--outline);border-radius:999px;background:var(--surface);color:var(--ink);padding:6px 12px;font-size:13px;text-decoration:none">2020+ Plans</a>
+            <a href="#" style="border:1px solid var(--outline);border-radius:999px;background:var(--surface);color:var(--ink);padding:6px 12px;font-size:13px;text-decoration:none">2021 Plans</a>
+            <a href="#" style="border:1px solid var(--outline);border-radius:999px;background:var(--surface);color:var(--ink);padding:6px 12px;font-size:13px;text-decoration:none">2021 Development Outline</a>
+            <a href="#" style="border:1px solid var(--outline);border-radius:999px;background:var(--surface);color:var(--ink);padding:6px 12px;font-size:13px;text-decoration:none">2022 Part 2 Development Plans</a>
+            <a href="#" style="border:1px solid var(--outline);border-radius:999px;background:var(--surface);color:var(--ink);padding:6px 12px;font-size:13px;text-decoration:none">Development Plan 2024 Edition</a>
+          </div>
+
+          <footer style="margin-block-start:34px;padding-block-start:14px;border-block-start:1px solid var(--outline);display:grid;gap:8px;font-size:12.5px;line-height:1.6;color:var(--ink-muted);max-width:80ch">
+            <span>Current revision only — complete revision history is explicitly deferred. Source revision <span style="font-family:'IBM Plex Mono',monospace">132458</span>, captured 31 Aug 2026, contributor hidden or unavailable. Text presented under the source CC BY-SA terms. <a href="#" style="color:var(--primary)">Open the exact source revision ↗</a></span>
+            <span style="display:flex;align-items:center;gap:7px;color:var(--warning)"><i class="icon-image-off" style="font-size:14px"></i>Media deferred: Current_Railway.jpg · Current_Shuttle.png · Shore Tip LRT.png · Sexterade LRT.png · Peckern North LRT.png</span>
+          </footer>
+        </article>
+
+        <aside style="position:sticky;inset-block-start:0;align-self:start;display:grid;gap:12px;padding-block-start:34px">
+          <div style="border-radius:12px;background:var(--panel);color:var(--panel-ink);padding:16px">
+            <p style="margin:0 0 12px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;opacity:.72">DIVISION AT A GLANCE</p>
+            <div style="display:grid">
+              <div style="display:flex;justify-content:space-between;gap:12px;padding-block:7px;border-block-end:1px solid rgb(230 244 245 / 16%);font-size:13.5px"><span style="opacity:.72">Established</span><strong style="font-weight:600">15 Mar 2015</strong></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding-block:7px;border-block-end:1px solid rgb(230 244 245 / 16%);font-size:13.5px"><span style="opacity:.72">Parent</span><strong style="font-weight:600">Nazca Railway</strong></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding-block:7px;border-block-end:1px solid rgb(230 244 245 / 16%);font-size:13.5px"><span style="opacity:.72">Stations</span><strong style="font-weight:600">1,222</strong></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding-block:7px;border-block-end:1px solid rgb(230 244 245 / 16%);font-size:13.5px"><span style="opacity:.72">Depots</span><strong style="font-weight:600">7 · 2 planned</strong></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding-block:7px;border-block-end:1px solid rgb(230 244 245 / 16%);font-size:13.5px"><span style="opacity:.72">Sidings</span><strong style="font-weight:600">12</strong></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding-block:7px;font-size:13.5px"><span style="opacity:.72">Structures</span><strong style="font-weight:600">121 tunnels · 8 bridges</strong></div>
+            </div>
+            <p style="margin:14px 0 7px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;opacity:.72">DISTRICTS SERVED</p>
+            <div style="display:flex;flex-wrap:wrap;gap:5px">
+              <span style="border:1px solid rgb(230 244 245 / 28%);border-radius:999px;padding:2px 8px;font-size:12px">Centopia</span>
+              <span style="border:1px solid rgb(230 244 245 / 28%);border-radius:999px;padding:2px 8px;font-size:12px">Xofa</span>
+              <span style="border:1px solid rgb(230 244 245 / 28%);border-radius:999px;padding:2px 8px;font-size:12px">TriPaw</span>
+              <span style="border:1px solid rgb(230 244 245 / 28%);border-radius:999px;padding:2px 8px;font-size:12px">Jupiter</span>
+              <span style="border:1px solid rgb(230 244 245 / 28%);border-radius:999px;padding:2px 8px;font-size:12px">22nd</span>
+              <span style="border:1px solid rgb(230 244 245 / 28%);border-radius:999px;padding:2px 8px;font-size:12px">Glacier</span>
+              <span style="border:1px solid rgb(230 244 245 / 28%);border-radius:999px;padding:2px 8px;font-size:12px">Odyssey</span>
+              <span style="border:1px solid rgb(230 244 245 / 28%);border-radius:999px;padding:2px 8px;font-size:12px">Intus Aquilo</span>
+            </div>
+            <p style="margin:14px 0 7px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;opacity:.72">ROLLING STOCK</p>
+            <div style="display:flex;flex-wrap:wrap;gap:5px">
+              <span style="border:1px solid rgb(230 244 245 / 28%);border-radius:999px;padding:2px 8px;font-size:12px">N-Stock</span>
+              <span style="border:1px solid rgb(230 244 245 / 28%);border-radius:999px;padding:2px 8px;font-size:12px">V-Stock</span>
+              <span style="border:1px solid rgb(230 244 245 / 28%);border-radius:999px;padding:2px 8px;font-size:12px">H-Stock</span>
+              <span style="border:1px solid rgb(230 244 245 / 28%);border-radius:999px;padding:2px 8px;font-size:12px">L-Tram</span>
+              <span style="border:1px solid rgb(230 244 245 / 28%);border-radius:999px;padding:2px 8px;font-size:12px">Nick-train</span>
+            </div>
+          </div>
+          <div style="border:1px solid var(--outline);border-radius:12px;background:var(--surface);padding:14px">
+            <p style="margin:0 0 9px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;color:var(--ink-muted)">SISTER DIVISIONS</p>
+            <div style="display:grid;gap:7px;font-size:13.5px">
+              <a href="#" style="display:flex;align-items:center;gap:9px;color:var(--ink);text-decoration:none"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-gold)"></span>Golden Division</a>
+              <a href="#" style="display:flex;align-items:center;gap:9px;color:var(--ink);text-decoration:none"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-green)"></span>Terracept Division</a>
+              <a href="#" style="display:flex;align-items:center;gap:9px;color:var(--ink);text-decoration:none"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-blue)"></span>Heaven Pacific Division</a>
+            </div>
+          </div>
+          <div style="border:1px solid var(--outline);border-radius:12px;background:var(--surface);padding:14px">
+            <p style="margin:0 0 9px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;color:var(--ink-muted)">LINK LEGEND</p>
+            <div style="display:grid;gap:6px;font-size:12.5px;color:var(--ink-soft)">
+              <span><span style="color:var(--ink);border-block-end:1px solid var(--hair)">in this corpus</span> · 3,422 articles</span>
+              <span><span style="color:var(--ink-muted);border-block-end:1px dotted var(--ink-muted)">not captured</span> · outside the snapshot</span>
+              <span><span style="color:var(--primary)">external ↗</span> · leaves the reader</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+      </sc-if>
+
+      <!-- ══════════ STATION ══════════ -->
+      <sc-if value="{{ isStation }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 316px;gap:26px;padding:28px 32px 64px">
+        <article style="min-width:0">
+          <nav style="display:flex;align-items:center;gap:7px;margin-block-end:14px;font-size:12.5px;color:var(--ink-muted)">
+            <button type="button" onClick="{{ goHome }}" style="border:0;background:transparent;color:var(--ink-muted);padding:0;font:inherit;cursor:pointer" style-hover="color:var(--primary)">Atlas</button><i class="icon-chevron-right" style="font-size:13px"></i>
+            <button type="button" onClick="{{ goList }}" style="border:0;background:transparent;color:var(--ink-muted);padding:0;font:inherit;cursor:pointer" style-hover="color:var(--primary)">Stations</button><i class="icon-chevron-right" style="font-size:13px"></i>
+            <span style="color:var(--ink)">Kapa Channel Station</span>
+          </nav>
+          <p style="margin:0 0 6px;display:flex;align-items:center;gap:9px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12.5px;font-weight:700;letter-spacing:0.12em;color:var(--primary)"><span style="width:22px;height:3px;background:var(--primary)"></span>STATION · LOS SENGAS DIVISION</p>
+          <h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:44px;font-weight:700;line-height:1.02;letter-spacing:-0.01em">Kapa Channel Station</h1>
+          <p style="margin:8px 0 0;font-size:15.5px;color:var(--ink-soft)">Served by <button type="button" onClick="{{ goArticle }}" style="border:0;background:transparent;padding:0;font:inherit;font-size:15.5px;color:var(--ink);border-block-end:1px solid var(--hair);cursor:pointer">Nazca Railway (Los Sengas Division)</button> · part of <a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">Kapa Channel Island</a></p>
+
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-block:16px">
+            <span style="display:flex;align-items:center;gap:6px;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:4px 11px;font-size:12.5px"><i class="icon-shopping-bag" style="font-size:13px;color:var(--route-red)"></i>61 NR Shops</span>
+            <span style="display:flex;align-items:center;gap:6px;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:4px 11px;font-size:12.5px"><i class="icon-utensils" style="font-size:13px;color:var(--route-gold)"></i>4 restaurants</span>
+            <span style="display:flex;align-items:center;gap:6px;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:4px 11px;font-size:12.5px"><i class="icon-armchair" style="font-size:13px;color:var(--route-green)"></i>Premium Lounge</span>
+            <span style="display:flex;align-items:center;gap:6px;border:1px solid var(--outline);border-radius:999px;background:var(--surface-soft);padding:4px 11px;font-size:12.5px;color:var(--ink-muted)"><i class="icon-triangle-alert" style="font-size:13px"></i>lines served not captured</span>
+          </div>
+
+          <p style="margin:0;font-size:16.5px;line-height:1.64;max-width:68ch">Kapa Channel Station is the fifty-second station in the division to receive <button type="button" onClick="{{ goArticle }}" style="border:0;background:transparent;padding:0;font:inherit;font-size:16.5px;color:var(--ink);border-block-end:1px solid var(--hair);cursor:pointer">NR Shops</button>, and carries the largest retail count of any station in Los Sengas. Its shops sit outside the vicinity of the station structure and are counted as part of <a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">Kapa Channel Island</a>.</p>
+
+          <h2 style="margin:34px 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700">Retail and facilities</h2>
+          <div style="height:3px;width:56px;background:var(--route-red);margin-block-end:14px"></div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-block-end:14px">
+            <div style="display:grid;gap:3px;border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:14px"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:30px;font-weight:700;line-height:1">61</strong><span style="font-size:12.5px;color:var(--ink-muted)">shops in total</span></div>
+            <div style="display:grid;gap:3px;border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:14px"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:30px;font-weight:700;line-height:1">4</strong><span style="font-size:12.5px;color:var(--ink-muted)">restaurants · KCH-R01–R04</span></div>
+            <div style="display:grid;gap:3px;border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:14px"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:30px;font-weight:700;line-height:1">52</strong><span style="font-size:12.5px;color:var(--ink-muted)">order of appearance</span></div>
+          </div>
+          <div style="border:1px solid var(--outline);border-radius:10px;background:var(--surface);overflow:hidden">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:8px;padding:9px 14px;background:var(--panel);color:var(--panel-ink);font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:600;letter-spacing:0.08em"><span>FACILITY</span><span>REFERENCE</span></div>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:8px;padding:9px 14px;border-block-end:1px solid var(--outline-soft);font-size:13.5px"><span><a href="#" style="color:var(--ink);text-decoration:none">Kapa Channel Premium Lounge</a> <span style="color:var(--ink-muted)">· free to use</span></span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-muted)">lounge 2 of 2</span></div>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:8px;padding:9px 14px;border-block-end:1px solid var(--outline-soft);font-size:13.5px;background:var(--surface-soft)"><span>Restaurants</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-muted)">KCH-R01 … R04</span></div>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:8px;padding:9px 14px;font-size:13.5px"><span style="color:var(--ink-muted)">Interchanges · platform layout · opening date</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--warning)">not in snapshot</span></div>
+          </div>
+
+          <h2 style="margin:34px 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700">Location</h2>
+          <div style="height:3px;width:56px;background:var(--route-green);margin-block-end:14px"></div>
+          <div style="border:1px solid var(--outline);border-radius:10px;overflow:hidden;background:var(--surface)">
+            <div style="height:200px;display:grid;place-items:center;background:repeating-linear-gradient(135deg, var(--surface-soft) 0 8px, var(--surface) 8px 16px)">
+              <span style="border:1px solid var(--outline);border-radius:6px;background:var(--surface);padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-muted)">station area diagram · drop the map crop here</span>
+            </div>
+            <p style="margin:0;padding:11px 14px;border-block-start:1px solid var(--outline);font-size:13px;color:var(--ink-muted)">Station diagrams are part of the 16,555 deferred media objects and will publish only after byte, MIME, dimension, hash, rights and attribution validation.</p>
+          </div>
+
+          <footer style="margin-block-start:34px;padding-block-start:14px;border-block-start:1px solid var(--outline);font-size:12.5px;line-height:1.6;color:var(--ink-muted);max-width:80ch">
+            Facts on this page are drawn from the captured <button type="button" onClick="{{ goArticle }}" style="border:0;background:transparent;padding:0;font:inherit;font-size:12.5px;color:var(--primary);cursor:pointer">Los Sengas Division</button> record, revision <span style="font-family:'IBM Plex Mono',monospace">132458</span>. Fields marked <em>not in snapshot</em> have no captured source value — the reader never guesses them.
+          </footer>
+        </article>
+
+        <aside style="position:sticky;inset-block-start:0;align-self:start;display:grid;gap:12px;padding-block-start:34px">
+          <div style="border-radius:12px;background:var(--panel);color:var(--panel-ink);padding:16px">
+            <p style="margin:0 0 12px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;opacity:.72">STATION AT A GLANCE</p>
+            <div style="display:grid">
+              <div style="display:flex;justify-content:space-between;gap:12px;padding-block:7px;border-block-end:1px solid rgb(230 244 245 / 16%);font-size:13.5px"><span style="opacity:.72">Operator</span><strong style="font-weight:600">Nazca Railway</strong></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding-block:7px;border-block-end:1px solid rgb(230 244 245 / 16%);font-size:13.5px"><span style="opacity:.72">Division</span><strong style="font-weight:600">Los Sengas</strong></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding-block:7px;border-block-end:1px solid rgb(230 244 245 / 16%);font-size:13.5px"><span style="opacity:.72">Shops</span><strong style="font-weight:600">61</strong></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding-block:7px;border-block-end:1px solid rgb(230 244 245 / 16%);font-size:13.5px"><span style="opacity:.72">Restaurants</span><strong style="font-weight:600">4</strong></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding-block:7px;border-block-end:1px solid rgb(230 244 245 / 16%);font-size:13.5px"><span style="opacity:.72">Lounge</span><strong style="font-weight:600">yes</strong></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding-block:7px;font-size:13.5px"><span style="opacity:.72">Lines served</span><strong style="font-weight:600;opacity:.6">not captured</strong></div>
+            </div>
+          </div>
+          <div style="border:1px solid var(--outline);border-radius:12px;background:var(--surface);padding:14px">
+            <p style="margin:0 0 9px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;color:var(--ink-muted)">STATIONS WITH MOST SHOPS</p>
+            <div style="display:grid;gap:0;font-size:13.5px">
+              <span style="display:flex;justify-content:space-between;gap:10px;padding-block:6px;border-block-end:1px solid var(--outline-soft)"><span style="color:var(--ink);font-weight:600">Kapa Channel</span><span style="font-variant-numeric:tabular-nums">61</span></span>
+              <span style="display:flex;justify-content:space-between;gap:10px;padding-block:6px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">North Mountain</a><span style="font-variant-numeric:tabular-nums">60</span></span>
+              <span style="display:flex;justify-content:space-between;gap:10px;padding-block:6px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Misty Mount</a><span style="font-variant-numeric:tabular-nums">56</span></span>
+              <span style="display:flex;justify-content:space-between;gap:10px;padding-block:6px;border-block-end:1px solid var(--outline-soft)"><a href="#" style="color:var(--ink);text-decoration:none">Skyhorse</a><span style="font-variant-numeric:tabular-nums">56</span></span>
+              <span style="display:flex;justify-content:space-between;gap:10px;padding-block:6px"><a href="#" style="color:var(--ink);text-decoration:none">Spring Point Gateway</a><span style="font-variant-numeric:tabular-nums">55</span></span>
+            </div>
+          </div>
+        </aside>
+      </div>
+      </sc-if>
+
+      <!-- ══════════ STUB ══════════ -->
+      <sc-if value="{{ isStub }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 316px;gap:26px;padding:28px 32px 64px">
+        <article style="min-width:0;max-width:72ch">
+          <nav style="display:flex;align-items:center;gap:7px;margin-block-end:14px;font-size:12.5px;color:var(--ink-muted)">
+            <button type="button" onClick="{{ goHome }}" style="border:0;background:transparent;color:var(--ink-muted);padding:0;font:inherit;cursor:pointer" style-hover="color:var(--primary)">Atlas</button><i class="icon-chevron-right" style="font-size:13px"></i>
+            <span>Years</span><i class="icon-chevron-right" style="font-size:13px"></i><span style="color:var(--ink)">2011</span>
+          </nav>
+          <p style="margin:0 0 6px;display:flex;align-items:center;gap:9px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12.5px;font-weight:700;letter-spacing:0.12em;color:var(--primary)"><span style="width:22px;height:3px;background:var(--primary)"></span>YEAR · 1 EVENT CAPTURED</p>
+          <h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:64px;font-weight:700;line-height:0.98;letter-spacing:-0.02em">2011</h1>
+          <p style="margin:10px 0 0;font-size:17px;line-height:1.6">The year in which <a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">Project Nazca</a> was established.</p>
+
+          <div style="display:flex;align-items:center;gap:8px;margin-block:20px;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:5px;width:fit-content">
+            <span style="border-radius:999px;background:var(--primary-soft);color:var(--primary-strong);padding:5px 14px;font-family:'Barlow Semi Condensed',sans-serif;font-size:15px;font-weight:700">2011</span>
+            <a href="#" style="color:var(--ink-soft);padding:5px 12px;font-size:14px;text-decoration:none">2012</a>
+            <a href="#" style="color:var(--ink-soft);padding:5px 12px;font-size:14px;text-decoration:none">2013</a>
+            <a href="#" style="color:var(--ink-soft);padding:5px 12px;font-size:14px;text-decoration:none">2014</a>
+            <span style="color:var(--ink-muted);padding-inline:8px;font-size:13px">…2026</span>
+          </div>
+
+          <h2 style="margin:26px 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700">List of historical events</h2>
+          <div style="height:3px;width:56px;background:var(--route-blue);margin-block-end:14px"></div>
+          <div style="display:grid;gap:0">
+            <p style="margin:0 0 6px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;color:var(--ink-muted)">NOVEMBER</p>
+            <div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:16px;align-items:baseline;padding-block:11px;border-block:1px solid var(--outline-soft)">
+              <a href="#" style="font-family:'Barlow Semi Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--ink);text-decoration:none">Nov 17</a>
+              <span style="font-size:15.5px;line-height:1.6"><a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">Project Nazca</a> was established.</span>
+            </div>
+            <p style="margin:18px 0 6px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;color:var(--ink-muted)">DECEMBER</p>
+            <p style="margin:0;padding-block:11px;border-block-start:1px solid var(--outline-soft);font-size:14.5px;color:var(--ink-muted)">No events captured for this month.</p>
+          </div>
+
+          <div style="display:flex;align-items:flex-start;gap:11px;margin-block-start:24px;border:1px solid var(--outline);border-radius:10px;background:var(--surface-soft);padding:14px">
+            <i class="icon-file-plus-2" style="font-size:17px;color:var(--ink-muted);margin-block-start:1px"></i>
+            <span style="font-size:13.5px;line-height:1.6;color:var(--ink-soft)"><strong style="font-weight:600;color:var(--ink)">Short record.</strong> This year has one captured event and two headings. Later years hold dozens — see <a href="#" style="color:var(--primary)">2012</a> for the first full year of Terracept.</span>
+          </div>
+
+          <h2 style="margin:30px 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:26px;font-weight:700">Citations and references</h2>
+          <div style="height:3px;width:56px;background:var(--hair);margin-block-end:14px"></div>
+          <p style="margin:0;font-size:14.5px"><a href="#" style="color:var(--primary);text-decoration:none">Category:Years ↗</a></p>
+
+          <footer style="margin-block-start:30px;padding-block-start:14px;border-block-start:1px solid var(--outline);font-size:12.5px;line-height:1.6;color:var(--ink-muted)">
+            Current revision only. Source page id <span style="font-family:'IBM Plex Mono',monospace">5856</span>, captured 31 Aug 2026 under CC BY-SA. <a href="#" style="color:var(--primary)">Open the source revision ↗</a>
+          </footer>
+        </article>
+
+        <aside style="position:sticky;inset-block-start:0;align-self:start;display:grid;gap:12px;padding-block-start:34px">
+          <div style="border-radius:12px;background:var(--panel);color:var(--panel-ink);padding:16px">
+            <p style="margin:0 0 12px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;opacity:.72">YEAR AT A GLANCE</p>
+            <div style="display:grid">
+              <div style="display:flex;justify-content:space-between;gap:12px;padding-block:7px;border-block-end:1px solid rgb(230 244 245 / 16%);font-size:13.5px"><span style="opacity:.72">Events</span><strong style="font-weight:600">1</strong></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding-block:7px;border-block-end:1px solid rgb(230 244 245 / 16%);font-size:13.5px"><span style="opacity:.72">Founding</span><strong style="font-weight:600">Project Nazca</strong></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding-block:7px;font-size:13.5px"><span style="opacity:.72">Category</span><strong style="font-weight:600">Years</strong></div>
+            </div>
+          </div>
+          <div style="border:1px solid var(--outline);border-radius:12px;background:var(--surface);padding:14px">
+            <p style="margin:0 0 9px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;color:var(--ink-muted)">DECADE</p>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;font-size:13px">
+              <span style="border-radius:6px;background:var(--primary-soft);color:var(--primary-strong);padding:3px 9px;font-weight:600">2011</span>
+              <a href="#" style="border-radius:6px;background:var(--surface-soft);color:var(--ink);padding:3px 9px;text-decoration:none">2012</a>
+              <a href="#" style="border-radius:6px;background:var(--surface-soft);color:var(--ink);padding:3px 9px;text-decoration:none">2013</a>
+              <a href="#" style="border-radius:6px;background:var(--surface-soft);color:var(--ink);padding:3px 9px;text-decoration:none">2014</a>
+              <a href="#" style="border-radius:6px;background:var(--surface-soft);color:var(--ink);padding:3px 9px;text-decoration:none">2015</a>
+              <a href="#" style="border-radius:6px;background:var(--surface-soft);color:var(--ink);padding:3px 9px;text-decoration:none">2016</a>
+              <a href="#" style="border-radius:6px;background:var(--surface-soft);color:var(--ink);padding:3px 9px;text-decoration:none">2017</a>
+              <a href="#" style="border-radius:6px;background:var(--surface-soft);color:var(--ink);padding:3px 9px;text-decoration:none">2018</a>
+              <a href="#" style="border-radius:6px;background:var(--surface-soft);color:var(--ink);padding:3px 9px;text-decoration:none">2019</a>
+            </div>
+          </div>
+        </aside>
+      </div>
+      </sc-if>
+
+      <!-- ══════════ LIST / STATIONS INDEX ══════════ -->
+      <sc-if value="{{ isList }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:28px 32px 64px;max-width:1240px">
+        <p style="margin:0 0 6px;display:flex;align-items:center;gap:9px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12.5px;font-weight:700;letter-spacing:0.12em;color:var(--primary)"><span style="width:22px;height:3px;background:var(--primary)"></span>INDEX · GENERATED FROM THE SNAPSHOT</p>
+        <h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:40px;font-weight:700;line-height:1.04">Stations and interchanges</h1>
+        <p style="margin:8px 0 0;font-size:15.5px;color:var(--ink-soft);max-width:70ch">1,222 indexed station titles. Shop counts below come from the NR Shops table of the <button type="button" onClick="{{ goArticle }}" style="border:0;background:transparent;padding:0;font:inherit;font-size:15.5px;color:var(--ink);border-block-end:1px solid var(--hair);cursor:pointer">Los Sengas Division</button> record; stations without a captured count are listed without one.</p>
+
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-block:18px">
+          <span style="border-radius:999px;background:var(--ink);color:var(--canvas);padding:6px 13px;font-size:13px">All 1,222</span>
+          <span style="border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:6px 13px;font-size:13px;color:var(--ink-soft)">With NR Shops · 72</span>
+          <span style="border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:6px 13px;font-size:13px;color:var(--ink-soft)">Checkpoints · 9</span>
+          <span style="border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:6px 13px;font-size:13px;color:var(--ink-soft)">Gateways · 5</span>
+          <span style="border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:6px 13px;font-size:13px;color:var(--ink-soft)">With lounges · 2</span>
+          <span style="flex:1"></span>
+          <span style="display:flex;align-items:center;gap:6px;border:1px solid var(--outline);border-radius:8px;background:var(--surface-soft);padding:6px 10px;font-size:12.5px;color:var(--ink-muted)"><i class="icon-arrow-down-up" style="font-size:14px"></i>Order of appearance</span>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-block-end:14px;font-family:'IBM Plex Mono',monospace;font-size:11px">
+          <span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">A</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">B</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">C</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">D</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">E</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">F</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">G</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">H</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">J</span><span style="border-radius:5px;background:var(--primary);color:var(--on-primary);padding:3px 7px">K</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">L</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">M</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">N</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">O</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">P</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">Q</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">S</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">T</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">V</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">W</span><span style="border-radius:5px;background:var(--surface-soft);color:var(--ink);padding:3px 7px">Z</span>
+        </div>
+
+        <div style="border:1px solid var(--outline);border-radius:12px;background:var(--surface);overflow:hidden">
+          <div style="display:grid;grid-template-columns:56px minmax(0,1fr) 200px 84px 110px;gap:10px;padding:10px 16px;background:var(--panel);color:var(--panel-ink);font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:600;letter-spacing:0.08em"><span>#</span><span>STATION</span><span>NOTES</span><span style="text-align:end">SHOPS</span><span style="text-align:end">FACILITIES</span></div>
+          <sc-for list="{{ stations }}" as="row" hint-placeholder-count="12">
+            <div style="display:grid;grid-template-columns:56px minmax(0,1fr) 200px 84px 110px;gap:10px;padding:10px 16px;border-block-end:1px solid var(--outline-soft);align-items:center;font-size:13.5px" style-hover="background:var(--surface-soft)">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-muted)">{{ row.rank }}</span>
+              <a href="#" style="color:var(--ink);text-decoration:none;font-weight:600">{{ row.name }}</a>
+              <span style="color:var(--ink-muted);font-size:12.5px">{{ row.note }}</span>
+              <span style="text-align:end;font-variant-numeric:tabular-nums">{{ row.shops }}</span>
+              <span style="text-align:end;font-size:12px;color:var(--ink-muted)">{{ row.facility }}</span>
+            </div>
+          </sc-for>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px">
+            <span style="font-size:12.5px;color:var(--ink-muted)">Showing 12 of 1,222 indexed titles</span>
+            <span style="display:flex;gap:6px">
+              <span style="border:1px solid var(--outline);border-radius:7px;background:var(--surface);padding:5px 11px;font-size:12.5px;color:var(--ink-muted)">Previous</span>
+              <span style="border:1px solid var(--outline);border-radius:7px;background:var(--surface-soft);padding:5px 11px;font-size:12.5px">Next</span>
+            </span>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ══════════ SEARCH ══════════ -->
+      <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:28px 32px 64px;max-width:1000px">
+        <p style="margin:0 0 6px;display:flex;align-items:center;gap:9px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12.5px;font-weight:700;letter-spacing:0.12em;color:var(--primary)"><span style="width:22px;height:3px;background:var(--primary)"></span>SEARCH · LOCAL, NO NETWORK CALLS</p>
+        <h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:34px;font-weight:700;line-height:1.06">{{ resultHeadline }}</h1>
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-block:16px">
+          <span style="border-radius:999px;background:var(--ink);color:var(--canvas);padding:6px 13px;font-size:13px">Plain text</span>
+          <span style="border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:6px 13px;font-size:13px;color:var(--ink-soft)">RE2 regular expression</span>
+          <span style="display:flex;align-items:center;gap:6px;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:6px 13px;font-size:13px;color:var(--ink-soft)"><i class="icon-cpu" style="font-size:13px"></i>Web Worker ready</span>
+        </div>
+        <div style="border:1px solid var(--outline);border-radius:12px;background:var(--surface);overflow:hidden">
+          <sc-for list="{{ results }}" as="row" hint-placeholder-count="4">
+            <button type="button" onClick="{{ row.open }}" style="width:100%;display:grid;grid-template-columns:12px minmax(0,1fr) auto;align-items:center;gap:12px;border:0;border-block-end:1px solid var(--outline-soft);background:transparent;color:inherit;padding:12px 16px;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)">
+              <span style="width:10px;height:10px;border-radius:50%;background:{{ row.color }}"></span>
+              <span style="min-width:0">
+                <strong style="display:block;font-size:15px;font-weight:600">{{ row.title }}</strong>
+                <span style="display:block;font-size:12.5px;color:var(--ink-muted)">{{ row.subtitle }}</span>
+              </span>
+              <span style="display:flex;align-items:center;gap:10px"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted)">{{ row.kind }}</span><i class="icon-chevron-right" style="font-size:16px;color:var(--ink-muted)"></i></span>
+            </button>
+          </sc-for>
+          <p style="margin:0;padding:12px 16px;font-size:12.5px;color:var(--ink-muted)">{{ resultFooter }}</p>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ══════════ REDIRECT ══════════ -->
+      <sc-if value="{{ isRedirect }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:28px 32px 64px;max-width:760px">
+        <p style="margin:0 0 6px;display:flex;align-items:center;gap:9px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12.5px;font-weight:700;letter-spacing:0.12em;color:var(--warning)"><span style="width:22px;height:3px;background:var(--warning)"></span>REDIRECT · NOT INDEXED AS AN ARTICLE</p>
+        <h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:38px;font-weight:700;line-height:1.04">Nazca Railway Los Sengas Division</h1>
+        <p style="margin:10px 0 0;font-size:16px;line-height:1.6;color:var(--ink-soft)">This title is one of 194 captured source redirects. You are being forwarded to the current article.</p>
+        <div style="display:flex;align-items:center;gap:14px;margin-block:22px;border:1px solid var(--outline);border-radius:12px;background:var(--surface);padding:16px">
+          <span style="display:grid;gap:2px;min-width:0"><span style="font-size:12px;color:var(--ink-muted)">from</span><span style="font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Nazca Railway Los Sengas Division</span></span>
+          <i class="icon-arrow-right" style="font-size:20px;color:var(--primary);flex:0 0 auto"></i>
+          <span style="display:grid;gap:2px;min-width:0"><span style="font-size:12px;color:var(--ink-muted)">to</span><span style="font-size:14.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Nazca Railway (Los Sengas Division)</span></span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button type="button" onClick="{{ goArticle }}" style="display:flex;align-items:center;gap:8px;border:0;border-radius:999px;background:var(--primary);color:var(--on-primary);padding:11px 18px;font-family:'Barlow Semi Condensed',sans-serif;font-size:15px;font-weight:700;cursor:pointer">Continue to the current article<i class="icon-arrow-right" style="font-size:16px"></i></button>
+          <a href="#" style="display:flex;align-items:center;gap:8px;border:1px solid var(--outline);border-radius:999px;background:var(--surface);color:var(--ink);padding:11px 18px;font-size:14px;text-decoration:none">Open source redirect record ↗</a>
+        </div>
+        <p style="margin:22px 0 0;font-size:12.5px;line-height:1.6;color:var(--ink-muted)">Redirects carry <span style="font-family:'IBM Plex Mono',monospace">noindex, nofollow</span> and are excluded from search results by default.</p>
+      </div>
+      </sc-if>
+
+      <!-- ══════════ NOT FOUND ══════════ -->
+      <sc-if value="{{ isNotFound }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:28px 32px 64px;max-width:760px">
+        <p style="margin:0 0 6px;display:flex;align-items:center;gap:9px;font-family:'Barlow Semi Condensed',sans-serif;font-size:12.5px;font-weight:700;letter-spacing:0.12em;color:var(--route-red)"><span style="width:22px;height:3px;background:var(--route-red)"></span>NOT IN THIS SNAPSHOT</p>
+        <h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:38px;font-weight:700;line-height:1.04">That title is not in the current corpus</h1>
+        <p style="margin:10px 0 0;font-size:16px;line-height:1.6;color:var(--ink-soft);max-width:64ch">The snapshot holds 3,422 articles and 194 redirects captured on 31 August 2026. The page may exist at the source, may be pending import, or may never have existed.</p>
+        <div style="display:flex;align-items:center;gap:9px;margin-block:20px;border:1px solid var(--outline);border-radius:999px;background:var(--surface-soft);height:44px;padding-inline:16px;max-width:520px">
+          <i class="icon-search" style="font-size:16px;color:var(--ink-muted)"></i>
+          <input value="{{ query }}" onInput="{{ onQuery }}" placeholder="Search the encyclopedia instead" style="min-width:0;flex:1;border:0;background:transparent;color:var(--ink);font:inherit;font-size:14px;outline:none">
+        </div>
+        <div style="display:grid;gap:0;border:1px solid var(--outline);border-radius:12px;background:var(--surface);overflow:hidden;max-width:520px">
+          <button type="button" onClick="{{ goArticle }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;background:transparent;color:inherit;padding:12px 16px;text-align:start;font:inherit;font-size:14px;cursor:pointer" style-hover="background:var(--surface-soft)">Nazca Railway (Los Sengas Division)<i class="icon-chevron-right" style="font-size:16px;color:var(--ink-muted)"></i></button>
+          <button type="button" onClick="{{ goList }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;border-block-start:1px solid var(--outline-soft);background:transparent;color:inherit;padding:12px 16px;text-align:start;font:inherit;font-size:14px;cursor:pointer" style-hover="background:var(--surface-soft)">Browse 1,222 station titles<i class="icon-chevron-right" style="font-size:16px;color:var(--ink-muted)"></i></button>
+          <button type="button" onClick="{{ goHome }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;border-block-start:1px solid var(--outline-soft);background:transparent;color:inherit;padding:12px 16px;text-align:start;font:inherit;font-size:14px;cursor:pointer" style-hover="background:var(--surface-soft)">Return to the atlas home<i class="icon-chevron-right" style="font-size:16px;color:var(--ink-muted)"></i></button>
+        </div>
+      </div>
+      </sc-if>
+
+    </main>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:100dvh;display:grid;place-items:center;background:var(--desk);padding:24px">
+  <div data-screen-label="Phone reader" style="width:390px;height:844px;overflow:hidden;position:relative;border:9px solid #10181b;border-radius:38px;background:var(--canvas);color:var(--ink);box-shadow:0 22px 60px rgb(8 13 15 / 34%)">
+    <div class="scroll" style="height:100%;overflow:auto">
+      <div style="position:sticky;inset-block-start:0;z-index:6;background:var(--surface)">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 18px 2px;font-size:11px;color:var(--ink-muted)"><span>9:41</span><span style="font-family:'IBM Plex Mono',monospace">rev 132458 · offline</span></div>
+        <div style="display:grid;grid-template-columns:38px minmax(0,1fr) 38px;align-items:center;gap:8px;padding:5px 10px 9px">
+          <button type="button" onClick="{{ goHome }}" style="display:grid;place-items:center;width:38px;height:38px;border:0;border-radius:11px;background:transparent;color:var(--ink);cursor:pointer"><i class="{{ phoneNavIcon }}" style="font-size:19px"></i></button>
+          <span style="min-width:0;text-align:center;font-family:'Barlow Semi Condensed',sans-serif;font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ phoneTitle }}</span>
+          <button type="button" onClick="{{ goSearch }}" style="display:grid;place-items:center;width:38px;height:38px;border:0;border-radius:11px;background:transparent;color:var(--ink);cursor:pointer"><i class="icon-search" style="font-size:19px"></i></button>
+        </div>
+        <div style="height:4px;display:flex"><span style="flex:1;background:var(--route-blue)"></span><span style="flex:1;background:var(--route-green)"></span><span style="flex:1;background:var(--route-gold)"></span><span style="flex:1;background:var(--route-red)"></span></div>
+      </div>
+
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:18px 18px 110px">
+        <p style="margin:0 0 6px;display:flex;align-items:center;gap:8px;font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:0.12em;color:var(--primary)"><span style="width:18px;height:3px;background:var(--primary)"></span>CURRENT SNAPSHOT</p>
+        <h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:34px;font-weight:700;line-height:1.02">The Encyclopedia of Los Sengas</h1>
+        <p style="margin:10px 0 0;font-size:15.5px;line-height:1.55;color:var(--ink-soft)">Searchable routes, readable railway tables, permanent attribution, no advertising rails.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-block:18px">
+          <button type="button" onClick="{{ goList }}" style="display:grid;gap:8px;border:1px solid var(--outline);border-radius:11px;background:var(--surface);padding:13px;text-align:start;color:inherit;font:inherit;cursor:pointer"><span style="width:10px;height:10px;border-radius:50%;background:var(--route-blue)"></span><span><strong style="display:block;font-family:'Barlow Semi Condensed',sans-serif;font-size:17px;font-weight:700">Stations</strong><span style="font-size:12px;color:var(--ink-muted)">1,222 titles</span></span></button>
+          <button type="button" style="display:grid;gap:8px;border:1px solid var(--outline);border-radius:11px;background:var(--surface);padding:13px;text-align:start;color:inherit;font:inherit;cursor:pointer"><span style="width:10px;height:10px;border-radius:50%;background:var(--route-red)"></span><span><strong style="display:block;font-family:'Barlow Semi Condensed',sans-serif;font-size:17px;font-weight:700">Lines</strong><span style="font-size:12px;color:var(--ink-muted)">156 records</span></span></button>
+          <button type="button" style="display:grid;gap:8px;border:1px solid var(--outline);border-radius:11px;background:var(--surface);padding:13px;text-align:start;color:inherit;font:inherit;cursor:pointer"><span style="width:10px;height:10px;border-radius:50%;background:var(--route-green)"></span><span><strong style="display:block;font-family:'Barlow Semi Condensed',sans-serif;font-size:17px;font-weight:700">Places</strong><span style="font-size:12px;color:var(--ink-muted)">Districts, islands</span></span></button>
+          <button type="button" style="display:grid;gap:8px;border:1px solid var(--outline);border-radius:11px;background:var(--surface);padding:13px;text-align:start;color:inherit;font:inherit;cursor:pointer"><span style="width:10px;height:10px;border-radius:50%;background:var(--route-gold)"></span><span><strong style="display:block;font-family:'Barlow Semi Condensed',sans-serif;font-size:17px;font-weight:700">Depots</strong><span style="font-size:12px;color:var(--ink-muted)">7 · 2 planned</span></span></button>
+        </div>
+        <h2 style="margin:0 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:20px;font-weight:700">Start with a useful record</h2>
+        <div style="height:3px;width:44px;background:var(--route-blue);margin-block-end:10px"></div>
+        <div style="border:1px solid var(--outline);border-radius:11px;background:var(--surface);overflow:hidden">
+          <button type="button" onClick="{{ goArticle }}" style="width:100%;display:grid;grid-template-columns:11px minmax(0,1fr) 16px;align-items:center;gap:11px;border:0;background:transparent;color:inherit;padding:12px 13px;text-align:start;font:inherit;cursor:pointer"><span style="width:10px;height:10px;border-radius:50%;background:var(--route-blue)"></span><span style="min-width:0"><strong style="display:block;font-size:14.5px;font-weight:600">Nazca Railway (Los Sengas Division)</strong><span style="font-size:12px;color:var(--ink-muted)">Article · 19 sections</span></span><i class="icon-chevron-right" style="font-size:16px;color:var(--ink-muted)"></i></button>
+          <button type="button" onClick="{{ goStation }}" style="width:100%;display:grid;grid-template-columns:11px minmax(0,1fr) 16px;align-items:center;gap:11px;border:0;border-block-start:1px solid var(--outline-soft);background:transparent;color:inherit;padding:12px 13px;text-align:start;font:inherit;cursor:pointer"><span style="width:10px;height:10px;border-radius:50%;background:var(--route-green)"></span><span style="min-width:0"><strong style="display:block;font-size:14.5px;font-weight:600">Kapa Channel Station</strong><span style="font-size:12px;color:var(--ink-muted)">Station · 61 shops</span></span><i class="icon-chevron-right" style="font-size:16px;color:var(--ink-muted)"></i></button>
+          <button type="button" onClick="{{ goStub }}" style="width:100%;display:grid;grid-template-columns:11px minmax(0,1fr) 16px;align-items:center;gap:11px;border:0;border-block-start:1px solid var(--outline-soft);background:transparent;color:inherit;padding:12px 13px;text-align:start;font:inherit;cursor:pointer"><span style="width:10px;height:10px;border-radius:50%;border:2px solid var(--hair)"></span><span style="min-width:0"><strong style="display:block;font-size:14.5px;font-weight:600">2011</strong><span style="font-size:12px;color:var(--ink-muted)">Year · Project Nazca founded</span></span><i class="icon-chevron-right" style="font-size:16px;color:var(--ink-muted)"></i></button>
+          <button type="button" onClick="{{ goRedirect }}" style="width:100%;display:grid;grid-template-columns:11px minmax(0,1fr) 16px;align-items:center;gap:11px;border:0;border-block-start:1px solid var(--outline-soft);background:transparent;color:inherit;padding:12px 13px;text-align:start;font:inherit;cursor:pointer"><span style="width:10px;height:10px;border-radius:50%;background:var(--warning)"></span><span style="min-width:0"><strong style="display:block;font-size:14.5px;font-weight:600">Nazca Railway Los Sengas Division</strong><span style="font-size:12px;color:var(--ink-muted)">Redirect</span></span><i class="icon-chevron-right" style="font-size:16px;color:var(--ink-muted)"></i></button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-block-start:16px">
+          <div style="display:grid;gap:2px;border-radius:9px;background:var(--surface-soft);padding:10px"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:19px;font-weight:700">3,422</strong><span style="font-size:11px;color:var(--ink-muted)">articles</span></div>
+          <div style="display:grid;gap:2px;border-radius:9px;background:var(--surface-soft);padding:10px"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:19px;font-weight:700">194</strong><span style="font-size:11px;color:var(--ink-muted)">redirects</span></div>
+          <div style="display:grid;gap:2px;border-radius:9px;background:var(--surface-soft);padding:10px"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:19px;font-weight:700">16.5k</strong><span style="font-size:11px;color:var(--warning)">deferred</span></div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isArticle }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:18px 18px 110px">
+        <p style="margin:0 0 6px;display:flex;align-items:center;gap:8px;font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:0.12em;color:var(--primary)"><span style="width:18px;height:3px;background:var(--primary)"></span>DIVISION · RAIL OPERATOR</p>
+        <h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:32px;font-weight:700;line-height:1.03">Nazca Railway<br>Los Sengas Division</h1>
+        <p style="margin:8px 0 0;font-size:14px;color:var(--ink-soft)">納斯卡鐵路 (洛聖加分部) · est. 15 March 2015</p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-block:14px">
+          <span style="display:flex;align-items:center;gap:6px;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:4px 10px;font-size:12px"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-blue)"></span>43 standard</span>
+          <span style="display:flex;align-items:center;gap:6px;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:4px 10px;font-size:12px"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-green)"></span>10 veloduct</span>
+          <span style="display:flex;align-items:center;gap:6px;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:4px 10px;font-size:12px"><span style="width:8px;height:8px;border-radius:50%;background:var(--route-gold)"></span>9 shuttle</span>
+        </div>
+        <div style="border-radius:12px;background:var(--panel);color:var(--panel-ink);padding:14px;margin-block-end:16px">
+          <p style="margin:0 0 10px;font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:0.12em;opacity:.72">AT A GLANCE</p>
+          <div style="display:flex;justify-content:space-between;gap:10px;padding-block:6px;border-block-end:1px solid rgb(230 244 245 / 16%);font-size:13.5px"><span style="opacity:.72">Stations</span><strong style="font-weight:600">1,222</strong></div>
+          <div style="display:flex;justify-content:space-between;gap:10px;padding-block:6px;border-block-end:1px solid rgb(230 244 245 / 16%);font-size:13.5px"><span style="opacity:.72">Depots</span><strong style="font-weight:600">7 · 2 planned</strong></div>
+          <div style="display:flex;justify-content:space-between;gap:10px;padding-block:6px;border-block-end:1px solid rgb(230 244 245 / 16%);font-size:13.5px"><span style="opacity:.72">Structures</span><strong style="font-weight:600">121 tunnels · 8 bridges</strong></div>
+          <div style="display:flex;justify-content:space-between;gap:10px;padding-block:6px;font-size:13.5px"><span style="opacity:.72">Parent</span><strong style="font-weight:600">Nazca Railway</strong></div>
+        </div>
+        <p style="margin:0 0 16px;font-size:16px;line-height:1.6">Development begun on <a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">March 10</a> the same year, and it is currently the largest rail transport operator in <a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">Los Sengas</a>. The division also assisted in the <a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">Metro-Vector-Paw Container Terminals</a> and <a href="#" style="color:var(--ink-muted);text-decoration:none;border-block-end:1px dotted var(--ink-muted)">Mayler Airport</a>.</p>
+
+        <h2 style="margin:0 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:22px;font-weight:700">Businesses</h2>
+        <div style="height:3px;width:44px;background:var(--route-blue);margin-block-end:12px"></div>
+        <div style="display:grid;gap:7px;margin-block-end:22px">
+          <div style="display:flex;align-items:center;gap:11px;border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:10px 12px"><span style="display:grid;place-items:center;width:26px;height:26px;border-radius:7px;background:var(--route-blue);color:#fff;flex:0 0 auto"><i class="icon-train-front" style="font-size:15px"></i></span><span style="font-size:14px"><strong style="font-weight:600">Standard Railway</strong><br><span style="color:var(--ink-muted);font-size:12px">heavy rail · 43 lines</span></span></div>
+          <div style="display:flex;align-items:center;gap:11px;border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:10px 12px"><span style="display:grid;place-items:center;width:26px;height:26px;border-radius:7px;background:var(--route-green);color:#fff;flex:0 0 auto"><i class="icon-tram-front" style="font-size:15px"></i></span><span style="font-size:14px"><strong style="font-weight:600">Veloduct</strong><br><span style="color:var(--ink-muted);font-size:12px">commuter rail · 10 routes</span></span></div>
+          <div style="display:flex;align-items:center;gap:11px;border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:10px 12px"><span style="display:grid;place-items:center;width:26px;height:26px;border-radius:7px;background:var(--route-red);color:#fff;flex:0 0 auto"><i class="icon-git-fork" style="font-size:15px"></i></span><span style="font-size:14px"><strong style="font-weight:600">Local Rapid Transit</strong><br><span style="color:var(--ink-muted);font-size:12px">regional rail · 3 systems</span></span></div>
+        </div>
+
+        <h2 style="margin:0 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:22px;font-weight:700">Standard Railway</h2>
+        <div style="height:3px;width:44px;background:var(--route-blue);margin-block-end:12px"></div>
+        <div style="border:1px solid var(--outline);border-radius:11px;background:var(--surface);overflow:hidden">
+          <div style="display:grid;grid-template-columns:42px minmax(0,1fr) 40px 52px;gap:8px;padding:8px 12px;background:var(--panel);color:var(--panel-ink);font-family:'Barlow Semi Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.08em"><span>LINE</span><span>CHARACTER</span><span style="text-align:end">STN</span><span style="text-align:end">KM</span></div>
+          <sc-for list="{{ mainLines }}" as="row" hint-placeholder-count="6">
+            <div style="display:grid;grid-template-columns:42px minmax(0,1fr) 40px 52px;gap:8px;padding:9px 12px;border-block-end:1px solid var(--outline-soft);align-items:center;font-size:13px">
+              <span style="display:inline-grid;place-items:center;width:28px;height:21px;border-radius:5px;background:{{ row.color }};color:#fff;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:12.5px">{{ row.no }}</span>
+              <span style="color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.characteristic }}</span>
+              <span style="text-align:end;font-variant-numeric:tabular-nums">{{ row.stations }}</span>
+              <span style="text-align:end;font-variant-numeric:tabular-nums">{{ row.km }}</span>
+            </div>
+          </sc-for>
+          <button type="button" onClick="{{ toggleRows }}" style="width:100%;border:0;background:transparent;color:var(--primary);padding:11px 12px;font-family:'Barlow Semi Condensed',sans-serif;font-size:13px;font-weight:600;cursor:pointer">{{ rowsLabel }}</button>
+        </div>
+        <p style="margin:10px 0 0;font-size:12.5px;line-height:1.55;color:var(--ink-muted)">Numbers increase by order of planning, not construction. Absent numbers are planned lines with no physical form yet.</p>
+        <div style="margin-block-start:18px;padding-block-start:12px;border-block-start:1px solid var(--outline);display:grid;gap:7px;font-size:12px;line-height:1.55;color:var(--ink-muted)">
+          <span>Current revision only. Revision <span style="font-family:'IBM Plex Mono',monospace">132458</span>, captured 31 Aug 2026, CC BY-SA.</span>
+          <span style="display:flex;align-items:center;gap:6px;color:var(--warning)"><i class="icon-image-off" style="font-size:13px"></i>5 media files deferred</span>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isStation }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:18px 18px 110px">
+        <p style="margin:0 0 6px;display:flex;align-items:center;gap:8px;font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:0.12em;color:var(--primary)"><span style="width:18px;height:3px;background:var(--primary)"></span>STATION · LOS SENGAS</p>
+        <h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:32px;font-weight:700;line-height:1.03">Kapa Channel Station</h1>
+        <p style="margin:8px 0 0;font-size:14px;color:var(--ink-soft)">Part of <a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">Kapa Channel Island</a></p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-block:16px">
+          <div style="display:grid;gap:2px;border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:11px"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:24px;font-weight:700;line-height:1">61</strong><span style="font-size:11px;color:var(--ink-muted)">shops</span></div>
+          <div style="display:grid;gap:2px;border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:11px"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:24px;font-weight:700;line-height:1">4</strong><span style="font-size:11px;color:var(--ink-muted)">restaurants</span></div>
+          <div style="display:grid;gap:2px;border:1px solid var(--outline);border-radius:10px;background:var(--surface);padding:11px"><strong style="font-family:'Barlow Semi Condensed',sans-serif;font-size:24px;font-weight:700;line-height:1">52</strong><span style="font-size:11px;color:var(--ink-muted)">order</span></div>
+        </div>
+        <p style="margin:0 0 16px;font-size:16px;line-height:1.6">The largest retail count of any station in Los Sengas. Its shops sit outside the vicinity of the station structure and count as part of Kapa Channel Island.</p>
+        <h2 style="margin:0 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:22px;font-weight:700">Facilities</h2>
+        <div style="height:3px;width:44px;background:var(--route-red);margin-block-end:12px"></div>
+        <div style="border:1px solid var(--outline);border-radius:11px;background:var(--surface);overflow:hidden">
+          <div style="display:grid;gap:2px;padding:11px 13px;border-block-end:1px solid var(--outline-soft);font-size:14px"><span><a href="#" style="color:var(--ink);text-decoration:none;font-weight:600">Kapa Channel Premium Lounge</a></span><span style="font-size:12px;color:var(--ink-muted)">free to use · lounge 2 of 2</span></div>
+          <div style="display:grid;gap:2px;padding:11px 13px;border-block-end:1px solid var(--outline-soft);font-size:14px"><span style="font-weight:600">Restaurants</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-muted)">KCH-R01 … KCH-R04</span></div>
+          <div style="display:grid;gap:2px;padding:11px 13px;font-size:14px;color:var(--ink-muted)"><span>Interchanges · platform layout · opening date</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--warning)">not in snapshot</span></div>
+        </div>
+        <div style="margin-block-start:16px;border:1px solid var(--outline);border-radius:11px;overflow:hidden;background:var(--surface)">
+          <div style="height:150px;display:grid;place-items:center;background:repeating-linear-gradient(135deg, var(--surface-soft) 0 8px, var(--surface) 8px 16px)">
+            <span style="border:1px solid var(--outline);border-radius:6px;background:var(--surface);padding:5px 9px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-muted)">station diagram · drop map crop</span>
+          </div>
+        </div>
+        <p style="margin:14px 0 0;padding-block-start:12px;border-block-start:1px solid var(--outline);font-size:12px;line-height:1.55;color:var(--ink-muted)">Facts drawn from the captured Los Sengas Division record, revision <span style="font-family:'IBM Plex Mono',monospace">132458</span>. The reader never guesses missing fields.</p>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isStub }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:18px 18px 110px">
+        <p style="margin:0 0 6px;display:flex;align-items:center;gap:8px;font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:0.12em;color:var(--primary)"><span style="width:18px;height:3px;background:var(--primary)"></span>YEAR · 1 EVENT</p>
+        <h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:54px;font-weight:700;line-height:0.98;letter-spacing:-0.02em">2011</h1>
+        <p style="margin:10px 0 0;font-size:16.5px;line-height:1.55">The year in which <a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">Project Nazca</a> was established.</p>
+        <div style="display:flex;align-items:center;gap:4px;margin-block:16px;overflow:auto;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:5px;width:fit-content;max-width:100%">
+          <span style="flex:0 0 auto;border-radius:999px;background:var(--primary-soft);color:var(--primary-strong);padding:5px 13px;font-family:'Barlow Semi Condensed',sans-serif;font-size:14px;font-weight:700">2011</span>
+          <a href="#" style="flex:0 0 auto;color:var(--ink-soft);padding:5px 11px;font-size:13.5px;text-decoration:none">2012</a>
+          <a href="#" style="flex:0 0 auto;color:var(--ink-soft);padding:5px 11px;font-size:13.5px;text-decoration:none">2013</a>
+          <a href="#" style="flex:0 0 auto;color:var(--ink-soft);padding:5px 11px;font-size:13.5px;text-decoration:none">2014</a>
+          <span style="flex:0 0 auto;color:var(--ink-muted);padding-inline:6px;font-size:12.5px">…2026</span>
+        </div>
+        <h2 style="margin:0 0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-size:22px;font-weight:700">Historical events</h2>
+        <div style="height:3px;width:44px;background:var(--route-blue);margin-block-end:12px"></div>
+        <p style="margin:0 0 6px;font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:0.12em;color:var(--ink-muted)">NOVEMBER</p>
+        <div style="display:grid;grid-template-columns:74px minmax(0,1fr);gap:12px;align-items:baseline;padding-block:11px;border-block:1px solid var(--outline-soft)">
+          <a href="#" style="font-family:'Barlow Semi Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--ink);text-decoration:none">Nov 17</a>
+          <span style="font-size:15px;line-height:1.55"><a href="#" style="color:var(--ink);text-decoration:none;border-block-end:1px solid var(--hair)">Project Nazca</a> was established.</span>
+        </div>
+        <p style="margin:16px 0 6px;font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:0.12em;color:var(--ink-muted)">DECEMBER</p>
+        <p style="margin:0;padding-block:11px;border-block-start:1px solid var(--outline-soft);font-size:14px;color:var(--ink-muted)">No events captured for this month.</p>
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-block-start:18px;border:1px solid var(--outline);border-radius:10px;background:var(--surface-soft);padding:13px">
+          <i class="icon-file-plus-2" style="font-size:16px;color:var(--ink-muted);margin-block-start:1px"></i>
+          <span style="font-size:13px;line-height:1.55;color:var(--ink-soft)"><strong style="font-weight:600;color:var(--ink)">Short record.</strong> One captured event and two headings. See <a href="#" style="color:var(--primary)">2012</a> for the first full year.</span>
+        </div>
+        <p style="margin:16px 0 0;padding-block-start:12px;border-block-start:1px solid var(--outline);font-size:12px;color:var(--ink-muted)">Page id <span style="font-family:'IBM Plex Mono',monospace">5856</span> · category Years · CC BY-SA</p>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isList }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:18px 18px 110px">
+        <p style="margin:0 0 6px;display:flex;align-items:center;gap:8px;font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:0.12em;color:var(--primary)"><span style="width:18px;height:3px;background:var(--primary)"></span>INDEX · 1,222 TITLES</p>
+        <h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:30px;font-weight:700;line-height:1.04">Stations and interchanges</h1>
+        <div style="display:flex;gap:6px;overflow:auto;margin-block:14px;padding-block-end:2px">
+          <span style="flex:0 0 auto;border-radius:999px;background:var(--ink);color:var(--canvas);padding:6px 12px;font-size:12.5px">All 1,222</span>
+          <span style="flex:0 0 auto;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:6px 12px;font-size:12.5px;color:var(--ink-soft)">With shops · 72</span>
+          <span style="flex:0 0 auto;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:6px 12px;font-size:12.5px;color:var(--ink-soft)">Checkpoints · 9</span>
+          <span style="flex:0 0 auto;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:6px 12px;font-size:12.5px;color:var(--ink-soft)">Lounges · 2</span>
+        </div>
+        <div style="border:1px solid var(--outline);border-radius:11px;background:var(--surface);overflow:hidden">
+          <sc-for list="{{ stations }}" as="row" hint-placeholder-count="8">
+            <button type="button" onClick="{{ goStation }}" style="width:100%;display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:10px;border:0;border-block-end:1px solid var(--outline-soft);background:transparent;color:inherit;padding:11px 13px;text-align:start;font:inherit;cursor:pointer">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-muted)">{{ row.rank }}</span>
+              <span style="min-width:0"><strong style="display:block;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.name }}</strong><span style="font-size:11.5px;color:var(--ink-muted)">{{ row.note }}</span></span>
+              <span style="display:flex;align-items:center;gap:8px"><span style="font-variant-numeric:tabular-nums;font-size:13.5px">{{ row.shops }}</span><i class="icon-chevron-right" style="font-size:15px;color:var(--ink-muted)"></i></span>
+            </button>
+          </sc-for>
+          <p style="margin:0;padding:11px 13px;font-size:12px;color:var(--ink-muted)">Showing 12 of 1,222 · ordered by appearance</p>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:18px 18px 110px">
+        <div style="display:flex;align-items:center;gap:9px;border:1px solid var(--outline);border-radius:12px;background:var(--surface-soft);height:44px;padding-inline:14px;margin-block-end:14px">
+          <i class="icon-search" style="font-size:16px;color:var(--ink-muted)"></i>
+          <input value="{{ query }}" onInput="{{ onQuery }}" placeholder="Search 3,422 articles" style="min-width:0;flex:1;border:0;background:transparent;color:var(--ink);font:inherit;font-size:14.5px;outline:none">
+        </div>
+        <div style="display:flex;gap:6px;margin-block-end:14px">
+          <span style="border-radius:999px;background:var(--ink);color:var(--canvas);padding:5px 12px;font-size:12.5px">Plain text</span>
+          <span style="border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:5px 12px;font-size:12.5px;color:var(--ink-soft)">RE2 regex</span>
+        </div>
+        <p style="margin:0 0 10px;font-family:'Barlow Semi Condensed',sans-serif;font-size:17px;font-weight:700">{{ resultHeadline }}</p>
+        <div style="border:1px solid var(--outline);border-radius:11px;background:var(--surface);overflow:hidden">
+          <sc-for list="{{ results }}" as="row" hint-placeholder-count="4">
+            <button type="button" onClick="{{ row.open }}" style="width:100%;display:grid;grid-template-columns:11px minmax(0,1fr) 16px;align-items:center;gap:11px;border:0;border-block-end:1px solid var(--outline-soft);background:transparent;color:inherit;padding:11px 13px;text-align:start;font:inherit;cursor:pointer">
+              <span style="width:10px;height:10px;border-radius:50%;background:{{ row.color }}"></span>
+              <span style="min-width:0"><strong style="display:block;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.title }}</strong><span style="display:block;font-size:11.5px;color:var(--ink-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.subtitle }}</span></span>
+              <i class="icon-chevron-right" style="font-size:15px;color:var(--ink-muted)"></i>
+            </button>
+          </sc-for>
+          <p style="margin:0;padding:11px 13px;font-size:11.5px;line-height:1.5;color:var(--ink-muted)">{{ resultFooter }}</p>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isRedirect }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:18px 18px 110px">
+        <p style="margin:0 0 6px;display:flex;align-items:center;gap:8px;font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:0.12em;color:var(--warning)"><span style="width:18px;height:3px;background:var(--warning)"></span>REDIRECT · NOT INDEXED</p>
+        <h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:28px;font-weight:700;line-height:1.06">Nazca Railway Los Sengas Division</h1>
+        <p style="margin:10px 0 0;font-size:15.5px;line-height:1.55;color:var(--ink-soft)">One of 194 captured source redirects. Forwarding you to the current article.</p>
+        <div style="display:grid;gap:10px;margin-block:18px;border:1px solid var(--outline);border-radius:11px;background:var(--surface);padding:14px">
+          <span style="display:grid;gap:2px"><span style="font-size:11.5px;color:var(--ink-muted)">from</span><span style="font-size:14px">Nazca Railway Los Sengas Division</span></span>
+          <i class="icon-arrow-down" style="font-size:18px;color:var(--primary)"></i>
+          <span style="display:grid;gap:2px"><span style="font-size:11.5px;color:var(--ink-muted)">to</span><span style="font-size:14px;font-weight:600">Nazca Railway (Los Sengas Division)</span></span>
+        </div>
+        <button type="button" onClick="{{ goArticle }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;background:var(--primary);color:var(--on-primary);padding:13px 18px;font-family:'Barlow Semi Condensed',sans-serif;font-size:15px;font-weight:700;cursor:pointer">Continue to the article<i class="icon-arrow-right" style="font-size:16px"></i></button>
+        <p style="margin:16px 0 0;font-size:11.5px;line-height:1.55;color:var(--ink-muted)">Redirects carry <span style="font-family:'IBM Plex Mono',monospace">noindex, nofollow</span>.</p>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isNotFound }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:18px 18px 110px">
+        <p style="margin:0 0 6px;display:flex;align-items:center;gap:8px;font-family:'Barlow Semi Condensed',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:0.12em;color:var(--route-red)"><span style="width:18px;height:3px;background:var(--route-red)"></span>NOT IN THIS SNAPSHOT</p>
+        <h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-size:28px;font-weight:700;line-height:1.06">That title is not in the current corpus</h1>
+        <p style="margin:10px 0 0;font-size:15.5px;line-height:1.55;color:var(--ink-soft)">The snapshot holds 3,422 articles and 194 redirects captured on 31 August 2026.</p>
+        <div style="display:flex;align-items:center;gap:9px;margin-block:16px;border:1px solid var(--outline);border-radius:12px;background:var(--surface-soft);height:44px;padding-inline:14px">
+          <i class="icon-search" style="font-size:16px;color:var(--ink-muted)"></i>
+          <input value="{{ query }}" onInput="{{ onQuery }}" placeholder="Search instead" style="min-width:0;flex:1;border:0;background:transparent;color:var(--ink);font:inherit;font-size:14.5px;outline:none">
+        </div>
+        <div style="border:1px solid var(--outline);border-radius:11px;background:var(--surface);overflow:hidden">
+          <button type="button" onClick="{{ goArticle }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:0;background:transparent;color:inherit;padding:12px 13px;text-align:start;font:inherit;font-size:14px;cursor:pointer">Nazca Railway (Los Sengas Division)<i class="icon-chevron-right" style="font-size:15px;color:var(--ink-muted)"></i></button>
+          <button type="button" onClick="{{ goList }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:0;border-block-start:1px solid var(--outline-soft);background:transparent;color:inherit;padding:12px 13px;text-align:start;font:inherit;font-size:14px;cursor:pointer">Browse station titles<i class="icon-chevron-right" style="font-size:15px;color:var(--ink-muted)"></i></button>
+          <button type="button" onClick="{{ goHome }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:0;border-block-start:1px solid var(--outline-soft);background:transparent;color:inherit;padding:12px 13px;text-align:start;font:inherit;font-size:14px;cursor:pointer">Atlas home<i class="icon-chevron-right" style="font-size:15px;color:var(--ink-muted)"></i></button>
+        </div>
+      </div>
+      </sc-if>
+
+    </div>
+
+    <div style="position:absolute;inset-inline:0;inset-block-end:0;display:grid;grid-template-columns:repeat(4,1fr);border-block-start:1px solid var(--outline);background:color-mix(in srgb, var(--surface) 94%, transparent);backdrop-filter:blur(12px);padding:8px 8px 16px">
+      <button type="button" onClick="{{ goHome }}" style="display:grid;justify-items:center;gap:3px;border:0;background:transparent;color:{{ tabHomeInk }};padding:6px 0;font:inherit;font-size:10.5px;cursor:pointer"><i class="icon-house" style="font-size:19px"></i>Home</button>
+      <button type="button" onClick="{{ goList }}" style="display:grid;justify-items:center;gap:3px;border:0;background:transparent;color:{{ tabListInk }};padding:6px 0;font:inherit;font-size:10.5px;cursor:pointer"><i class="icon-train-front" style="font-size:19px"></i>Stations</button>
+      <button type="button" onClick="{{ goSearch }}" style="display:grid;justify-items:center;gap:3px;border:0;background:transparent;color:{{ tabSearchInk }};padding:6px 0;font:inherit;font-size:10.5px;cursor:pointer"><i class="icon-search" style="font-size:19px"></i>Search</button>
+      <button type="button" onClick="{{ goArticle }}" style="display:grid;justify-items:center;gap:3px;border:0;background:transparent;color:{{ tabReadInk }};padding:6px 0;font:inherit;font-size:10.5px;cursor:pointer"><i class="icon-book-open" style="font-size:19px"></i>Reading</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light' | 'dark'&quot;,&quot;section&quot;:&quot;Presentation&quot;},&quot;viewport&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;desktop&quot;,&quot;phone&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;'desktop' | 'phone'&quot;,&quot;section&quot;:&quot;Presentation&quot;}}">
+const DARK = "--canvas:#0f1618;--surface:#151f22;--surface-soft:#1d2a2e;--ink:#e9f1f2;--ink-soft:#b3c4c8;--ink-muted:#8ba0a5;--outline:#2c3d42;--outline-soft:#243237;--hair:#3a4d53;--primary:#79d2dc;--primary-strong:#9ae2e9;--primary-soft:#1e434a;--on-primary:#082126;--panel:#0a2a30;--panel-ink:#dff1f3;--warning:#e0b165;--route-red:#ff8080;--route-blue:#82b9ee;--route-green:#76d2a8;--route-gold:#edc767;--desk:#080d0f";
+
+const MAIN_LINES = [
+  { no: '1', characteristic: 'Core Line · Circular', opened: '15 Mar 2015', extended: '29 Sep 2015', stations: 37, km: '57.895', min: '61.63', kind: 'core' },
+  { no: '2', characteristic: 'Core Line · Circular', opened: '25 May 2015', extended: '5 Jun 2020', stations: 62, km: '97.285', min: '92.03', kind: 'core' },
+  { no: '3', characteristic: 'Core Line', opened: '24 May 2015', extended: '17 Feb 2026', stations: 17, km: '45.55', min: '37.79', kind: 'core' },
+  { no: '4', characteristic: 'Core Line', opened: '21 Apr 2015', extended: '1 Feb 2022', stations: 29, km: '51.06', min: '48.58', kind: 'core' },
+  { no: '5', characteristic: 'Core Line', opened: '21 Apr 2015', extended: '1 Jul 2021', stations: 39, km: '53.22', min: '60.31', kind: 'core' },
+  { no: '6', characteristic: 'Core Line', opened: '1 May 2015', extended: '14 Aug 2021', stations: 31, km: '49.62', min: '51.64', kind: 'core' },
+  { no: '7', characteristic: 'Auxiliary Line', opened: '6 Apr 2015', extended: '22 Mar 2024', stations: 20, km: '30.93', min: '32.22', kind: 'aux' },
+  { no: '8', characteristic: 'Auxiliary Line', opened: '8 Nov 2015', extended: '14 Feb 2025', stations: 18, km: '33.57', min: '32.22', kind: 'aux' },
+  { no: '9', characteristic: 'District Line · 22nd', opened: '14 Oct 2015', extended: '18 Feb 2021', stations: 8, km: '9.695', min: '10.06', kind: 'district' },
+  { no: '10', characteristic: 'Auxiliary Line', opened: '23 Jul 2015', extended: '18 Jul 2020', stations: 13, km: '21.93', min: '22.20', kind: 'aux' },
+  { no: '11', characteristic: 'District Line · Centopia, Xofa', opened: '18 Aug 2019', extended: '7 Jan 2024', stations: 7, km: '11.60', min: '11.67', kind: 'district' },
+  { no: '12', characteristic: 'District Line · Centopia, Xofa', opened: '31 Jul 2019', extended: '7 Jan 2024', stations: 7, km: '10.21', min: '10.45', kind: 'district' },
+  { no: '13', characteristic: 'Auxiliary Line', opened: '11 Feb 2017', extended: '17 Jul 2022', stations: 10, km: '15.095', min: '15.56', kind: 'aux' },
+  { no: '14', characteristic: 'District Line · TriPaw, Jupiter', opened: '10 Sep 2016', extended: '1 Dec 2022', stations: 10, km: '16.25', min: '16.08', kind: 'district' },
+  { no: '15', characteristic: 'District Line · Ingress, Winsol', opened: '13 Apr 2017', extended: '30 Sep 2025', stations: 9, km: '15.63', min: '15.37', kind: 'district' },
+  { no: '16', characteristic: 'District Line · Glacier, Rover, Snowty', opened: '16 Dec 2016', extended: '20 Dec 2020', stations: 19, km: '30.745', min: '31.32', kind: 'district' },
+  { no: '27', characteristic: 'Strategic Line', opened: '14 Feb 2022', extended: '29 Mar 2026', stations: 39, km: '68.015', min: '69.89', kind: 'strategic' },
+  { no: '28', characteristic: 'Strategic Line', opened: '24 Jul 2022', extended: '2026', stations: 42, km: '—', min: '64.90', kind: 'strategic' },
+];
+
+const VELODUCTS = [
+  { no: 'A', opened: '3 May 2016', extended: '27 Jul 2020', termini: 'Centopia', stations: 6, km: '32.855', min: '23.04' },
+  { no: 'B', opened: '9 Sep 2016', extended: '27 Aug 2021', termini: 'not captured', stations: 10, km: '45.685', min: '33.75' },
+  { no: 'C', opened: '11 Sep 2016', extended: '30 Sep 2025', termini: 'not captured', stations: 8, km: '52.89', min: '35.30' },
+  { no: 'D', opened: '14 May 2016', extended: '14 Jan 2022', termini: 'not captured', stations: 10, km: '48.56', min: '33.46' },
+  { no: 'E', opened: '21 Feb 2019', extended: '3 Aug 2020', termini: 'not captured', stations: 3, km: '9.70', min: '7.09' },
+  { no: 'F', opened: '10 Mar 2017', extended: '3 Mar 2020', termini: 'not captured', stations: 6, km: '34.68', min: '23.10' },
+  { no: 'G', opened: '31 Jul 2020', extended: '11 Dec 2024', termini: 'not captured', stations: 6, km: '19.78', min: '15.11' },
+  { no: 'K', opened: '19 Feb 2018', extended: '21 Apr 2026', termini: 'not captured', stations: 4, km: '13.35', min: '9.65' },
+  { no: 'L', opened: '14 Aug 2024', extended: '27 Mar 2025', termini: 'not captured', stations: 8, km: '26.86', min: '20.73' },
+  { no: 'M', opened: '16 Mar 2023', extended: '15 Jan 2026', termini: 'not captured', stations: 4, km: '17.64', min: '12.08' },
+];
+
+const STATIONS = [
+  { rank: '01', name: 'Zootuary Station', note: '', shops: 22, facility: '—' },
+  { rank: '02', name: 'Gull Woods Station', note: 'interchange', shops: 19, facility: '—' },
+  { rank: '03', name: 'North Mountain Station', note: 'interchange', shops: 60, facility: '—' },
+  { rank: '04', name: 'Hillum Station', note: '', shops: 8, facility: '—' },
+  { rank: '05', name: 'Lake Lane Station', note: '', shops: 6, facility: '—' },
+  { rank: '06', name: 'Brackox Station', note: '', shops: 8, facility: '—' },
+  { rank: '07', name: 'Venus Street Station', note: '', shops: 5, facility: '—' },
+  { rank: '08', name: 'The Three Pass Station', note: 'count revised from 10', shops: 9, facility: '—' },
+  { rank: '09', name: 'Sand-O Bay Station', note: '', shops: 6, facility: '—' },
+  { rank: '10', name: 'Southend Station', note: 'interchange', shops: 6, facility: '—' },
+  { rank: '11', name: 'Savanna Central Station', note: '', shops: 4, facility: '—' },
+  { rank: '12', name: 'Vertow Valley Station', note: 'interchange', shops: 18, facility: '—' },
+];
+
+const CORPUS = [
+  { title: 'Nazca Railway (Los Sengas Division)', subtitle: 'Rail operator · 19 sections, 6 tables', kind: 'ARTICLE', color: 'var(--route-blue)', screen: 'article' },
+  { title: 'Nazca Railway', subtitle: 'Parent organisation across four divisions', kind: 'ARTICLE', color: 'var(--route-blue)', screen: 'article' },
+  { title: 'Kapa Channel Station', subtitle: 'Station · 61 shops, premium lounge', kind: 'STATION', color: 'var(--route-green)', screen: 'station' },
+  { title: 'Kapa Channel Island', subtitle: 'Place · holds the station retail area', kind: 'PLACE', color: 'var(--route-gold)', screen: 'station' },
+  { title: 'Kapa Channel Premium Lounge', subtitle: 'Facility · one of two in the division', kind: 'FACILITY', color: 'var(--route-green)', screen: 'station' },
+  { title: 'Metropolis Terminal', subtitle: 'Station · interchange of the six core lines', kind: 'STATION', color: 'var(--route-blue)', screen: 'station' },
+  { title: 'Local Rapid Transit', subtitle: 'Article · regional rail, three systems', kind: 'ARTICLE', color: 'var(--route-red)', screen: 'article' },
+  { title: 'Standard Railway', subtitle: 'Article · high-capacity heavy rail', kind: 'ARTICLE', color: 'var(--route-blue)', screen: 'article' },
+  { title: 'Veloducts', subtitle: 'Article · ten commuter routes', kind: 'ARTICLE', color: 'var(--route-green)', screen: 'article' },
+  { title: 'The Shuttle', subtitle: 'Article · personal rapid transit', kind: 'ARTICLE', color: 'var(--route-gold)', screen: 'article' },
+  { title: 'Sava Light Transit', subtitle: 'Article · former subsidiary, now independent', kind: 'ARTICLE', color: 'var(--hair)', screen: 'article' },
+  { title: 'Nazca Ferry Co. Ltd.', subtitle: 'Article · water transport operator', kind: 'ARTICLE', color: 'var(--route-blue)', screen: 'article' },
+  { title: 'Zootuary Station', subtitle: 'Station · first station with NR Shops', kind: 'STATION', color: 'var(--route-green)', screen: 'station' },
+  { title: 'North Mountain Station', subtitle: 'Station · 60 shops, interchange', kind: 'STATION', color: 'var(--route-green)', screen: 'station' },
+  { title: '2011', subtitle: 'Year · Project Nazca established', kind: 'YEAR', color: 'var(--hair)', screen: 'stub' },
+  { title: 'Nazca Railway Los Sengas Division', subtitle: 'Redirect · to the current article', kind: 'REDIRECT', color: 'var(--warning)', screen: 'redirect' },
+  { title: 'List of Nazca Railway Stations and Interchanges', subtitle: 'Redirect · index of station titles', kind: 'REDIRECT', color: 'var(--warning)', screen: 'list' },
+];
+
+const LINE_COLOR = { core: 'var(--route-blue)', aux: 'var(--route-gold)', district: 'var(--route-green)', strategic: 'var(--route-red)' };
+
+class Component extends DCLogic {
+  state = { theme: null, viewport: null, screen: 'article', query: '', allRows: false };
+
+  get theme() { return this.state.theme ?? this.props.theme ?? 'light'; }
+  get viewport() { return this.state.viewport ?? this.props.viewport ?? 'desktop'; }
+
+  go(screen) { this.setState({ screen }); }
+
+  renderVals() {
+    const dark = this.theme === 'dark';
+    const desktop = this.viewport === 'desktop';
+    const s = this.state.screen;
+    const rows = (this.state.allRows ? MAIN_LINES : MAIN_LINES.slice(0, 9))
+      .map((r) => ({ ...r, color: LINE_COLOR[r.kind] }));
+    const tab = (name) => ({
+      bar: s === name ? 'var(--primary)' : 'transparent',
+      bg: s === name ? 'var(--primary-soft)' : 'transparent',
+      ink: s === name ? 'var(--primary-strong)' : 'var(--ink-soft)',
+    });
+    const home = tab('home'), list = tab('list'), stub = tab('stub'), nf = tab('notfound');
+    return {
+      themeVars: dark ? DARK : '',
+      themeIcon: dark ? 'icon-sun' : 'icon-moon',
+      toggleTheme: () => this.setState({ theme: dark ? 'light' : 'dark' }),
+      setDesktop: () => this.setState({ viewport: 'desktop' }),
+      setPhone: () => this.setState({ viewport: 'phone' }),
+      isDesktop: desktop,
+      isPhone: !desktop,
+      deskChipBg: desktop ? 'var(--ink)' : 'transparent',
+      deskChipInk: desktop ? 'var(--canvas)' : 'var(--ink-muted)',
+      phoneChipBg: desktop ? 'transparent' : 'var(--ink)',
+      phoneChipInk: desktop ? 'var(--ink-muted)' : 'var(--canvas)',
+
+      isHome: s === 'home',
+      isArticle: s === 'article',
+      isStation: s === 'station',
+      isStub: s === 'stub',
+      isList: s === 'list',
+      isSearch: s === 'search',
+      isRedirect: s === 'redirect',
+      isNotFound: s === 'notfound',
+      isReading: s === 'article' || s === 'station' || s === 'stub',
+
+      goSearch: () => this.go('search'),
+      phoneTitle: { home: 'Los Sengas Atlas', article: 'Los Sengas Division', station: 'Kapa Channel Station', stub: '2011', list: 'Stations', search: 'Search', redirect: 'Redirect', notfound: 'Not found' }[s] || 'Los Sengas Atlas',
+      phoneNavIcon: s === 'home' ? 'icon-menu' : 'icon-arrow-left',
+      tabHomeInk: s === 'home' ? 'var(--primary)' : 'var(--ink-muted)',
+      tabListInk: s === 'list' ? 'var(--primary)' : 'var(--ink-muted)',
+      tabSearchInk: s === 'search' ? 'var(--primary)' : 'var(--ink-muted)',
+      tabReadInk: (s === 'article' || s === 'station' || s === 'stub') ? 'var(--primary)' : 'var(--ink-muted)',
+      goHome: () => this.go('home'),
+      goArticle: () => this.go('article'),
+      goStation: () => this.go('station'),
+      goStub: () => this.go('stub'),
+      goList: () => this.go('list'),
+      goRedirect: () => this.go('redirect'),
+      goNotFound: () => this.go('notfound'),
+
+      homeBar: home.bar, homeBg: home.bg, homeInk: home.ink,
+      listBar: list.bar, listBg: list.bg, listInk: list.ink,
+      stubBar: stub.bar, stubBg: stub.bg, stubInk: stub.ink,
+      nfBar: nf.bar, nfBg: nf.bg, nfInk: nf.ink,
+
+      query: this.state.query,
+      onQuery: (e) => this.setState({ query: e.target.value, screen: e.target.value ? 'search' : 'home' }),
+
+      mainLines: rows,
+      veloducts: VELODUCTS,
+      stations: STATIONS,
+      results: (this.state.query
+        ? CORPUS.filter((r) => (r.title + ' ' + r.subtitle).toLowerCase().includes(this.state.query.toLowerCase()))
+        : CORPUS.slice(0, 6)
+      ).map((r) => ({ ...r, open: () => this.go(r.screen) })),
+      resultHeadline: this.state.query
+        ? '“' + this.state.query + '” · ' + CORPUS.filter((r) => (r.title + ' ' + r.subtitle).toLowerCase().includes(this.state.query.toLowerCase())).length + ' results'
+        : 'Search the encyclopedia',
+      resultFooter: this.state.query
+        ? 'Matched against titles, aliases, categories and excerpts of 3,422 articles. Redirects are shown but never indexed.'
+        : 'Start typing to search 3,422 articles, 194 redirects and 1,222 station titles — entirely in the browser.',
+      rowsLabel: this.state.allRows ? 'SHOW FEWER LINES' : 'OPEN THE FULL LINE TABLE · 46 ROWS',
+      toggleRows: () => this.setState({ allRows: !this.state.allRows }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

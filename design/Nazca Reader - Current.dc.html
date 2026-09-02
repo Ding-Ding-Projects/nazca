@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/lucide-static@0.436.0/font/lucide.css">
+<style>
+  body { margin: 0; background: #f4f7f8; }
+  a { color: #0b5560; }
+  a:hover { color: #116c79; }
+  .rc-body a { color: #0000ee; }
+  .rc-body a:visited { color: #551a8b; }
+  .rc-body h2 { margin: 0; font-size: clamp(1.25rem, 2.5vw, 1.65rem); }
+  .rc-body p { max-width: 72ch; color: #526169; line-height: 1.72; }
+  .rc-body figure.media-deferred { margin: 1em 40px; }
+</style>
+</helmet>
+
+<div style="--canvas:#f4f7f8;--surface:#ffffff;--surface-soft:#eaf0f2;--surface-accent:#dff0f2;--ink:#172126;--ink-soft:#526169;--ink-muted:#526169;--outline:#d5e0e3;--outline-strong:#b4c5ca;--primary:#116c79;--primary-strong:#0b5560;--primary-soft:#d9eef1;--on-primary:#ffffff;--warning:#9b6418;--focus:#087f93;--route-red:#d04b4b;--route-blue:#2f72b7;--route-green:#2d8a64;--route-gold:#b88718;--shadow-card:0 1px 2px rgb(23 33 38 / 6%), 0 12px 32px rgb(23 33 38 / 7%);font-family:Inter, Aptos, 'Segoe UI', 'Noto Sans', Arial, sans-serif;background:var(--canvas);color:var(--ink);min-height:100dvh">
+
+  <div style="position:fixed;z-index:500;inset-inline-start:50%;translate:-50% 0;inset-block-end:14px;display:flex;gap:4px;align-items:center;border:1px solid var(--outline-strong);border-radius:999px;background:rgb(255 255 255 / 92%);backdrop-filter:blur(10px);padding:5px 8px;box-shadow:0 20px 50px rgb(23 33 38 / 18%);font-family:ui-monospace, Consolas, monospace;font-size:11px">
+    <span style="color:var(--ink-muted);padding-inline:6px;letter-spacing:.06em">RECREATION</span>
+    <button type="button" onClick="{{ showArticle }}" style="border:0;border-radius:999px;background:{{ articleChipBg }};color:{{ articleChipInk }};padding:6px 10px;font:inherit;cursor:pointer">/wiki/article</button>
+    <button type="button" onClick="{{ showHome }}" style="border:0;border-radius:999px;background:{{ homeChipBg }};color:{{ homeChipInk }};padding:6px 10px;font:inherit;cursor:pointer">/ atlas home</button>
+    <button type="button" onClick="{{ showRedirect }}" style="border:0;border-radius:999px;background:{{ redirectChipBg }};color:{{ redirectChipInk }};padding:6px 10px;font:inherit;cursor:pointer">/wiki/redirect</button>
+  </div>
+
+  <sc-if value="{{ isArticle }}" hint-placeholder-val="{{ true }}">
+  <main data-screen-label="Current · article reader" style="min-height:100dvh;background:var(--canvas)">
+    <header style="position:sticky;inset-block-start:0;z-index:40;min-height:4rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-block-end:1px solid var(--outline);background:color-mix(in srgb, var(--surface) 95%, transparent);padding:0.65rem clamp(0.9rem, 3vw, 2rem);backdrop-filter:blur(18px)">
+      <a href="#" style="min-height:2.75rem;display:inline-flex;align-items:center;gap:0.55rem;border-radius:999px;color:var(--primary-strong);padding:0 0.8rem;font-weight:750;text-decoration:none" style-hover="background:var(--primary-soft)"><i class="icon-arrow-left" style="font-size:18px;line-height:1"></i>Atlas home</a>
+      <div style="color:var(--ink-muted);font-size:0.75rem;font-weight:650">v0.1.0 · updated 2026-08-31, 14:20:07 UTC</div>
+    </header>
+
+    <div style="width:min(100%, 88rem);min-width:0;display:grid;grid-template-columns:minmax(15rem, 18rem) minmax(0, 1fr);gap:clamp(1rem, 3vw, 3rem);margin-inline:auto;padding:clamp(1rem, 3vw, 2.5rem)">
+      <aside aria-label="Article sections" style="position:sticky;inset-block-start:5.25rem;align-self:start;max-height:calc(100dvh - 6.5rem);overflow:auto;border:1px solid var(--outline);border-radius:1rem;background:var(--surface);padding:0.9rem;box-shadow:var(--shadow-card)">
+        <div>
+          <label for="nazca-article-search-input" style="display:block;margin:0 0 0.45rem;color:var(--ink-soft);font-size:0.74rem;font-weight:800">Search this article</label>
+          <div style="display:grid;grid-template-columns:minmax(0, 1fr) auto;align-items:center;border:1px solid var(--outline);border-radius:0.8rem;background:var(--surface-soft)">
+            <input id="nazca-article-search-input" type="search" placeholder="Find a section" style="min-width:0;height:2.75rem;border:0;background:transparent;color:var(--ink);padding:0 0.5rem 0 1rem;font:inherit;outline:none">
+            <button type="button" aria-label="Open regular expression builder for Search this article" style="min-width:2.75rem;min-height:2.75rem;display:grid;place-items:center;border:0;border-radius:999px;background:transparent;color:var(--ink-soft);cursor:pointer" style-hover="background:var(--surface-accent);color:var(--primary-strong)"><i class="icon-search" style="font-size:18px;line-height:1"></i></button>
+          </div>
+        </div>
+        <nav aria-label="Article sections" style="display:grid;gap:0.25rem;margin-block-start:0.9rem">
+          <button type="button" style="min-height:2.75rem;border:0;border-radius:0.7rem;background:var(--primary-soft);color:var(--primary-strong);padding:0.55rem 0.7rem;text-align:start;font:inherit;font-weight:800;cursor:pointer">Businesses</button>
+          <button type="button" style="min-height:2.75rem;border:0;border-radius:0.7rem;background:transparent;color:var(--ink-soft);padding:0.55rem 0.7rem;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)">Standard Railway System</button>
+          <button type="button" style="min-height:2.75rem;border:0;border-radius:0.7rem;background:transparent;color:var(--ink-soft);padding:0.55rem 0.7rem;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)">Veloduct System</button>
+          <button type="button" style="min-height:2.75rem;border:0;border-radius:0.7rem;background:transparent;color:var(--ink-soft);padding:0.55rem 0.7rem;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)">The Shuttle</button>
+          <button type="button" style="min-height:2.75rem;border:0;border-radius:0.7rem;background:transparent;color:var(--ink-soft);padding:0.55rem 0.7rem;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)">Local Rapid Transit System</button>
+          <button type="button" style="min-height:2.75rem;border:0;border-radius:0.7rem;background:transparent;color:var(--ink-soft);padding:0.55rem 0.7rem;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)">Sava Light Transit (SLT) System</button>
+          <button type="button" style="min-height:2.75rem;border:0;border-radius:0.7rem;background:transparent;color:var(--ink-soft);padding:0.55rem 0.7rem;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)">Rolling Stocks</button>
+          <button type="button" style="min-height:2.75rem;border:0;border-radius:0.7rem;background:transparent;color:var(--ink-soft);padding:0.55rem 0.7rem;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)">Train Bases</button>
+          <button type="button" style="min-height:2.75rem;border:0;border-radius:0.7rem;background:transparent;color:var(--ink-soft);padding:0.55rem 0.7rem;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)">List of Nazca Railway Structures</button>
+          <button type="button" style="min-height:2.75rem;border:0;border-radius:0.7rem;background:transparent;color:var(--ink-soft);padding:0.55rem 0.7rem;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)">Track Diagrams</button>
+          <button type="button" style="min-height:2.75rem;border:0;border-radius:0.7rem;background:transparent;color:var(--ink-soft);padding:0.55rem 0.7rem;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)">Incidents</button>
+          <button type="button" style="min-height:2.75rem;border:0;border-radius:0.7rem;background:transparent;color:var(--ink-soft);padding:0.55rem 0.7rem;text-align:start;font:inherit;cursor:pointer" style-hover="background:var(--surface-soft)">Future Development</button>
+        </nav>
+      </aside>
+
+      <article id="article-content" style="min-width:0;width:min(100%, 58rem)">
+        <p style="margin:0 0 0.6rem;color:var(--primary-strong);font-size:0.72rem;font-weight:850;letter-spacing:0.11em;text-transform:uppercase">Nazca Railway · current source snapshot</p>
+        <h1 style="max-width:18ch;margin:0;font-size:clamp(2.4rem, 6vw, 5.25rem);line-height:0.96;letter-spacing:-0.055em;font-weight:700">Nazca Railway (Los Sengas Division)</h1>
+        <p style="max-width:64ch;margin:1rem 0 0;color:var(--ink-soft);font-size:clamp(1rem, 2vw, 1.16rem);line-height:1.65">Current article body captured from the source at revision 132458. This reader is a static, sanitized presentation.</p>
+        <nav aria-label="Article views" style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-block:1.5rem;border-block-end:1px solid var(--outline);padding-block-end:0.75rem">
+          <a href="#read" style="min-height:2.75rem;display:inline-flex;align-items:center;gap:0.4rem;border-radius:999px;background:var(--primary-soft);color:var(--primary-strong);padding:0 0.85rem;text-decoration:none">Read</a>
+          <a href="#source" style="min-height:2.75rem;display:inline-flex;align-items:center;gap:0.4rem;border-radius:999px;color:var(--ink-soft);padding:0 0.85rem;text-decoration:none" style-hover="background:var(--primary-soft);color:var(--primary-strong)">Source and attribution</a>
+          <a href="#history" style="min-height:2.75rem;display:inline-flex;align-items:center;gap:0.4rem;border-radius:999px;color:var(--ink-soft);padding:0 0.85rem;text-decoration:none" style-hover="background:var(--primary-soft);color:var(--primary-strong)"><i class="icon-history" style="font-size:15px;line-height:1"></i> History boundary</a>
+        </nav>
+
+        <section id="read" style="scroll-margin-block-start:5rem;border:1px solid var(--outline);border-radius:1rem;background:var(--surface);padding:clamp(1rem, 3vw, 1.65rem);box-shadow:var(--shadow-card)">
+          <div class="rc-body">
+            <p><a href="#">Nazca Railway</a> Los Sengas Division (納斯卡鐵路 (洛聖加分部) ;Formerly named Metropolis Division), is established on <a href="#">March 15</a> <a href="#">2015</a>. Development of this division begun on <a href="#">March 10</a> the same year, and is currently the largest Rail Transport Operator in <a href="#">Los Sengas</a>. Rail networks under this flagship is scattered all across <a href="#">Los Sengas</a>, and this division also assisted in multiple infrastructural projects, including but not limited to the <a href="#">Metro-Vector-Paw Container Terminals</a> and <a href="#">Mayler Airport</a>.</p>
+            <h2 id="page-410-businesses">Businesses</h2>
+            <p>In <a href="#">Los Sengas</a>, <a href="#">Nazca Railway</a> is responsible for the construction and management of the following railway systems<a href="#">Railway 納斯卡鐵路－關於</a>&lt;/ref&gt;:</p>
+            <ul><li>&lt;s&gt;Light Rail: <a href="#">Sava Light Transit</a> (Formerly)&lt;/s&gt;</li><li>Regional Rail: <a href="#">Local Rapid Transit</a> (LRT)</li><li>Medium-Capacity Rail Systems: <a href="#">Sub-Standard Railway</a></li><li>High-Capacity/Heavy Rail Systems: <a href="#">Standard Railway</a></li><li>Commuter Rail: <a href="#">Veloduct</a></li><li>Intercity Rail: <a href="#">Linker Railway</a> (Proposed)</li><li>Airport Railway: <a href="#">Hub Railway</a> (Proposed)</li><li>Personal Rapid Transit: <a href="#">The Shuttle</a></li></ul>
+            <h2 id="page-410-standard-railway-system">Standard Railway System</h2>
+            <p>The Standard Railway System in Los Sengas Division includes 43 Lines of Standard Railway standards (1 Express Line and 5 Branch Lines, the other 37 lines are &quot;Main Lines&quot;) and 3 Lines of Sub-Standard Railway Standards (1 Main Line, the other 2 are branch lines) connecting across <a href="#">Los Sengas</a>.</p>
+            <p>{| class=&quot;wikitable&quot; style=&quot;text-align: center; font-size: 90%;&quot; width=&quot;100%&quot; |+ |- ! colspan=&quot;10&quot; |<figure class="media-deferred"><figcaption>Media deferred: Current_Railway.jpg (Current_Railway.jpg)</figcaption></figure> |- ! width=&quot;9.5%&quot; |Line ! width=&quot;3%&quot; |Line Number ! width=&quot;18%&quot; |Line &lt;br /&gt; Characteristic ! width=&quot;12%&quot; |Opening Date ! width=&quot;12%&quot; |Latest &lt;br /&gt; Extension Date ! colspan=&quot;2&quot; width=&quot;18%&quot; |Termini ! width=&quot;7.5%&quot; |Number of Stations ! width=&quot;10%&quot; |Route Length&lt;br /&gt; (km) ! width=&quot;10%&quot; |Journey&lt;br /&gt;Time&lt;br /&gt; (min) |- ! colspan=&quot;10&quot; |&#39;&#39;&#39;Main Lines&#39;&#39;&#39; |- | |1 |Core Line, Circular Line |<a href="#">March 15</a> <a href="#">2015</a> |<a href="#">September 29</a> <a href="#">2015</a> |colspan=2|N/A |37 |57.895 |61.63 |- | |2 |Core Line, Circular Line |<a href="#">May 25</a> <a href="#">2015</a> |<a href="#">June 5</a> <a href="#">2020</a> |colspan=2|N/A |62 |97.285 |92.03(Main Line)&lt;br/&gt;89.13(Branch Line) |- | |3 |Core Line |<a href="#">May 24</a> <a href="#">2015</a> |<a href="#">February 17</a> <a href="#">2026</a> | | |17 |45.55 |37.79 |- | |4 |Core Line |<a href="#">April 21</a> <a href="#">2015</a> |<a href="#">February 1</a> <a href="#">2022</a> |&lt;br /&gt; | |29 |51.06 |48.58(Hillfield)&lt;br /&gt;20.51(Boundary Island) |- | |5 |Core Line |<a href="#">April 21</a> <a href="#">2015</a> |<a href="#">July 1</a> <a href="#">2021</a> | | |39 |53.22 |60.31 |- | |6 |Core Line |<a href="#">May 1</a> <a href="#">2015</a> |<a href="#">August 14</a> <a href="#">2021</a> | | |31 |49.62 |51.64 |- | |7 |Auxiliary Line |<a href="#">April 6</a> <a href="#">2015</a> |<a href="#">March 22</a> <a href="#">2024</a> | | |20 |30.93 |32.22 |- | |8 |Auxiliary Line |<a href="#">November 8</a> <a href="#">2015</a> |<a href="#">February 14</a> <a href="#">2025</a> | | |18 |33.57 |32.22 |- | |9 |District Line (<a href="#">22nd</a>) |<a href="#">October 14</a> <a href="#">2015</a> |<a href="#">February 18</a> <a href="#">2021</a> |&lt;br /&gt; | |8 |9.695 |10.06(Edward Island)&lt;br /&gt;1.45(Sheung Che Nung)</p>
+            <ul><li>Note: While the Lines are listed in numerical order, the numbers themselves increased by the order of planning instead of construction. Numbers not shown on the above lists refer to lines that have already been planned but have not existed in physical form yet.</li></ul>
+            <ul><li>Line Characteristics are listed as follows: </li><li>Core Lines － The first six lines to pass through <a href="#">Metropolis Terminal</a>.</li><li>Circular Lines － Lines on whcih the termini are identical and formed in a loop.</li><li>Auxiliary Lines － Lines that serve to assist core lines.</li><li>District Line － Lines that serve specific districts. They are usually linked to large interchanges within or at nearby districts. District Lines would include the districts served by the line concerned in a bracket ().</li><li>Strategic Lines － Two lines that enhance connections between lines that serve the <a href="#">Metropolis Terminal</a> and its surroundings.</li></ul>
+            <h2 id="page-410-veloduct-system">Veloduct System</h2>
+            <p> <a href="#">NR</a> currenly runs 10 commuter railway lines named &quot;Veloducts&quot;. However, since Season 3 Episode 16, <a href="#">NR</a> no longer draws independent Veloduct Route Maps. Instead, Veloducts are included in the &quot;Standard Railway Route Map&quot; as seen above. {| class=&quot;wikitable&quot; style=&quot;text-align: center; font-size: 90%;&quot; width=&quot;100%&quot; |- ! width=&quot;10%&quot; |Line ! width=&quot;5%&quot; |Line Number ! width=&quot;17.5%&quot; |Opening Date ! width=&quot;17.5%&quot; |Latest &lt;br/&gt; Extension Date ! colspan=&quot;2&quot; width=&quot;18%&quot; |Termini ! width=&quot;7.5%&quot; |Number of Stations ! width=&quot;10%&quot; |Route Length&lt;br /&gt; (km) ! width=&quot;15%&quot; |Journey&lt;br /&gt;Time&lt;br /&gt; (min) |- | |A |<a href="#">May 3</a> <a href="#">2016</a> |<a href="#">July 27</a> <a href="#">2020</a> | width=&quot;9%&quot; |<a href="#">Centopia</a> | width=&quot;9%&quot; | |6 |32.855 |23.04 |- | |B |<a href="#">September 9</a> <a href="#">2016</a> |<a href="#">August 27</a> <a href="#">2021</a> | | |10 |45.685 |33.75</p>
+            <h2 id="page-410-rolling-stocks">Rolling Stocks</h2>
+            <ul><li><a href="#">N-Stock</a>: The Rolling Stock used for Standard Railways and occasionally Veloducts.</li><li><a href="#">V-Stock</a>: The Rolling Stock used exclusively by Veloducts.</li><li><a href="#">H-Stock</a>: The proposed Rolling Stock used for Hub Railways.</li><li><a href="#">L-Tram</a>: The Rolling Stock used by SLT, with a high undercarriage design.</li><li><a href="#">Nick-train</a>: The inspection train used by Nazca Railway. Also used for new routes for testing purposes.</li></ul>
+          </div>
+        </section>
+
+        <section id="source" style="display:flex;align-items:center;justify-content:space-between;gap:1.5rem;margin-block-start:1rem;border:1px solid var(--outline);border-radius:1rem;background:var(--surface-accent);padding:clamp(1rem, 3vw, 1.65rem)">
+          <div>
+            <h2 style="margin:0;font-size:clamp(1.25rem, 2.5vw, 1.65rem)">Source and attribution</h2>
+            <p style="max-width:72ch;color:var(--ink-soft);line-height:1.72">Source: <a href="#">Fandom revision 132458</a>. Text is presented under the source CC BY-SA terms.</p>
+            <p style="max-width:72ch;color:var(--ink-soft);line-height:1.72">Revision timestamp: 2026-08-30T11:04:52Z. Contributor: hidden or unavailable.</p>
+            <p style="max-width:72ch;color:var(--ink-soft);line-height:1.72">Capture window is recorded in the release manifest. Historical revisions, maps, and media bytes remain outside this current snapshot.</p>
+          </div>
+          <a href="#" style="min-height:2.75rem;display:inline-flex;align-items:center;flex:0 0 auto;gap:0.45rem;border-radius:999px;background:var(--primary);color:var(--on-primary);padding:0 1rem;font-weight:750;text-decoration:none">Open exact source revision <i class="icon-external-link" style="font-size:15px;line-height:1"></i></a>
+        </section>
+
+        <section id="history" style="display:flex;align-items:center;justify-content:space-between;gap:1.5rem;margin-block-start:1rem;border:1px solid var(--outline);border-radius:1rem;background:var(--surface-accent);padding:clamp(1rem, 3vw, 1.65rem)">
+          <div>
+            <h2 style="margin:0;font-size:clamp(1.25rem, 2.5vw, 1.65rem)">History boundary</h2>
+            <p style="max-width:72ch;color:var(--ink-soft);line-height:1.72">This release includes the current revision only. Complete revision history is explicitly deferred.</p>
+            <p style="max-width:72ch;color:var(--ink-soft);line-height:1.72">Media deferred: Current_Railway.jpg, Current_Shuttle.png, Shore Tip LRT.png, Sexterade LRT.png, Peckern North LRT.png.</p>
+          </div>
+        </section>
+      </article>
+    </div>
+  </main>
+  </sc-if>
+
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Current · atlas home" style="min-height:100dvh;display:grid;grid-template-rows:4.5rem minmax(0, 1fr)">
+    <header aria-label="Nazca Railway header" style="position:sticky;inset-block-start:0;z-index:40;min-width:0;display:grid;grid-template-columns:minmax(11rem, auto) minmax(14rem, 44rem) auto;align-items:center;gap:1rem;min-height:4.5rem;padding:0.75rem 1.25rem;border-block-end:1px solid var(--outline);background:color-mix(in srgb, var(--surface) 93%, transparent);backdrop-filter:blur(18px)">
+      <button type="button" aria-label="Open Nazca Railway home" style="min-width:0;display:flex;align-items:center;gap:0.75rem;border:0;background:transparent;color:inherit;text-align:start;cursor:pointer;font:inherit">
+        <span aria-hidden="true" style="width:2.65rem;height:2.65rem;display:grid;place-items:center;flex:0 0 auto;border-radius:0.9rem;background:var(--primary);color:var(--on-primary);font-weight:850;letter-spacing:-0.05em;box-shadow:var(--shadow-card)">NR</span>
+        <span style="min-width:0">
+          <strong style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.96rem">Nazca Railway</strong>
+          <span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-muted);font-size:0.72rem">The Encyclopedia of Los Sengas</span>
+        </span>
+      </button>
+      <div style="min-width:0;position:relative">
+        <div style="display:grid;grid-template-columns:minmax(0, 1fr) auto;align-items:center;border:1px solid var(--outline);border-radius:999px;background:var(--surface-soft)">
+          <input type="search" placeholder="Search stations, lines, places, and articles" aria-label="Search the encyclopedia" style="min-width:0;height:2.75rem;border:0;background:transparent;color:var(--ink);padding:0 0.5rem 0 1rem;font:inherit;outline:none">
+          <button type="button" aria-label="Open regular expression builder" style="min-width:2.75rem;min-height:2.75rem;display:grid;place-items:center;border:0;border-radius:999px;background:transparent;color:var(--ink-soft);cursor:pointer" style-hover="background:var(--surface-accent);color:var(--primary-strong)"><i class="icon-search" style="font-size:18px;line-height:1"></i></button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;align-items:center;gap:0.45rem">
+        <div style="min-height:2.5rem;display:flex;flex-direction:column;justify-content:center;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:0.4rem 0.85rem;line-height:1.05">
+          <strong style="font-size:0.72rem">v0.1.0</strong>
+          <span style="color:var(--ink-muted);font-size:0.6rem">2026-08-31, 14:20:07 UTC</span>
+        </div>
+        <button type="button" aria-label="Open command palette" style="min-width:2.75rem;min-height:2.75rem;display:grid;place-items:center;border:0;border-radius:999px;background:transparent;color:var(--ink-soft);cursor:pointer" style-hover="background:var(--surface-accent);color:var(--primary-strong)"><i class="icon-command" style="font-size:19px;line-height:1"></i></button>
+        <button type="button" aria-label="Open notifications" style="position:relative;min-width:2.75rem;min-height:2.75rem;display:grid;place-items:center;border:0;border-radius:999px;background:transparent;color:var(--ink-soft);cursor:pointer" style-hover="background:var(--surface-accent);color:var(--primary-strong)"><i class="icon-bell" style="font-size:19px;line-height:1"></i><span aria-hidden="true" style="position:absolute;inset-block-start:0.35rem;inset-inline-end:0.35rem;width:0.55rem;height:0.55rem;border:2px solid var(--surface);border-radius:50%;background:var(--route-red)"></span></button>
+        <button type="button" aria-label="Use dark theme" style="min-width:2.75rem;min-height:2.75rem;display:grid;place-items:center;border:0;border-radius:999px;background:transparent;color:var(--ink-soft);cursor:pointer" style-hover="background:var(--surface-accent);color:var(--primary-strong)"><i class="icon-moon" style="font-size:19px;line-height:1"></i></button>
+      </div>
+    </header>
+
+    <div style="min-width:0;min-height:0;display:grid;grid-template-columns:15.5rem minmax(0, 1fr) 18rem">
+      <nav aria-label="Atlas tabs" style="min-height:0;overflow:auto;border-inline-end:1px solid var(--outline);background:var(--surface);padding:1rem 0.85rem">
+        <div>
+          <p style="margin:1rem 0.65rem 0.45rem;color:var(--ink-muted);font-size:0.67rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase">Reader</p>
+          <div style="display:grid;gap:0.2rem">
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:var(--primary-soft);color:var(--primary-strong);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit;font-weight:750"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-house" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Home</span></button>
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:transparent;color:var(--ink-soft);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit" style-hover="background:var(--surface-soft)"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-compass" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Explore</span></button>
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:transparent;color:var(--ink-soft);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit" style-hover="background:var(--surface-soft)"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-train-front" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Stations</span><span style="color:var(--ink-muted);font-size:0.7rem">1.2k</span></button>
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:transparent;color:var(--ink-soft);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit" style-hover="background:var(--surface-soft)"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-layers-3" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Lines</span><span style="color:var(--ink-muted);font-size:0.7rem">156</span></button>
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:transparent;color:var(--ink-soft);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit" style-hover="background:var(--surface-soft)"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-landmark" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Infrastructure</span></button>
+          </div>
+        </div>
+        <div>
+          <p style="margin:1rem 0.65rem 0.45rem;color:var(--ink-muted);font-size:0.67rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase">Atlas</p>
+          <div style="display:grid;gap:0.2rem">
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:transparent;color:var(--ink-soft);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit" style-hover="background:var(--surface-soft)"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-building-2" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Places</span></button>
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:transparent;color:var(--ink-soft);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit" style-hover="background:var(--surface-soft)"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-map" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Maps</span><span style="color:var(--ink-muted);font-size:0.7rem">3</span></button>
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:transparent;color:var(--ink-soft);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit" style-hover="background:var(--surface-soft)"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-clock-3" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Timeline</span></button>
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:transparent;color:var(--ink-soft);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit" style-hover="background:var(--surface-soft)"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-tram-front" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Streetcars</span><span style="color:var(--ink-muted);font-size:0.7rem">581</span></button>
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:transparent;color:var(--ink-soft);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit" style-hover="background:var(--surface-soft)"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-image" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Media</span><span style="color:var(--ink-muted);font-size:0.7rem">16.5k</span></button>
+          </div>
+        </div>
+        <div>
+          <p style="margin:1rem 0.65rem 0.45rem;color:var(--ink-muted);font-size:0.67rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase">Research</p>
+          <div style="display:grid;gap:0.2rem">
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:transparent;color:var(--ink-soft);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit" style-hover="background:var(--surface-soft)"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-history" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">History</span></button>
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:transparent;color:var(--ink-soft);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit" style-hover="background:var(--surface-soft)"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-scroll-text" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Changelog</span><span style="color:var(--ink-muted);font-size:0.7rem">6</span></button>
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:transparent;color:var(--ink-soft);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit" style-hover="background:var(--surface-soft)"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-circle-gauge" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Status</span></button>
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:transparent;color:var(--ink-soft);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit" style-hover="background:var(--surface-soft)"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-wrench" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Tools</span></button>
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:transparent;color:var(--ink-soft);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit" style-hover="background:var(--surface-soft)"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-settings" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Settings</span></button>
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:transparent;color:var(--ink-soft);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit" style-hover="background:var(--surface-soft)"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-book-open" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Help</span></button>
+            <button type="button" style="min-width:0;min-height:2.75rem;display:grid;grid-template-columns:2rem minmax(0, 1fr) auto;align-items:center;gap:0.45rem;border:0;border-radius:0.8rem;background:transparent;color:var(--ink-soft);padding:0.35rem 0.55rem;text-align:start;cursor:pointer;font:inherit" style-hover="background:var(--surface-soft)"><span style="width:2rem;height:2rem;display:grid;place-items:center;border-radius:0.65rem;background:color-mix(in srgb, var(--surface) 78%, transparent)"><i class="icon-info" style="font-size:18px;line-height:1"></i></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">About</span></button>
+          </div>
+        </div>
+      </nav>
+
+      <main style="min-width:0;min-height:0;overflow:auto;padding:clamp(1rem, 2.6vw, 2.25rem)">
+        <div style="width:min(100%, 72rem);margin-inline:auto">
+          <p style="margin:0 0 0.6rem;color:var(--primary-strong);font-size:0.72rem;font-weight:850;letter-spacing:0.11em;text-transform:uppercase">Nazca Railway atlas</p>
+          <h1 style="max-width:18ch;margin:0;font-size:clamp(2.1rem, 5vw, 4.2rem);line-height:0.98;letter-spacing:-0.055em;font-weight:700">Railways without the clutter.</h1>
+          <p style="max-width:68ch;margin:1rem 0 0;color:var(--ink-soft);font-size:clamp(1rem, 1.8vw, 1.18rem);line-height:1.65">A modern, searchable home for the complete Los Sengas transport encyclopedia, with clear routes, readable tables, source history, and a focused map-first experience.</p>
+
+          <section aria-label="Explore the encyclopedia" style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:0.8rem;margin-block:1.75rem">
+            <button type="button" style="min-height:7.6rem;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--outline);border-radius:1rem;background:var(--surface);box-shadow:var(--shadow-card);color:inherit;padding:1rem;text-align:start;cursor:pointer;font:inherit" style-hover="border-color:var(--outline-strong);translate:0 -2px"><span aria-hidden="true" style="width:0.85rem;height:0.85rem;flex:0 0 auto;border:0.18rem solid var(--surface);border-radius:50%;box-shadow:0 0 0 2px currentColor;color:var(--route-blue)"></span><span><strong style="display:block;font-size:1rem">Stations</strong><span style="display:block;color:var(--ink-muted);font-size:0.78rem">1,222 indexed titles</span></span></button>
+            <button type="button" style="min-height:7.6rem;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--outline);border-radius:1rem;background:var(--surface);box-shadow:var(--shadow-card);color:inherit;padding:1rem;text-align:start;cursor:pointer;font:inherit" style-hover="border-color:var(--outline-strong);translate:0 -2px"><span aria-hidden="true" style="width:0.85rem;height:0.85rem;flex:0 0 auto;border:0.18rem solid var(--surface);border-radius:50%;box-shadow:0 0 0 2px currentColor;color:var(--route-red)"></span><span><strong style="display:block;font-size:1rem">Lines</strong><span style="display:block;color:var(--ink-muted);font-size:0.78rem">156 line records</span></span></button>
+            <button type="button" style="min-height:7.6rem;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--outline);border-radius:1rem;background:var(--surface);box-shadow:var(--shadow-card);color:inherit;padding:1rem;text-align:start;cursor:pointer;font:inherit" style-hover="border-color:var(--outline-strong);translate:0 -2px"><span aria-hidden="true" style="width:0.85rem;height:0.85rem;flex:0 0 auto;border:0.18rem solid var(--surface);border-radius:50%;box-shadow:0 0 0 2px currentColor;color:var(--route-green)"></span><span><strong style="display:block;font-size:1rem">Places</strong><span style="display:block;color:var(--ink-muted);font-size:0.78rem">Districts and islands</span></span></button>
+            <button type="button" style="min-height:7.6rem;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--outline);border-radius:1rem;background:var(--surface);box-shadow:var(--shadow-card);color:inherit;padding:1rem;text-align:start;cursor:pointer;font:inherit" style-hover="border-color:var(--outline-strong);translate:0 -2px"><span aria-hidden="true" style="width:0.85rem;height:0.85rem;flex:0 0 auto;border:0.18rem solid var(--surface);border-radius:50%;box-shadow:0 0 0 2px currentColor;color:var(--route-gold)"></span><span><strong style="display:block;font-size:1rem">Infrastructure</strong><span style="display:block;color:var(--ink-muted);font-size:0.78rem">Roads, bridges, depots</span></span></button>
+          </section>
+
+          <div style="display:grid;grid-template-columns:minmax(0, 1.55fr) minmax(18rem, 0.85fr);gap:1rem">
+            <section aria-labelledby="map-heading" style="position:relative;min-height:24rem;overflow:hidden;border:1px solid var(--outline);border-radius:1rem;box-shadow:var(--shadow-card);background:linear-gradient(90deg, transparent 49%, color-mix(in srgb, var(--outline) 40%, transparent) 50%, transparent 51%), linear-gradient(transparent 49%, color-mix(in srgb, var(--outline) 40%, transparent) 50%, transparent 51%), var(--surface-soft);background-size:3.5rem 3.5rem" style-before="content:'';position:absolute;inset-inline-start:12%;inset-block-start:21%;width:75%;height:55%;border:0.55rem solid var(--route-blue);border-inline-color:var(--route-green);border-radius:46% 28% 42% 31%;rotate:-7deg;opacity:0.85" style-after="content:'';position:absolute;inset-inline-start:22%;inset-block-start:34%;width:58%;height:34%;border:0.55rem solid var(--route-red);border-block-color:var(--route-gold);border-radius:46% 28% 42% 31%;rotate:11deg;opacity:0.85">
+              <div style="position:relative;z-index:2;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;padding:1rem">
+                <div>
+                  <h2 id="map-heading" style="margin:0;font-size:1.05rem">Metropolis network overview</h2>
+                  <p style="margin:0.35rem 0 0;color:var(--ink-muted);font-size:0.78rem;line-height:1.5">The final interactive view preserves all three source map records and a complete text equivalent.</p>
+                </div>
+                <i class="icon-map" style="font-size:20px;line-height:1"></i>
+              </div>
+              <span style="position:absolute;z-index:3;inset-inline-start:14%;inset-block-start:55%;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:0.35rem 0.55rem;box-shadow:var(--shadow-card);font-size:0.7rem;font-weight:750">Metropolis</span>
+              <span style="position:absolute;z-index:3;inset-inline-start:58%;inset-block-start:29%;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:0.35rem 0.55rem;box-shadow:var(--shadow-card);font-size:0.7rem;font-weight:750">Arcgo</span>
+              <span style="position:absolute;z-index:3;inset-inline-start:66%;inset-block-start:69%;border:1px solid var(--outline);border-radius:999px;background:var(--surface);padding:0.35rem 0.55rem;box-shadow:var(--shadow-card);font-size:0.7rem;font-weight:750">Oasis Bay</span>
+            </section>
+
+            <div style="display:grid;gap:1rem;align-content:start">
+              <section aria-labelledby="corpus-heading" style="border:1px solid var(--outline);border-radius:1rem;background:var(--surface);box-shadow:var(--shadow-card);padding:1.15rem">
+                <h2 id="corpus-heading" style="margin:0;font-size:1.05rem">Pinned corpus baseline</h2>
+                <p style="margin:0.35rem 0 0;color:var(--ink-muted);font-size:0.78rem;line-height:1.5">The importer recaptures and reconciles one stable cutoff before this repository becomes canonical.</p>
+                <div style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:0.5rem;margin-top:0.8rem">
+                  <div style="border-radius:0.75rem;background:var(--surface-soft);padding:0.7rem"><strong style="display:block;font-size:1.05rem">3,422</strong><span style="display:block;margin-top:0.2rem;color:var(--ink-muted);font-size:0.65rem">articles</span></div>
+                  <div style="border-radius:0.75rem;background:var(--surface-soft);padding:0.7rem"><strong style="display:block;font-size:1.05rem">194</strong><span style="display:block;margin-top:0.2rem;color:var(--ink-muted);font-size:0.65rem">redirects</span></div>
+                  <div style="border-radius:0.75rem;background:var(--surface-soft);padding:0.7rem"><strong style="display:block;font-size:1.05rem">16,555</strong><span style="display:block;margin-top:0.2rem;color:var(--ink-muted);font-size:0.65rem">media</span></div>
+                </div>
+              </section>
+              <section aria-labelledby="recent-heading" style="border:1px solid var(--outline);border-radius:1rem;background:var(--surface);box-shadow:var(--shadow-card);padding:1.15rem">
+                <h2 id="recent-heading" style="margin:0;font-size:1.05rem">Start with a useful record</h2>
+                <ul style="list-style:none;margin:0.7rem 0 0;padding:0">
+                  <li><button type="button" style="width:100%;min-height:3.6rem;display:flex;align-items:center;gap:0.75rem;border:0;background:transparent;color:inherit;padding:0.55rem 0;text-align:start;cursor:pointer;font:inherit" style-hover="color:var(--primary-strong)"><span aria-hidden="true" style="width:0.85rem;height:0.85rem;flex:0 0 auto;border:0.18rem solid var(--surface);border-radius:50%;box-shadow:0 0 0 2px currentColor;color:var(--route-blue)"></span><span><strong style="display:block">Nazca Railway (Los Sengas Division)</strong><span style="display:block;margin-top:0.15rem;color:var(--ink-muted);font-size:0.72rem">Article · Railway systems, rolling stock, structures, incidents, and future development</span></span></button></li>
+                  <li style="border-top:1px solid var(--outline)"><button type="button" style="width:100%;min-height:3.6rem;display:flex;align-items:center;gap:0.75rem;border:0;background:transparent;color:inherit;padding:0.55rem 0;text-align:start;cursor:pointer;font:inherit" style-hover="color:var(--primary-strong)"><span aria-hidden="true" style="width:0.85rem;height:0.85rem;flex:0 0 auto;border:0.18rem solid var(--surface);border-radius:50%;box-shadow:0 0 0 2px currentColor;color:var(--route-green)"></span><span><strong style="display:block">Dragonire Bay Station</strong><span style="display:block;margin-top:0.15rem;color:var(--ink-muted);font-size:0.72rem">Station · Recently updated station record</span></span></button></li>
+                  <li style="border-top:1px solid var(--outline)"><button type="button" style="width:100%;min-height:3.6rem;display:flex;align-items:center;gap:0.75rem;border:0;background:transparent;color:inherit;padding:0.55rem 0;text-align:start;cursor:pointer;font:inherit" style-hover="color:var(--primary-strong)"><span aria-hidden="true" style="width:0.85rem;height:0.85rem;flex:0 0 auto;border:0.18rem solid var(--surface);border-radius:50%;box-shadow:0 0 0 2px currentColor;color:var(--route-red)"></span><span><strong style="display:block">Odyssey Circular</strong><span style="display:block;margin-top:0.15rem;color:var(--ink-muted);font-size:0.72rem">Line · District circular service, line 44</span></span></button></li>
+                </ul>
+              </section>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <aside aria-label="Provenance and status" style="min-height:0;overflow:auto;border-inline-start:1px solid var(--outline);background:var(--surface);padding:1rem">
+        <section style="border:1px solid var(--outline);border-radius:1rem;background:var(--surface);box-shadow:var(--shadow-card);padding:1.15rem">
+          <h2 style="margin:0;font-size:1.05rem">Source provenance</h2>
+          <p style="margin:0.35rem 0 0;color:var(--ink-muted);font-size:0.78rem;line-height:1.5">Fandom remains the credited legacy source. This repository becomes canonical at the stable import cutoff.</p>
+          <table style="width:100%;margin-top:0.75rem;border-collapse:collapse;font-size:0.72rem">
+            <tbody>
+              <tr><th scope="row" style="width:42%;border-top:1px solid var(--outline);padding:0.55rem 0;text-align:start;vertical-align:top;color:var(--ink-muted);font-weight:600">Source</th><td style="border-top:1px solid var(--outline);padding:0.55rem 0;text-align:start;vertical-align:top">enlossengas.fandom.com</td></tr>
+              <tr><th scope="row" style="width:42%;border-top:1px solid var(--outline);padding:0.55rem 0;text-align:start;vertical-align:top;color:var(--ink-muted);font-weight:600">Text license</th><td style="border-top:1px solid var(--outline);padding:0.55rem 0;text-align:start;vertical-align:top">CC BY-SA</td></tr>
+              <tr><th scope="row" style="width:42%;border-top:1px solid var(--outline);padding:0.55rem 0;text-align:start;vertical-align:top;color:var(--ink-muted);font-weight:600">Planning capture</th><td style="border-top:1px solid var(--outline);padding:0.55rem 0;text-align:start;vertical-align:top">31 Aug 2026</td></tr>
+              <tr><th scope="row" style="width:42%;border-top:1px solid var(--outline);padding:0.55rem 0;text-align:start;vertical-align:top;color:var(--ink-muted);font-weight:600">Final cutoff</th><td style="border-top:1px solid var(--outline);padding:0.55rem 0;text-align:start;vertical-align:top">Pending stable import</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <section style="margin-top:0.8rem;border:1px solid var(--outline);border-radius:1rem;background:var(--surface);box-shadow:var(--shadow-card);padding:1.15rem">
+          <h2 style="margin:0;font-size:1.05rem">Implementation status</h2>
+          <p style="margin:0.35rem 0 0;color:var(--ink-muted);font-size:0.78rem;line-height:1.5">The Sites foundation is active. Corpus, media, universal features, verification, and public delivery remain in progress.</p>
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.75rem;color:var(--ink-soft);font-size:0.75rem"><span aria-hidden="true" style="width:0.65rem;height:0.65rem;border-radius:50%;background:var(--warning)"></span> Running · first atlas slice</div>
+        </section>
+        <section style="margin-top:0.8rem;border:1px solid var(--outline);border-radius:1rem;background:var(--surface);box-shadow:var(--shadow-card);padding:1.15rem">
+          <h2 style="margin:0;font-size:1.05rem">Modern by design</h2>
+          <p style="margin:0.35rem 0 0;color:var(--ink-muted);font-size:0.78rem;line-height:1.5">One navigation model, calm product chrome, route colours as data, no advertising, readable tables, and search wherever information lives.</p>
+        </section>
+      </aside>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isRedirect }}" hint-placeholder-val="{{ false }}">
+  <main data-screen-label="Current · redirect page" style="min-height:100dvh;background:var(--canvas);padding:clamp(1rem, 3vw, 2.5rem)">
+    <p style="margin:0 0 0.6rem;color:var(--primary-strong);font-size:0.72rem;font-weight:850;letter-spacing:0.11em;text-transform:uppercase">Nazca Railway current snapshot</p>
+    <h1 style="margin:0;font-size:2em;font-weight:700">Metropolis Division</h1>
+    <p>This title is a source redirect and is not indexed as an article.</p>
+    <p>Target: Nazca Railway (Los Sengas Division)</p>
+    <a href="#" style="min-height:2.75rem;display:inline-flex;align-items:center;border-radius:999px;background:var(--primary);color:var(--on-primary);padding:0 1rem;font-weight:750;text-decoration:none">Continue to the current article</a>
+    <p><a href="#">Open source redirect record</a></p>
+  </main>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { screen: 'article' };
+  chip(name) {
+    const on = this.state.screen === name;
+    return { bg: on ? '#116c79' : 'transparent', ink: on ? '#ffffff' : '#526169' };
+  }
+  renderVals() {
+    const a = this.chip('article'), h = this.chip('home'), r = this.chip('redirect');
+    return {
+      isArticle: this.state.screen === 'article',
+      isHome: this.state.screen === 'home',
+      isRedirect: this.state.screen === 'redirect',
+      showArticle: () => this.setState({ screen: 'article' }),
+      showHome: () => this.setState({ screen: 'home' }),
+      showRedirect: () => this.setState({ screen: 'redirect' }),
+      articleChipBg: a.bg, articleChipInk: a.ink,
+      homeChipBg: h.bg, homeChipInk: h.ink,
+      redirectChipBg: r.bg, redirectChipInk: r.ink,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
