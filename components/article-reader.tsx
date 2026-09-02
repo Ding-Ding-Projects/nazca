@@ -8,6 +8,10 @@ import type { CurrentArticleRecordV1 } from '@/lib/contracts';
 import { formatBuildTime, type BuildProvenance } from '@/lib/provenance';
 import { publicPath } from '@/lib/public-path';
 
+function articleHtmlForSurface(html: string) {
+  return html.replace(/href="(\/wiki\/[^\"]*)"/g, (_, pathname: string) => `href="${publicPath(pathname)}"`);
+}
+
 export function ArticleReader({ record, provenance }: { record: CurrentArticleRecordV1; provenance: BuildProvenance }) {
   const [activeSection, setActiveSection] = useState(record.headings[0]?.id ?? 'article-content');
   const [updatedAt, setUpdatedAt] = useState(() => formatBuildTime(provenance.builtAt));
@@ -32,7 +36,7 @@ export function ArticleReader({ record, provenance }: { record: CurrentArticleRe
           <h1>{record.displayTitle}</h1>
           <p className="article-subtitle">Current article body captured from the source at revision {record.currentRevisionId}. This reader is a static, sanitized presentation.</p>
           <nav className="article-meta-tabs" aria-label="Article views"><a href="#read" aria-current="page">Read</a><a href="#source">Source and attribution</a><a href="#history"><History size={15} aria-hidden="true" /> History boundary</a></nav>
-          <section id="read" className="article-section"><div className="article-rendered-content" dangerouslySetInnerHTML={{ __html: record.safeHtml }} /></section>
+          <section id="read" className="article-section"><div className="article-rendered-content" dangerouslySetInnerHTML={{ __html: articleHtmlForSurface(record.safeHtml) }} /></section>
           <section id="source" className="article-source-card">
             <div><h2>Source and attribution</h2><p>Source: <a href={record.sourceUrl} target="_blank" rel="noopener noreferrer external" referrerPolicy="no-referrer">Fandom revision {record.currentRevisionId}</a>. Text is presented under the source CC BY-SA terms.</p><p>Revision timestamp: {record.timestamp}. Contributor: {record.contributorState === 'visible' ? record.contributor : 'hidden or unavailable'}.</p><p>Capture window is recorded in the release manifest. Historical revisions, maps, and media bytes remain outside this current snapshot.</p></div><a href={record.sourceUrl} target="_blank" rel="noopener noreferrer external" referrerPolicy="no-referrer">Open exact source revision <ExternalLink size={15} aria-hidden="true" /></a>
           </section>

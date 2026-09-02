@@ -18,6 +18,7 @@
     "import:inventory:owner-override": "node scripts/import-fandom.mjs --skip-robots --continue-on-terms-challenge",
     "import:current-pages": "node scripts/import-current-pages.mjs",
     "import:current-redirects": "node scripts/import-current-redirects.mjs",
+    "import:current-rendered": "node scripts/import-current-rendered.mjs",
     "compile:current-corpus": "node scripts/compile-current-corpus.mjs",
     "check:current-corpus": "node scripts/check-current-corpus.mjs",
     "check:no-lfs": "node scripts/check-no-git-lfs.mjs",

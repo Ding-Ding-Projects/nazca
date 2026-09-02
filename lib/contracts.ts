@@ -431,6 +431,7 @@ export const currentCorpusManifestSchema = z
     routes: z.object({ registry: z.string().min(1).max(256), sha256 }).strict(),
     redirects: z.object({ registry: z.string().min(1).max(256), sha256, hashes: z.record(z.string().max(64), sha256) }).strict(),
     search: z.object({ index: z.string().min(1).max(256), sha256 }).strict(),
+    rendered: z.object({ manifest: z.string().min(1).max(256), pages: z.number().int().nonnegative(), sha256 }).strict(),
     shards: z.array(z.object({ name: z.string().regex(/^articles-\d{4}\.json$/), records: z.number().int().positive().max(64), sha256, bytes: z.number().int().positive() }).strict()).max(1000),
     articleHashes: z.record(z.string().max(64), sha256),
     archive: z.object({ name: z.string().regex(/^nazca-current-corpus-\d+\.\d+\.\d+\.zip$/), bytes: z.number().int().positive(), sha256, manifestSha256: sha256 }).strict(),

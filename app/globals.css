@@ -1031,6 +1031,36 @@ input:focus-visible,
 .table-scroll tbody th {
   color: var(--primary-strong);
 }
+.article-rendered-content {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  line-height: 1.6;
+}
+.article-rendered-content table {
+  width: max-content;
+  min-width: 46rem;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+.article-rendered-content caption {
+  padding: 0.85rem;
+  color: var(--ink-soft);
+  font-weight: 750;
+  text-align: start;
+}
+.article-rendered-content th,
+.article-rendered-content td {
+  border: 1px solid var(--outline);
+  padding: 0.65rem 0.75rem;
+  text-align: start;
+  vertical-align: top;
+}
+.article-rendered-content th {
+  background: var(--surface-soft);
+  color: var(--ink-soft);
+  font-weight: 750;
+}
 .article-source-card {
   display: flex;
   align-items: center;

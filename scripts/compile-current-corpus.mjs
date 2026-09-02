@@ -6,6 +6,7 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import sanitizeHtml from 'sanitize-html';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CORPUS_ROOT = path.join(ROOT, 'data', 'corpus');
@@ -31,6 +32,7 @@ const normalizeTitle = (title) => String(title ?? '').trim().replaceAll(' ', '_'
 const routeForTitle = (title) => `/wiki/${encodeURIComponent(normalizeTitle(title)).replaceAll('%', '~')}`;
 const titleKey = (title) => normalizeTitle(title).replaceAll('_', ' ').toLocaleLowerCase();
 const plainText = (html) => html.replace(/<[^>]+>/g, ' ').replace(/&(?:amp|lt|gt|quot|#39);/g, (entity) => ({ '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" }[entity] ?? entity)).replace(/\s+/g, ' ').trim();
+const headingSlug = (label) => String(label).toLocaleLowerCase().replaceAll(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'section';
 
 function sourceUrl(title, revisionId) {
   const url = new URL(`/wiki/${normalizeTitle(title)}`, API_ORIGIN);
@@ -68,6 +70,76 @@ function safeInline(input, pageId, knownTitles, routeMap, deferredMedia) {
   text = escapeHtml(text);
   text = text.replace(/'''([^']+)'''/g, '<strong>$1</strong>').replace(/''([^']+)''/g, '<em>$1</em>');
   return text.replace(/\u0000(\d+)\u0000/g, (_, index) => tokens[Number(index)] ?? '');
+}
+
+function renderedSourceTitle(href) {
+  try {
+    const url = new URL(href, API_ORIGIN);
+    if (url.hostname !== new URL(API_ORIGIN).hostname || !url.pathname.startsWith('/wiki/')) return null;
+    return decodeURIComponent(url.pathname.slice('/wiki/'.length)).replaceAll('_', ' ');
+  } catch {
+    return null;
+  }
+}
+
+function compileRenderedHtml(rendered, pageId, knownTitles, routeMap) {
+  const deferredMedia = new Set();
+  for (const image of rendered.images ?? []) {
+    const label = typeof image === 'string' ? image : image?.title ?? image?.name ?? image?.url;
+    if (typeof label === 'string' && label.trim()) deferredMedia.add(label.trim());
+  }
+  let html = sanitizeHtml(String(rendered.renderedHtml ?? ''), {
+    allowedTags: [...sanitizeHtml.defaults.allowedTags, 'figure', 'figcaption', 'table', 'caption', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'colgroup', 'col'],
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      '*': ['class', 'id', 'colspan', 'rowspan', 'scope'],
+      a: ['href', 'title', 'target', 'rel'],
+      img: ['src', 'alt', 'title', 'width', 'height'],
+    },
+    allowedSchemes: ['http', 'https', 'mailto'],
+    allowedSchemesByTag: { img: ['https'] },
+    allowProtocolRelative: false,
+  });
+  html = html.replace(/<img\b([^>]*)>/gi, (_, attributes) => {
+    const source = attributes.match(/\bsrc="([^"]*)"/i)?.[1] ?? '';
+    const alt = attributes.match(/\balt="([^"]*)"/i)?.[1] ?? '';
+    const label = alt || source.split('/').pop() || 'Source media';
+    deferredMedia.add(label);
+    return `<figure class="media-deferred"><figcaption>Media deferred: ${escapeHtml(label)}</figcaption></figure>`;
+  });
+  html = html.replace(/<a\b([^>]*)\bhref="([^"]*)"([^>]*)>/gi, (_, before, href, after) => {
+    const title = renderedSourceTitle(href);
+    if (!title) {
+      if (href.startsWith('#')) {
+        const fragmentName = href.slice(1).replace(/^page-\d+-/i, '');
+        const local = `#page-${pageId}-${headingSlug(fragmentName.replaceAll('_', ' '))}`;
+        return `<a${before}href="${escapeHtml(local)}"${after}>`;
+      }
+      if (/^https?:\/\//i.test(href)) {
+        const safeAfter = after.replace(/\s(?:target|rel|referrerpolicy)="[^"]*"/gi, '');
+        return `<a${before}href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer external" referrerpolicy="no-referrer"${safeAfter}>`;
+      }
+      return `<a${before}href="${escapeHtml(href)}"${after}>`;
+    }
+    const fragment = href.includes('#') ? href.slice(href.indexOf('#') + 1) : '';
+    const key = titleKey(title);
+    const target = knownTitles.has(key)
+      ? routeMap.get(key) ?? routeForTitle(title)
+      : sourceUrl(title);
+    const suffix = fragment ? `#page-${pageId}-${encodeURIComponent(fragment.toLocaleLowerCase().replaceAll(' ', '-'))}` : '';
+    const local = `${target}${suffix}`;
+    const safeAfter = knownTitles.has(key) ? after : after.replace(/\s(?:target|rel|referrerpolicy)="[^"]*"/gi, '');
+    return `<a${before}href="${escapeHtml(local)}"${knownTitles.has(key) ? '' : ' target="_blank" rel="noopener noreferrer external" referrerpolicy="no-referrer"'}${safeAfter}>`;
+  });
+  const headings = [];
+  html = html.replace(/<h([2-6])\b[^>]*>([\s\S]*?)<\/h\1>/gi, (_, level, inner) => {
+    const label = plainText(inner);
+    const anchor = `page-${pageId}-${headingSlug(label)}`;
+    headings.push({ id: anchor, anchor, level: Number(level), heading: label, markdown: label });
+    return `<h${level} id="${anchor}">${inner}</h${level}>`;
+  });
+  if (!html.trim()) html = '<p>No readable article body was supplied for this revision.</p>';
+  return { safeHtml: html, plain: plainText(html), sections: headings, deferredMedia: [...deferredMedia].sort((a, b) => a.localeCompare(b)) };
 }
 
 function compileWikitext(raw, pageId, knownTitles, routeMap) {
@@ -130,6 +202,23 @@ async function loadCurrentPages(capture, directoryName, expectedCount) {
   return records;
 }
 
+async function loadRenderedPages(capture, expectedCount) {
+  const directory = path.join(capture, 'rendered-pages');
+  const names = (await readdir(directory)).filter((name) => /^batch-\d+\.json$/.test(name)).sort();
+  const records = [];
+  for (const name of names) {
+    const batch = JSON.parse(await readFile(path.join(directory, name), 'utf8'));
+    if (!Array.isArray(batch.records)) throw new Error(`INVALID_RENDERED_BATCH:${name}`);
+    records.push(...batch.records);
+  }
+  if (records.length !== expectedCount) throw new Error(`RENDERED_COUNT_MISMATCH:${records.length}:${expectedCount}`);
+  const manifest = JSON.parse(await readFile(path.join(directory, 'manifest.json'), 'utf8'));
+  if (manifest.pages !== records.length) throw new Error(`RENDERED_MANIFEST_COUNT_MISMATCH:${manifest.pages}:${records.length}`);
+  const byId = new Map(records.map((record) => [Number(record.pageId), record]));
+  if (byId.size !== records.length) throw new Error('DUPLICATE_RENDERED_PAGE_ID');
+  return { byId, manifest };
+}
+
 function redirectDetails(record, knownArticles, knownRedirects, routeMap) {
   const raw = record.currentRevision?.rawWikitext ?? '';
   const match = raw.match(/^\s*#redirect\s*:?\s*\[\[([^\]]+)\]\]/im);
@@ -151,6 +240,7 @@ async function buildArchive(capture, pointer, articlePages, redirectPages) {
   const selected = ['snapshot.json', 'routes.json', 'articles.json', 'redirects.json', 'templates.json', 'modules.json', 'maps.json', 'media-manifest.json', 'siteinfo.raw.json', 'response-pages.json'];
   for (const file of selected) await cp(path.join(capture, file), path.join(staging, file));
   await cp(path.join(capture, 'current-pages'), path.join(staging, 'current-pages'), { recursive: true });
+  await cp(path.join(capture, 'rendered-pages'), path.join(staging, 'rendered-pages'), { recursive: true });
   await cp(path.join(capture, 'current-redirects'), path.join(staging, 'current-redirects'), { recursive: true });
   const files = [];
   async function walk(dir) { for (const entry of await readdir(dir, { withFileTypes: true })) { const target = path.join(dir, entry.name); if (entry.isDirectory()) await walk(target); else { const bytes = await readFile(target); files.push({ path: path.relative(staging, target).replaceAll('\\', '/'), bytes: bytes.byteLength, sha256: sha256(bytes) }); } } }
@@ -170,6 +260,8 @@ async function main() {
   const inventoryArticles = JSON.parse(await readFile(path.join(capture, 'articles.json'), 'utf8'));
   const inventoryRedirects = JSON.parse(await readFile(path.join(capture, 'redirects.json'), 'utf8'));
   const articlePages = await loadCurrentPages(capture, 'current-pages', inventoryArticles.length);
+  const renderedCapture = await loadRenderedPages(capture, articlePages.length);
+  const renderedPages = renderedCapture.byId;
   const redirectPages = await loadCurrentPages(capture, 'current-redirects', inventoryRedirects.length);
   const articleTitles = new Map(articlePages.map((record) => [titleKey(record.title), record]));
   const redirectTitles = new Map(redirectPages.map((record) => [titleKey(record.title), record]));
@@ -187,9 +279,11 @@ async function main() {
     if (!routeMap.has(key)) routeMap.set(key, route);
   }
   const articles = articlePages.map((record) => {
-    const compiled = compileWikitext(record.currentRevision.rawWikitext, record.pageId, knownTitles, routeMap);
+    const rendered = renderedPages.get(record.pageId);
+    if (!rendered || Number(rendered.revisionId) !== Number(record.currentRevision.revisionId)) throw new Error(`RENDERED_REVISION_MISMATCH:${record.pageId}`);
+    const compiled = compileRenderedHtml(rendered, record.pageId, knownTitles, routeMap);
     const route = routeByPageId.get(record.pageId) ?? routeForTitle(record.title);
-    const value = { recordType: 'CurrentArticleRecordV1', schemaVersion: '1.0.0', pageId: record.pageId, title: record.title, displayTitle: record.displayTitle ?? record.title, normalizedTitle: normalizeTitle(record.title), route, aliases: [record.title], safeHtml: compiled.safeHtml, plainTextExcerpt: compiled.plain.slice(0, 640), headings: compiled.sections, categories: [], knownInternalLinks: [], externalLinks: [], deferredMedia: compiled.deferredMedia, currentRevisionId: record.currentRevision.revisionId, sha1: record.currentRevision.sha1, timestamp: record.currentRevision.timestamp, contributor: record.currentRevision.userHidden ? null : record.currentRevision.user, contributorState: record.currentRevision.userHidden ? 'hidden' : record.currentRevision.user ? 'visible' : 'unknown', sourceUrl: sourceUrl(record.title, record.currentRevision.revisionId), transforms: ['wikitext-to-safe-html', 'source-anchor-prefix', 'local-target-only-links', 'remote-media-deferred', 'unknown-links-externalized'], renderedSha256: sha256(compiled.safeHtml) };
+    const value = { recordType: 'CurrentArticleRecordV1', schemaVersion: '1.0.0', pageId: record.pageId, title: record.title, displayTitle: record.displayTitle ?? record.title, normalizedTitle: normalizeTitle(record.title), route, aliases: [record.title], safeHtml: compiled.safeHtml, plainTextExcerpt: compiled.plain.slice(0, 640), headings: compiled.sections, categories: [], knownInternalLinks: [], externalLinks: [], deferredMedia: compiled.deferredMedia, currentRevisionId: record.currentRevision.revisionId, sha1: record.sha1 ?? record.currentRevision.sha1, timestamp: record.timestamp ?? record.currentRevision.timestamp, contributor: record.userHidden ? null : record.user ?? record.currentRevision.user, contributorState: (record.userHidden ?? record.currentRevision.userHidden) ? 'hidden' : (record.user ?? record.currentRevision.user) ? 'visible' : 'unknown', sourceUrl: sourceUrl(record.title, record.currentRevision.revisionId), transforms: ['exact-oldid-rendered-html', 'sanitized-html', 'source-anchor-prefix', 'local-target-only-links', 'remote-media-deferred', 'unknown-links-externalized'], renderedSha256: sha256(compiled.safeHtml) };
     value.categories = [...new Set((record.currentRevision.rawWikitext.match(/\[\[Category:([^\]|]+)/gi) ?? []).map((item) => item.replace(/^\[\[Category:/i, '').trim()))].sort((a, b) => a.localeCompare(b));
     value.knownInternalLinks = [...new Set((record.currentRevision.rawWikitext.match(/\[\[([^\]|#:]+)(?:#[^\]|]+)?(?:\|[^\]]+)?\]\]/g) ?? []).map((item) => item.replace(/^\[\[/, '').split(/[|#]/)[0].trim()).filter((title) => articleTitles.has(titleKey(title)) || redirectTitles.has(titleKey(title))))].sort((a, b) => a.localeCompare(b));
     value.externalLinks = [...new Set((record.currentRevision.rawWikitext.match(/https:\/\/[^\s<]+/gi) ?? []).map((item) => item.replace(/[)>.,]+$/, '')))].slice(0, 4096);
@@ -218,8 +312,8 @@ async function main() {
   const searchIndex = articles.map((record) => ({ id: `article:${record.pageId}`, pageId: record.pageId, title: record.title, displayTitle: record.displayTitle, aliases: record.aliases, categories: record.categories, excerpt: record.plainTextExcerpt, route: record.route })).sort((a, b) => a.title.localeCompare(b.title));
   await writeJson(path.join(READER_ROOT, 'routes.json'), routeRegistry); await writeJson(path.join(READER_ROOT, 'redirects.json'), redirects); await writeJson(path.join(READER_ROOT, 'search-index.json'), searchIndex);
   const archive = await buildArchive(capture, pointer, articlePages, redirectPages);
-  const manifest = { recordType: 'CurrentCorpusManifestV1', schemaVersion: '1.0.0', release: '0.1.0', captureWindow: { startedAt: sourceSnapshot.capturedAt, finishedAt: new Date().toISOString() }, source: { apiUrl: sourceSnapshot.source.apiUrl, rightsUrl: sourceSnapshot.source.rightsUrl, termsUrl: sourceSnapshot.source.termsUrl, termsState: sourceSnapshot.source.termsState, robotsState: sourceSnapshot.source.robotsState, policyReceipts: { termsSha256: sourceSnapshot.source.termsSha256, robotsSha256: sourceSnapshot.source.robotsSha256, termsOverrideReason: sourceSnapshot.source.termsOverrideReason, robotsSkipReason: sourceSnapshot.source.robotsSkipReason } }, counts: { routes: routeRegistry.length, articles: articles.length, redirects: redirects.length, articleShards: shards.length, searchRecords: searchIndex.length }, redirectStates: Object.fromEntries(['resolved', 'outside-reader-corpus', 'invalid'].map((state) => [state, redirects.filter((record) => record.state === state).length])), routes: { registry: 'routes.json', sha256: sha256(jsonBytes(routeRegistry)) }, redirects: { registry: 'redirects.json', sha256: sha256(jsonBytes(redirects)), hashes: redirectHashes }, search: { index: 'search-index.json', sha256: sha256(jsonBytes(searchIndex)) }, shards, articleHashes, archive: { name: ARCHIVE_NAME, bytes: archive.bytes, sha256: archive.sha256, manifestSha256: sha256(canonical(archive.manifest)) }, deferredScope: ['historical revisions', 'media bytes', 'maps', 'template and module closure', 'stable cutoff reconciliation'], generatedAt: new Date().toISOString() };
-  manifest.manifestSha256 = sha256(canonical(manifest)); await writeJson(path.join(READER_ROOT, 'manifest.json'), manifest); await writeJson(path.join(CORPUS_ROOT, 'current-capture-summary.json'), { recordType: 'CorpusCaptureSummaryV1', schemaVersion: '1.0.0', capturedAt: manifest.generatedAt, stable: false, source: sourceSnapshot.source.apiUrl, inventory: { manifestSha256: pointer.manifestSha256, routes: routeRegistry.length, articles: articles.length, redirects: redirects.length, templates: sourceSnapshot.counts.templates, modules: sourceSnapshot.counts.modules, maps: sourceSnapshot.counts.maps, media: sourceSnapshot.counts.media, mediaBytes: sourceSnapshot.counts.mediaBytes }, currentPages: { captured: articles.length, rawWikitextBytes: articlePages.reduce((sum, item) => sum + item.currentRevision.rawWikitextBytes, 0), batches: shards.length, manifestSha256: manifest.manifestSha256 }, policyReceipts: manifest.source.policyReceipts, storage: { currentCapture: 'ignored local resumable capture', releaseArchive: ARCHIVE_NAME, ordinaryGitContainsRawCorpus: false }, remaining: manifest.deferredScope });
+  const manifest = { recordType: 'CurrentCorpusManifestV1', schemaVersion: '1.0.0', release: '0.1.0', captureWindow: { startedAt: sourceSnapshot.capturedAt, finishedAt: new Date().toISOString() }, source: { apiUrl: sourceSnapshot.source.apiUrl, rightsUrl: sourceSnapshot.source.rightsUrl, termsUrl: sourceSnapshot.source.termsUrl, termsState: sourceSnapshot.source.termsState, robotsState: sourceSnapshot.source.robotsState, policyReceipts: { termsSha256: sourceSnapshot.source.termsSha256, robotsSha256: sourceSnapshot.source.robotsSha256, termsOverrideReason: sourceSnapshot.source.termsOverrideReason, robotsSkipReason: sourceSnapshot.source.robotsSkipReason } }, counts: { routes: routeRegistry.length, articles: articles.length, redirects: redirects.length, articleShards: shards.length, searchRecords: searchIndex.length }, redirectStates: Object.fromEntries(['resolved', 'outside-reader-corpus', 'invalid'].map((state) => [state, redirects.filter((record) => record.state === state).length])), routes: { registry: 'routes.json', sha256: sha256(jsonBytes(routeRegistry)) }, redirects: { registry: 'redirects.json', sha256: sha256(jsonBytes(redirects)), hashes: redirectHashes }, search: { index: 'search-index.json', sha256: sha256(jsonBytes(searchIndex)) }, rendered: { manifest: 'rendered-pages/manifest.json', pages: renderedCapture.manifest.pages, sha256: renderedCapture.manifest.manifestSha256 }, shards, articleHashes, archive: { name: ARCHIVE_NAME, bytes: archive.bytes, sha256: archive.sha256, manifestSha256: sha256(canonical(archive.manifest)) }, deferredScope: ['historical revisions', 'media bytes', 'maps', 'template and module closure', 'stable cutoff reconciliation'], generatedAt: new Date().toISOString() };
+  manifest.manifestSha256 = sha256(canonical(manifest)); await writeJson(path.join(READER_ROOT, 'manifest.json'), manifest); await writeJson(path.join(CORPUS_ROOT, 'current-capture-summary.json'), { recordType: 'CorpusCaptureSummaryV1', schemaVersion: '1.0.0', capturedAt: manifest.generatedAt, stable: false, source: sourceSnapshot.source.apiUrl, inventory: { manifestSha256: pointer.manifestSha256, routes: routeRegistry.length, articles: articles.length, redirects: redirects.length, templates: sourceSnapshot.counts.templates, modules: sourceSnapshot.counts.modules, maps: sourceSnapshot.counts.maps, media: sourceSnapshot.counts.media, mediaBytes: sourceSnapshot.counts.mediaBytes }, currentPages: { captured: articles.length, rawWikitextBytes: articlePages.reduce((sum, item) => sum + item.currentRevision.rawWikitextBytes, 0), batches: shards.length, manifestSha256: manifest.manifestSha256, renderedManifestSha256: renderedCapture.manifest.manifestSha256 }, policyReceipts: manifest.source.policyReceipts, storage: { currentCapture: 'ignored local resumable capture', releaseArchive: ARCHIVE_NAME, ordinaryGitContainsRawCorpus: false }, remaining: manifest.deferredScope });
   console.log(JSON.stringify({ ok: true, captureWindow: manifest.captureWindow, counts: manifest.counts, redirectStates: manifest.redirectStates, archive, generated: { readerRoot: READER_ROOT, shards: shards.length, routes: routeRegistry.length, redirects: redirects.length, search: searchIndex.length } }, null, 2));
 }
 
