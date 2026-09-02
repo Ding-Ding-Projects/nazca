@@ -155,8 +155,17 @@ jobs:
         continue-on-error: true
         with:
           name: nazca-release-assets-${{ github.run_id }}
+          path: release-staging/*
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload release logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: nazca-release-logs-${{ github.run_id }}
           path: |
-            release-staging/**
             ${{ runner.temp }}/nazca-release-build.log
             ${{ runner.temp }}/nazca-installer-build.log
           if-no-files-found: warn
@@ -209,18 +218,12 @@ jobs:
           $corpus = Get-Content -Raw (Join-Path $stage 'corpus-manifest.json') | ConvertFrom-Json
           $raw = @($release.assets | Where-Object name -eq $corpus.archive.name) | Select-Object -First 1
           if (-not $raw -or $raw.size -ne $corpus.archive.bytes) { throw 'Pre-uploaded raw corpus archive size does not match the tracked manifest.' }
-          $rawPath = Join-Path $env:RUNNER_TEMP 'nazca-current-corpus-0.1.0.zip'
-          gh api "repos/$env:REPOSITORY/releases/assets/$($raw.id)" -H 'Accept: application/octet-stream' --output $rawPath
-          $rawHash = (Get-FileHash -LiteralPath $rawPath -Algorithm SHA256).Hash.ToLowerInvariant()
-          if ($rawHash -ne $corpus.archive.sha256) { throw "Pre-uploaded raw corpus archive SHA-256 $rawHash does not match the tracked manifest." }
+          if (-not $raw.digest -or $raw.digest -ne "sha256:$($corpus.archive.sha256)") { throw "Pre-uploaded raw corpus archive digest $($raw.digest) does not match the tracked manifest." }
           $checksumAsset = @($release.assets | Where-Object { $_.name -match '(?i)current-corpus.*(sha256|checksum)' }) | Select-Object -First 1
-          $checksumPath = Join-Path $env:RUNNER_TEMP 'nazca-current-corpus.sha256'
-          gh api "repos/$env:REPOSITORY/releases/assets/$($checksumAsset.id)" -H 'Accept: application/octet-stream' --output $checksumPath
-          if (-not ((Get-Content -Raw $checksumPath).Contains($corpus.archive.sha256))) { throw 'Pre-uploaded raw corpus checksum does not contain the tracked archive SHA-256.' }
+          $checksumText = gh api "repos/$env:REPOSITORY/releases/assets/$($checksumAsset.id)" -H 'Accept: application/octet-stream'
+          if (-not ([string]$checksumText).Contains($corpus.archive.sha256)) { throw 'Pre-uploaded raw corpus checksum does not contain the tracked archive SHA-256.' }
           $archiveAsset = @($release.assets | Where-Object { $_.name -match '(?i)archive-manifest' }) | Select-Object -First 1
-          $archiveManifestPath = Join-Path $env:RUNNER_TEMP 'nazca-archive-manifest.json'
-          gh api "repos/$env:REPOSITORY/releases/assets/$($archiveAsset.id)" -H 'Accept: application/octet-stream' --output $archiveManifestPath
-          $archiveManifest = Get-Content -Raw $archiveManifestPath | ConvertFrom-Json
+          $archiveManifest = gh api "repos/$env:REPOSITORY/releases/assets/$($archiveAsset.id)" -H 'Accept: application/octet-stream' | ConvertFrom-Json
           if ($archiveManifest.archive -ne $corpus.archive.name -or $archiveManifest.articlePages -ne $corpus.counts.articles -or $archiveManifest.redirectPages -ne $corpus.counts.redirects) { throw 'Pre-uploaded archive manifest does not match the tracked corpus manifest.' }
 
       - name: Upload generated release assets without replacing corpus assets
@@ -252,13 +255,12 @@ jobs:
           $release = gh api "repos/$env:REPOSITORY/releases/$env:RELEASE_ID" | ConvertFrom-Json
           $checksums = @{}
           foreach ($line in Get-Content -LiteralPath (Join-Path $stage 'SHA256SUMS.txt')) { if ($line -match '^([0-9a-fA-F]{64})\s{2}(.+)$') { $checksums[$matches[2]] = $matches[1].ToLowerInvariant() } }
+          $checksumsDigest = (Get-FileHash -LiteralPath (Join-Path $stage 'SHA256SUMS.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
           foreach ($file in Get-ChildItem -LiteralPath $stage -File | Where-Object Name -ne 'release-notes.md') {
             $asset = $release.assets | Where-Object name -eq $file.Name
             if (-not $asset -or $asset.size -le 0) { throw "Uploaded asset is missing or empty: $($file.Name)" }
-            $download = Join-Path $env:RUNNER_TEMP ("uploaded-" + $file.Name)
-            gh api "repos/$env:REPOSITORY/releases/assets/$($asset.id)" -H 'Accept: application/octet-stream' --output $download
-            $actual = (Get-FileHash -LiteralPath $download -Algorithm SHA256).Hash.ToLowerInvariant()
-            if ($checksums[$file.Name] -ne $actual) { throw "Uploaded asset SHA-256 mismatch: $($file.Name)" }
+            $expected = if ($file.Name -eq 'SHA256SUMS.txt') { $checksumsDigest } else { $checksums[$file.Name] }
+            if (-not $expected -or -not $asset.digest -or $asset.digest -ne "sha256:$expected") { throw "Uploaded asset digest mismatch: $($file.Name)" }
           }
 
       - name: Publish the existing draft
