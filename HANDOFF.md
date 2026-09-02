@@ -52,6 +52,14 @@
   or screenshots. Its first remote release run remains pending.
 - The GitHub Wiki is intentionally uninitialized. The configured Sites project
   is unavailable in the current connector workspace, so no Sites URL is claimed.
+- Selected design direction: `Nazca Reader 1b.dc.html`. The committed handoff
+  archive is `design/handoff/Wiki design rewrite.zip`, 81,903 bytes, SHA-256
+  `2fadc260047ae2b83d45e205801d2233331b8ac1fbe217854e0429d3a97efae1`.
+  Production paths are `components/nazca-shell.tsx`,
+  `components/article-reader.tsx`, and `app/globals.css`.
+- The design handoff record intentionally has no tests, browser interactions,
+  or screenshots. Sites remains unavailable and the GitHub Wiki remains
+  intentionally uninitialized.
 - Windows desktop runtime source with isolated renderer boundaries, loopback
   static serving, stable provenance, and an unsigned Squirrel.Windows packaging
   path. The installer itself remains unbuilt and unverified.

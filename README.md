@@ -22,6 +22,16 @@ static analysis, accessibility checks, security checks, reviews, or screenshots.
 The configured Sites project is unavailable in the current connector workspace,
 so no Sites URL is claimed. The GitHub Wiki is intentionally uninitialized.
 
+## Current design direction
+
+The selected direction is `Nazca Reader 1b.dc.html`. Its committed handoff
+archive is `design/handoff/Wiki design rewrite.zip`, 81,903 bytes, with SHA-256
+`2fadc260047ae2b83d45e205801d2233331b8ac1fbe217854e0429d3a97efae1`. The real
+production paths are `components/nazca-shell.tsx`,
+`components/article-reader.tsx`, and `app/globals.css`. This design handoff
+update intentionally ran no tests, browser interactions, or screenshots. Sites
+remains unavailable and the GitHub Wiki remains intentionally uninitialized.
+
 > [!IMPORTANT]
 > Candidate A now contains a fresh current snapshot: 3,422 article bodies and
 > 194 redirects captured in resumable 50-page batches, with 3,422 sanitized

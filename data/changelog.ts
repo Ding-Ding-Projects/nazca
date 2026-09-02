@@ -95,4 +95,13 @@ export const changelogEntries: ChangelogEntry[] = [
       'Made each left navigation destination render its own truthful surface, with generated article records opening their exact reader routes.',
     commit: '99f6ce6ed6eb45c223fd97cdbddefd9e793bea82',
   },
+  {
+    version: '0.1.0-dev.9',
+    date: '2026-09-02T19:44:53-04:00',
+    category: 'Foundation',
+    title: 'Selected Reader 1b design direction',
+    summary:
+      'Integrated the selected reader design direction into the production shell, article reader, and global styling paths, with the committed handoff archive preserved.',
+    commit: '6e23d907c331dff8d37299c19b742931c3eb12ba',
+  },
 ];

@@ -8,6 +8,7 @@
 - [x] Add a concrete Nazca Railway article route.
 - [x] Add project-path-aware GitHub Pages static output.
 - [x] Add generated build provenance and the social preview.
+- [x] Select `Nazca Reader 1b.dc.html` and commit the handoff archive at `design/handoff/Wiki design rewrite.zip` with its recorded digest.
 - [ ] Publish the primary Sites URL and set the repository homepage.
 - [ ] Deploy the identical GitHub Pages mirror.
 - [x] Add a secure Windows desktop runtime and Squirrel.Windows packaging path.
@@ -58,6 +59,7 @@
 - [ ] Add focused local tests and deliberate red-then-green regressions.
 - [ ] Register and use the required isolated headless verification route.
 - [ ] Capture all required screens, states, widths, languages, themes, and scales.
+- [ ] Verify the selected 1b design against the built production paths; no tests, browser interactions, or screenshots have run in this design handoff lane.
 - [x] Add the build-only GitHub Actions release and Pages workflow; first remote release run remains pending.
 - [ ] Publish one unique non-draft v0.1.0 release and verify all assets.
 - [ ] Publish the repository wiki, final handoff, and release announcement.
