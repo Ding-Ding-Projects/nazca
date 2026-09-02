@@ -262,6 +262,13 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
   );
 
   useEffect(() => {
+    const requestedTab = new URLSearchParams(window.location.search).get('tab');
+    if (requestedTab && groups.some((group) => group.items.some((item) => item.id === requestedTab))) {
+      setActiveTab(requestedTab);
+    }
+  }, []);
+
+  useEffect(() => {
     const timer = setTimeout(
       () => setUpdatedAt(formatBuildTime(provenance.builtAt, true)),
       0,
