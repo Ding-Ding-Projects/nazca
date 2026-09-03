@@ -208,3 +208,10 @@ fandom-style portal: introduction and working search actions first, subject
 navigation second, useful records third, and concise source boundaries last.
 The home drops the duplicate third status rail while preserving the persistent
 Reader, Atlas, and Research navigation and the local regex-enabled search.
+
+### Compact phone layout
+
+At phone widths, the shell keeps its header, route stripe, and content in three
+explicit rows. The grouped dock becomes one safe-area-aware, touch-scrollable
+bottom row, while long titles and featured records wrap inside the viewport
+instead of widening the page.

@@ -34,3 +34,9 @@
 The GitHub Pages home uses a reader-first hierarchy rather than a fandom-style
 portal. See [Atlas shell](reader/atlas-shell.md) for its content order,
 responsive behavior, source boundary, and verification status.
+
+## Compact layout repair
+
+The compact-layout repair is documented in the reader shell guide. It covers
+the explicit three-row mobile shell, horizontally discoverable dock, safe-area
+spacing, and overflow containment at the 320 px minimum width.

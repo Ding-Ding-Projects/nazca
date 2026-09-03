@@ -89,3 +89,8 @@ public Pages URL remains https://ding-ding-projects.github.io/nazca/.
 - [x] Remove the duplicate home status rail while retaining source and snapshot boundaries.
 - [x] Document the responsive directory in the repository wiki and reader guide.
 - [ ] Complete runtime interaction, accessibility, and multi-width capture evidence for release publication.
+
+## Compact shell follow-up
+
+- [x] Stabilize the 320–608 px shell rows, bottom dock, safe-area spacing, and long-content wrapping after the home reorganization.
+- [ ] Capture the repaired home and dock at 320 px and 608 px for release evidence.
