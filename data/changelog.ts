@@ -113,4 +113,13 @@ export const changelogEntries: ChangelogEntry[] = [
       'Replaced the unchanged home overview with the Reader 1b hero, destination cards, useful-record list, corpus evidence, and responsive network and provenance rail.',
     commit: 'c0f8aafcae2baf94c879ea746c349a3b92a9a75d',
   },
+  {
+    version: '0.1.1-dev.1',
+    date: '2026-09-02T21:19:07-04:00',
+    category: 'Reader',
+    title: 'Completed Reader 1b state compositions',
+    summary:
+      'Added corpus-backed station and year presentations, full destination and dedicated search states, shared redirect and not-found recovery surfaces, and responsive phone bottom navigation.',
+    commit: 'a9db9ad8caa1ba31206e9aeab27f81c6c6c594f3',
+  },
 ];
