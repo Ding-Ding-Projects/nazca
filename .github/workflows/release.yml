@@ -290,7 +290,7 @@ jobs:
           $completed = [DateTimeOffset]::Parse($release.published_at).ToUniversalTime()
           $duration = $completed - $started
           $body = [string]$release.body
-          $body += "`n`n## Verified delivery`n`n- Workflow started: $($started.ToString('o'))`n- Workflow completed: $($completed.ToString('o'))`n- Workflow duration: $($duration.ToString('hh\:mm\:ss'))`n- Source commit: $env:EXPECTED_SHA`n- Checks run by this workflow: none. This build-only workflow does not run tests, lint, type checks, static analysis, accessibility checks, security checks, reviews, or screenshots.`n- Code name: Classic Har Gow · 蝦餃. Photo: https://github.com/Ding-Ding-Projects/dim-sum-photos/releases/download/catalog-v1/hk-dish-0001-classic-har-gow.png"
+          $body += "`n`n## Verified delivery`n`n- Workflow started: $($started.ToString('o'))`n- Workflow completed: $($completed.ToString('o'))`n- Workflow duration: $($duration.ToString('hh\:mm\:ss'))`n- Source commit: $env:EXPECTED_SHA`n- Checks run by this workflow: none. This build-only workflow does not run tests, lint, type checks, static analysis, accessibility checks, security checks, reviews, or screenshots.`n- Code name: Scallop Har Gow · 帶子蝦餃. Photo: https://github.com/Ding-Ding-Projects/dim-sum-photos/releases/download/catalog-v1/hk-dish-0002-scallop-har-gow.png"
           $stage = Join-Path $env:GITHUB_WORKSPACE 'release-staging'
           $notesPath = Join-Path $stage 'release-notes.md'
           $body | Set-Content -LiteralPath $notesPath -Encoding utf8
