@@ -113,4 +113,13 @@ export const changelogEntries: ChangelogEntry[] = [
       'Replaced the unchanged home overview with the Reader 1b hero, destination cards, useful-record list, corpus evidence, and responsive network and provenance rail.',
     commit: 'c0f8aafcae2baf94c879ea746c349a3b92a9a75d',
   },
+  {
+    version: '0.1.0-dev.11',
+    date: '2026-09-02T21:31:41-04:00',
+    category: 'Operations',
+    title: 'Reliable Pages cache refresh',
+    summary:
+      'Versioned service-worker caches now retire older project shells deterministically, bypass HTTP cache reuse during updates, and offer an accessible reload action that preserves the current URL and visitor state.',
+    commit: 'ded29c692128a96c6cc54a556ca5d4405db74219',
+  },
 ];
