@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ArticleReader } from '@/components/article-reader';
+import { ReaderStatePage } from '@/components/reader-state-page';
 import { buildProvenance } from '@/lib/provenance';
-import { loadCurrentRoute, loadCurrentRoutes } from '@/lib/current-corpus';
-import { publicPath } from '@/lib/public-path';
+import { loadCurrentRoute, loadCurrentRoutes, loadCurrentSearchIndex } from '@/lib/current-corpus';
 
 function routeFromSlug(slug: string[]) {
   const joined = slug.join('/');
@@ -35,16 +35,5 @@ export default async function WikiArticlePage({ params }: { params: Promise<{ sl
   const result = loadCurrentRoute(routeFromSlug(slug));
   if (result.kind === 'missing') notFound();
   if (result.kind === 'article') return <ArticleReader record={result.record} provenance={buildProvenance} />;
-  const target = result.record.targetRoute ? publicPath(result.record.targetRoute) : null;
-  return (
-    <main className="article-page redirect-page" id="main-content">
-      {target ? <meta httpEquiv="refresh" content={`0;url=${target}`} /> : null}
-      <p className="eyebrow">Nazca Railway current snapshot</p>
-      <h1>{result.record.sourceTitle}</h1>
-      <p>This title is a source redirect and is not indexed as an article.</p>
-      <p>Target: {result.record.targetTitle}</p>
-      {target ? <a className="button" href={target}>Continue to the current article</a> : <p>The target is outside this reader corpus or the redirect syntax was invalid. Open the <a href={result.record.sourceUrl}>source record</a> for details.</p>}
-      <p><a href={result.record.sourceUrl} target="_blank" rel="noopener noreferrer external" referrerPolicy="no-referrer">Open source redirect record</a></p>
-    </main>
-  );
+  return <ReaderStatePage state={{ kind: 'redirect', record: result.record }} provenance={buildProvenance} corpusSearch={loadCurrentSearchIndex()} />;
 }

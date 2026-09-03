@@ -27,17 +27,31 @@ bundle.
 | ID | Reference state | Production route | Theme and viewport | Implementation |
 | --- | --- | --- | --- | --- |
 | reader-home | Home overview with route strip, quick destinations, corpus baseline, map placeholder, and provenance | `/` | Light or dark, desktop and phone | `components/nazca-shell.tsx`, `app/globals.css` |
-| reader-article | Article-first layout with breadcrumbs, metadata tabs, rendered body, source card, and summary rail | `/wiki/<encoded-title>` | Light or dark, desktop and phone | `components/article-reader.tsx`, `app/globals.css` |
-| reader-sections | Article section navigation and local search | Same article route | Light or dark, desktop and phone | `components/article-reader.tsx`, `components/search-workbench.tsx` |
-| reader-list | Destination list reached from persistent navigation or a home card | `/?tab=stations`, `/?tab=lines`, `/?tab=places`, `/?tab=infrastructure` | Light or dark, desktop and phone | `components/nazca-shell.tsx` |
-| reader-deferred | Maps, media, and timeline boundaries report missing source coverage without inventing content | `/?tab=maps`, `/?tab=media`, `/?tab=timeline` | Light or dark, desktop and phone | `components/nazca-shell.tsx` |
+| reader-article-generic | Generic article-first layout with breadcrumbs, metadata tabs, rendered body, source card, and summary rail | `/wiki/<encoded-title>` for non-specialized records | Light or dark, desktop and phone | `components/article-reader.tsx`, `app/globals.css` |
+| reader-article-station | Specialized station article presentation with corpus-derived facts, categories, source boundary, and rendered source content | `/wiki/<encoded-station-title>` | Light or dark, desktop and phone | `components/article-reader.tsx`, `app/globals.css` |
+| reader-article-year | Year or stub presentation with year-specific heading, corpus-derived facts, and rendered historical source content | `/wiki/<year>` or `/wiki/<encoded-year-title>` | Light or dark, desktop and phone | `components/article-reader.tsx`, `app/globals.css` |
+| reader-list | Full destination list of generated corpus records with exact route activation | `/?tab=stations`, `/?tab=lines`, `/?tab=places`, `/?tab=streetcars`, `/?tab=explore` | Light or dark, desktop and phone | `components/nazca-shell.tsx`, `app/globals.css` |
+| reader-search | Dedicated local search state over the complete generated search index, with the shared anchored regex builder | `/?tab=search` | Light or dark, desktop and phone | `components/nazca-shell.tsx`, `components/search-workbench.tsx`, `app/globals.css` |
+| reader-redirect | Redirect state with source-to-target mapping, exact source link, and current-article action when the target is in the corpus | `/wiki/<redirect-title>` | Light or dark, desktop and phone | `components/reader-state-page.tsx`, `app/wiki/[...slug]/page.tsx`, `app/globals.css` |
+| reader-not-found | Not-found state with honest snapshot boundary, local search recovery, home route, and station-list route | Any missing `/wiki/<title>` route | Light or dark, desktop and phone | `components/reader-state-page.tsx`, `app/not-found.tsx`, `app/globals.css` |
 
 ## Functional mapping
 
 - The brand, breadcrumb, and every persistent navigation item are real buttons
   that route to Home or to a destination state using the existing shell.
-- The article search uses the shared local search workbench and opens the exact
-  matching heading, with its anchored regular-expression builder retained.
+- Generic, station, and year article states use the shared local search workbench
+  and open the exact matching heading, with its anchored regular-expression builder
+  retained.
+- Station records are detected from real record titles and category metadata, then
+  receive a dedicated station presentation without replacing their captured HTML.
+- Year records are detected from real four-digit titles or the `Years` category, then
+  receive a dedicated year or stub presentation without inventing events.
+- The dedicated search state indexes every generated search record and routes each
+  selected result to its exact corpus route. Plain text remains the default and the
+  adjacent builder supplies the existing bounded RE2 mode.
+- Redirect and not-found states use the shared reader boundary shell, preserve the
+  desktop navigation, and expose the phone bottom navigation. Redirect targets and
+  source links come from the redirect record; not-found recovery stays local.
 - Article section buttons update the active section and scroll to the exact
   rendered heading. Internal article links retain their corpus routes.
 - The command button opens the existing command palette, the notification button
@@ -48,9 +62,11 @@ bundle.
   useful-record list, five-column corpus evidence, and a stacked map/provenance
   rail. Destination cards, record rows, brand, command, notification, and theme
   controls remain wired to their existing actions.
-- The home layout collapses from two columns to a single reading column at
-  tablet widths, then reduces destination and baseline grids to two columns on
-  phone widths without hiding the evidence or deferred-state copy.
+- The home and every reader state collapse from two columns to a single reading
+  column at tablet widths, then use a fixed four-action phone bottom navigation at
+  phone widths without hiding evidence, source boundaries, or recovery actions.
+- Destination lists render the complete filtered generated record set, with every
+  row retaining an accessible button and exact route activation.
 - Tables remain source data, but are placed in bounded scroll containers and
   receive readable borders, headers, spacing, and responsive overflow treatment.
 - Phone layouts collapse the destination rail to a bottom icon strip, stack the

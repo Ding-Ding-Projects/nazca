@@ -41,6 +41,8 @@ type ReaderDestination = {
   count?: string;
 };
 
+type ArticlePresentation = 'generic' | 'station' | 'year';
+
 const readerGroups: Array<{ label: string; items: ReaderDestination[] }> = [
   {
     label: 'Reader',
@@ -89,6 +91,16 @@ function displayLabel(id: string, fallback: string, languageMode: 'en' | 'zh-HK'
   return pair ? localize(pair[0], pair[1], languageMode) : fallback;
 }
 
+function articlePresentation(record: CurrentArticleRecordV1): ArticlePresentation {
+  if (/^\d{4}$/.test(record.displayTitle.trim()) || record.categories.some((category) => category.toLocaleLowerCase() === 'years')) {
+    return 'year';
+  }
+  if (record.displayTitle.toLocaleLowerCase().endsWith(' station') || record.categories.some((category) => category.toLocaleLowerCase().includes('station'))) {
+    return 'station';
+  }
+  return 'generic';
+}
+
 export function ArticleReader({
   record,
   provenance,
@@ -101,6 +113,7 @@ export function ArticleReader({
   const settings = state.settings;
   const languageMode = settings.schoolMode.enabled ? 'en' : settings.languageMode;
   const L = (english: string, cantonese: string) => text(localize(english, cantonese, languageMode));
+  const presentation = articlePresentation(record);
   const [activeSection, setActiveSection] = useState(record.headings[0]?.id ?? 'article-content');
   const [updatedAt, setUpdatedAt] = useState(() => formatBuildTime(provenance.builtAt));
 
@@ -196,23 +209,44 @@ export function ArticleReader({
 
         <main className="article-main-viewport" id="main-content" tabIndex={-1}>
           <div className="article-layout article-layout-reference">
-            <article className="article-body" id="article-content">
+            <article className={`article-body article-body-${presentation}`} id="article-content" data-reader-state={`article-${presentation}`}>
               <nav className="article-breadcrumbs" aria-label="Breadcrumb">
                 <button type="button" onClick={() => navigateDestination('home')}>Atlas</button>
                 <span aria-hidden="true">›</span>
-                <span>Current reader</span>
+                <span>{presentation === 'station' ? 'Stations' : presentation === 'year' ? 'Years' : 'Current reader'}</span>
                 <span aria-hidden="true">›</span>
                 <strong>{record.displayTitle}</strong>
               </nav>
-              <p className="eyebrow article-eyebrow"><span aria-hidden="true" />CURRENT ARTICLE · SOURCE SNAPSHOT</p>
-              <h1>{record.displayTitle}</h1>
-              <p className="article-subtitle">Current article body captured from the source at revision <code>{record.currentRevisionId}</code>. This reader is a static, sanitized presentation.</p>
+              <p className="eyebrow article-eyebrow"><span aria-hidden="true" />{presentation === 'station' ? 'STATION · CURRENT SNAPSHOT' : presentation === 'year' ? 'YEAR · CURRENT SNAPSHOT' : 'CURRENT ARTICLE · SOURCE SNAPSHOT'}</p>
+              <h1 className={presentation === 'year' ? 'article-year-heading' : undefined}>{record.displayTitle}</h1>
+              <p className="article-subtitle">{presentation === 'station' ? 'A captured station record from the current reader index.' : presentation === 'year' ? 'A captured year record from the current reader index.' : 'Current article body captured from the source.'} Revision <code>{record.currentRevisionId}</code>. This reader is a static, sanitized presentation.</p>
+              {presentation !== 'generic' ? (
+                <section className="reader-fact-grid" aria-label={presentation === 'station' ? 'Station record facts' : 'Year record facts'}>
+                  <div className="reader-fact-card reader-fact-card-primary">
+                    <span className="reader-fact-label">{presentation === 'station' ? 'STATION RECORD' : 'YEAR RECORD'}</span>
+                    <strong>{record.displayTitle}</strong>
+                    <span>{record.plainTextExcerpt.slice(0, 220)}{record.plainTextExcerpt.length > 220 ? '…' : ''}</span>
+                  </div>
+                  <div className="reader-fact-card">
+                    <span className="reader-fact-label">CATEGORIES</span>
+                    <div className="reader-fact-tags">
+                      {record.categories.length ? record.categories.slice(0, 8).map((category) => <span key={category}>{category}</span>) : <span>None captured</span>}
+                    </div>
+                  </div>
+                  <div className="reader-fact-card">
+                    <span className="reader-fact-label">SOURCE BOUNDARY</span>
+                    <strong>Revision {record.currentRevisionId}</strong>
+                    <span>{record.deferredMedia.length ? `${record.deferredMedia.length} media references deferred` : 'No media references deferred'}</span>
+                  </div>
+                </section>
+              ) : null}
               <div className="article-meta-tabs" role="tablist" aria-label="Article views">
                 <a href="#read" aria-current="page">Read</a>
                 <a href="#source">Source and attribution</a>
                 <a href="#history"><History size={15} aria-hidden="true" /> History boundary</a>
               </div>
               <section id="read" className="article-section">
+                {presentation !== 'generic' ? <h2 className="reader-captured-heading">Captured source content</h2> : null}
                 <div className="article-rendered-content" dangerouslySetInnerHTML={{ __html: articleHtmlForSurface(record.safeHtml) }} />
               </section>
               <section id="source" className="article-source-card">

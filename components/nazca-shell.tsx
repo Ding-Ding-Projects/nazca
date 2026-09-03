@@ -19,6 +19,7 @@ import {
   Map,
   Moon,
   ScrollText,
+  Search,
   Settings,
   Sun,
   TramFront,
@@ -124,6 +125,7 @@ const groups: readonly AtlasTabGroup[] = [
     items: [
       { id: 'home', label: 'Home', icon: Home, count: '' },
       { id: 'explore', label: 'Explore', icon: Compass, count: '' },
+      { id: 'search', label: 'Search', icon: Search, count: '3.4k' },
       { id: 'stations', label: 'Stations', icon: TrainFront, count: '1.2k' },
       { id: 'lines', label: 'Lines', icon: Layers3, count: '156' },
       {
@@ -216,7 +218,7 @@ function CorpusDestination({
       <p className="lede">{description}</p>
       {destinationRecords.length ? (
         <ul className="recent-list destination-record-list">
-          {destinationRecords.slice(0, 80).map((record) => (
+          {destinationRecords.map((record) => (
             <li key={record.id}>
               <button
                 type="button"
@@ -244,6 +246,47 @@ function CorpusDestination({
           </p>
         </section>
       )}
+    </div>
+  );
+}
+
+function CorpusSearchDestination({
+  records,
+  onOpen,
+}: {
+  records: CorpusSearchRecord[];
+  onOpen: (record: CorpusSearchRecord) => void;
+}) {
+  const searchRecords: SearchRecord[] = records.map((record) => ({
+    id: record.id,
+    title: record.displayTitle || record.title,
+    subtitle: record.categories.slice(0, 3).join(' · ') || 'Article',
+    text: `${record.title} ${record.displayTitle} ${record.aliases.join(' ')} ${record.categories.join(' ')} ${record.excerpt}`,
+  }));
+  return (
+    <div className="route-content reader-search-state" data-reader-state="search">
+      <p className="eyebrow"><span aria-hidden="true" />SEARCH · LOCAL, NO NETWORK CALLS</p>
+      <h1 className="page-title">Search the current reader</h1>
+      <p className="lede">Search {records.length.toLocaleString()} captured article records, aliases, categories, and excerpts. Every result opens its exact static route.</p>
+      <div className="reader-search-panel">
+        <SearchWorkbench
+          surfaceId="dedicated-reader-search"
+          label="Search the current reader"
+          placeholder="Search articles, stations, lines, and places"
+          records={searchRecords}
+          onActivate={(result) => {
+            const record = records.find((candidate) => candidate.id === result.id);
+            if (record) onOpen(record);
+          }}
+        />
+      </div>
+      <section className="content-card reader-search-summary" aria-label="Search index summary">
+        <div className="section-heading">
+          <div><p className="section-overline">Indexed source</p><h2>Complete current index</h2></div>
+          <span>{records.length.toLocaleString()} records</span>
+        </div>
+        <p>Plain text is the default. Open the adjacent regular-expression builder when you need bounded RE2 matching, captures, replacement preview, and timing.</p>
+      </section>
     </div>
   );
 }
@@ -519,6 +562,8 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
             />
           ) : activeTab === 'status' ? (
             <StatusWorkspace provenance={provenance} />
+          ) : activeTab === 'search' ? (
+            <CorpusSearchDestination records={corpusSearch} onOpen={openCorpusRecord} />
           ) : ['explore', 'stations', 'lines', 'places', 'streetcars'].includes(activeTab) ? (
             <CorpusDestination
               eyebrow={tabLabel(activeTab, selectedLabel)}
