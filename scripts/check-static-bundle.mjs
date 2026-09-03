@@ -100,9 +100,9 @@ if (pages) {
   for (const [label, value] of [
     ['home asset prefix', home.includes('/nazca/_next/')],
     ['article asset prefix', article.includes('/nazca/_next/')],
-    ['article home path', article.includes('href="/nazca"')],
+    ['article home control', article.includes('aria-label="Open Nazca Railway home"')],
     ['article title', article.includes(sampleRoute ? (readerRoutes.find((entry) => entry.route === sampleRoute)?.title ?? '') : '')],
-    ['article current-snapshot marker', article.includes('current source snapshot')],
+    ['article current-snapshot marker', article.includes('outside this current snapshot')],
     [
       'Open Graph image',
       article.includes(

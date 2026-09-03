@@ -89,3 +89,5 @@ public Pages URL remains https://ding-ding-projects.github.io/nazca/.
 - [x] Remove the duplicate home status rail while retaining source and snapshot boundaries.
 - [x] Document the responsive directory in the repository wiki and reader guide.
 - [ ] Complete runtime interaction, accessibility, and multi-width capture evidence for release publication.
+- [x] Repair the Reader 1b redirect-registry type boundary and semantic search loading status found by the local TypeScript and lint checks.
+- [x] Align static Pages verification with the Reader 1b button-based home control.

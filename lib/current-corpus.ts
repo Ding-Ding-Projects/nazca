@@ -31,7 +31,7 @@ function load() {
   if (cached) return cached;
   const manifest = readJson<CurrentCorpusManifestV1>('manifest.json');
   const routes = readJson<RouteEntry[]>(manifest.routes.registry);
-  const redirects = readJson<CurrentRedirectRecordV1>(manifest.redirects.registry);
+  const redirects = readJson<CurrentRedirectRecordV1[]>(manifest.redirects.registry);
   const articlesById = new Map<number, CurrentArticleRecordV1>();
   for (const shard of manifest.shards) {
     const records = readJson<CurrentArticleRecordV1[]>(shard.name);
