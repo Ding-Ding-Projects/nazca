@@ -85,6 +85,12 @@
   installer was not built in this documentation lane and remains pending.
 - Generated build provenance, social preview, Open Graph metadata, standard Git
   LFS prohibition, static-bundle bounds, and GitHub Pages project-path checks.
+- Context-menu target labels now preserve explicit accessible labels and avoid
+  concatenating descendant navigation text when a broad container is selected.
+  The implementation is `a5cb9d7aba63cf3347ade74539ff730717793292` in
+  `components/context-menu-host.tsx`. `git diff --check` passed; the clean-lane
+  TypeScript check remains unverified because `@cloudflare/workers-types`,
+  `node`, and `vinext/types` are not installed there.
 
 ## Candidate A local build evidence
 
@@ -136,6 +142,9 @@ response as allowed or verified. The MediaWiki API capture is proceeding.
    staging, volume, and round-trip verification using the committed publisher.
 5. Run a fresh final build from this documentation commit, then run the v0.1.2 build-only GitHub Actions release and Pages publication workflow.
 6. Register the isolated headless verification route and capture the built UI.
+7. Re-run the focused TypeScript check for the context-menu label fix after the
+   declared type packages are available, then recapture the affected menu from
+   the built output.
 
 ## Honesty boundary
 

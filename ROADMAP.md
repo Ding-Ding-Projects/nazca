@@ -50,6 +50,9 @@
 - [ ] Ship personal vocabulary, renamed School mode, narrator, and schedules.
 - [ ] Ship the five independent attention modes.
 - [ ] Ship appearance, logo, context-menu, and element-lock tools.
+- [ ] Verify the context-menu target-label fix from the built output after the
+  declared type packages are available; the implementation is committed, but
+  the focused TypeScript check is currently unavailable in the clean lane.
 - [ ] Ship authenticator, local history, converter, and local model manager.
 - [ ] Ship command palette, notifications, exports, bulk actions, and changelog.
 - [ ] Ship offline documentation and service-worker update behavior.

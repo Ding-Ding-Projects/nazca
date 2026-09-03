@@ -140,4 +140,13 @@ export const changelogEntries: ChangelogEntry[] = [
       'Removed per-route search-index serialization from redirect and not-found states, added bounded client loading, and staged one verified static search-index asset for Sites and GitHub Pages paths.',
     commit: 'dc4842c80917738f9b60023990bf832f28819c74',
   },
+  {
+    version: '0.1.2-dev.4',
+    date: '2026-09-03T17:15:46-04:00',
+    category: 'Reader',
+    title: 'Bound context-menu target labels',
+    summary:
+      'Preserved explicit accessible labels and prevented broad containers from concatenating descendant navigation text into one target label.',
+    commit: 'a5cb9d7aba63cf3347ade74539ff730717793292',
+  },
 ];

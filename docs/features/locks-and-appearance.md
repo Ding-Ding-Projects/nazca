@@ -10,6 +10,17 @@ through their own anchored RE2/WASM workbench.
 Imported content will replace generated identifiers with stable page, section,
 paragraph, link, image, table-cell, and state IDs during the final corpus import.
 
+Target labels prefer an explicit `aria-label` or `title`. When neither exists,
+the host reads only text nodes owned directly by the selected element, then
+falls back to its semantic role or tag plus its generated element identifier.
+This prevents a broad container from presenting the concatenated text of its
+descendant navigation as one misleading label. The fix is implemented in
+`components/context-menu-host.tsx` at commit
+`a5cb9d7aba63cf3347ade74539ff730717793292`. TypeScript validation in the clean
+lane remains unavailable until the declared type packages are installed; the
+reported missing packages were `@cloudflare/workers-types`, `node`, and
+`vinext/types`.
+
 ## Appearance
 
 The current non-destructive editor changes text color, background, font size, and
