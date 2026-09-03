@@ -238,8 +238,54 @@ $env:RELEASE_CODE_PHOTO_URL
 
 This build-only workflow does not run tests, lint, type checks, static analysis, accessibility checks, security checks, reviews, or screenshots.
 "@
-            $created = gh api --method POST "repos/$env:REPOSITORY/releases" -f "tag_name=$releaseTag" -f "target_commitish=$env:EXPECTED_SHA" -f "name=Nazca Railway v$env:RELEASE_VERSION · $env:RELEASE_CODE_NAME" -f "body=$body" -F draft=true | ConvertFrom-Json
-            if (-not $created.id -or -not $created.draft -or $created.tag_name -ne $releaseTag) { throw "Created release draft is not the expected $releaseTag record." }
+            $trackedCorpus = Get-Content -Raw (Join-Path $env:GITHUB_WORKSPACE 'data\corpus\reader\v0.1.0\manifest.json') | ConvertFrom-Json
+            $sourceReleases = @(gh api "repos/$env:REPOSITORY/releases?per_page=100" | ConvertFrom-Json | Where-Object { $_.tag_name -eq 'v0.1.1' -and -not $_.draft -and -not $_.prerelease })
+            if ($sourceReleases.Count -ne 1) { throw "Expected exactly one published v0.1.1 source release, found $($sourceReleases.Count)." }
+            $sourceRelease = $sourceReleases[0]
+            $seedNames = @('nazca-current-corpus-0.1.0.zip', 'nazca-current-corpus-0.1.0.zip.sha256', 'archive-manifest.json')
+            $seedAssets = @{}
+            foreach ($seedName in $seedNames) {
+              $matches = @($sourceRelease.assets | Where-Object name -ceq $seedName)
+              if ($matches.Count -ne 1 -or $matches[0].size -le 0) { throw "Published v0.1.1 source release does not contain exactly one nonempty $seedName asset." }
+              $seedAssets[$seedName] = $matches[0]
+            }
+            $seedDirectory = Join-Path $env:RUNNER_TEMP "nazca-v0.1.2-corpus-seed-$($env:GITHUB_RUN_ID)"
+            if (Test-Path -LiteralPath $seedDirectory) { Remove-Item -LiteralPath $seedDirectory -Recurse -Force }
+            New-Item -ItemType Directory -Path $seedDirectory -Force | Out-Null
+            try {
+              foreach ($seedName in $seedNames) {
+                $seedPath = Join-Path $seedDirectory $seedName
+                gh api "repos/$env:REPOSITORY/releases/assets/$($seedAssets[$seedName].id)" -H 'Accept: application/octet-stream' --output $seedPath
+                if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $seedPath -PathType Leaf)) { throw "Authenticated download failed for $seedName." }
+                $seedFile = Get-Item -LiteralPath $seedPath
+                if ($seedFile.Length -le 0 -or $seedFile.Length -ne [int64]$seedAssets[$seedName].size) { throw "Downloaded $seedName has an unexpected size." }
+              }
+              $archiveName = [string]$trackedCorpus.archive.name
+              if ($archiveName -ne 'nazca-current-corpus-0.1.0.zip') { throw 'Tracked corpus manifest changed the required v0.1.0 archive name.' }
+              $archivePath = Join-Path $seedDirectory $archiveName
+              if ((Get-Item -LiteralPath $archivePath).Length -ne [int64]$trackedCorpus.archive.bytes) { throw 'Downloaded raw corpus archive size does not match the tracked corpus manifest.' }
+              $archiveHash = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash.ToLowerInvariant()
+              if ($archiveHash -ne $trackedCorpus.archive.sha256) { throw "Downloaded raw corpus archive SHA-256 $archiveHash does not match the tracked corpus manifest." }
+              $checksumText = Get-Content -Raw -LiteralPath (Join-Path $seedDirectory 'nazca-current-corpus-0.1.0.zip.sha256')
+              if (-not $checksumText.Contains($trackedCorpus.archive.sha256) -or -not $checksumText.Contains($archiveName)) { throw 'Downloaded raw corpus checksum does not contain the tracked archive name and SHA-256.' }
+              $archiveManifest = Get-Content -Raw -LiteralPath (Join-Path $seedDirectory 'archive-manifest.json') | ConvertFrom-Json
+              if ($archiveManifest.archive -ne $archiveName -or $archiveManifest.articlePages -ne $trackedCorpus.counts.articles -or $archiveManifest.redirectPages -ne $trackedCorpus.counts.redirects) { throw 'Downloaded archive manifest does not match the tracked corpus manifest.' }
+              $created = gh api --method POST "repos/$env:REPOSITORY/releases" -f "tag_name=$releaseTag" -f "target_commitish=$env:EXPECTED_SHA" -f "name=Nazca Railway v$env:RELEASE_VERSION · $env:RELEASE_CODE_NAME" -f "body=$body" -F draft=true | ConvertFrom-Json
+              if (-not $created.id -or -not $created.draft -or $created.tag_name -ne $releaseTag) { throw "Created release draft is not the expected $releaseTag record." }
+              foreach ($seedName in $seedNames) {
+                $seedPath = Join-Path $seedDirectory $seedName
+                $assetName = [Uri]::EscapeDataString($seedName)
+                gh api --method POST "https://uploads.github.com/repos/$env:REPOSITORY/releases/assets?name=$assetName" --input $seedPath -H 'Content-Type: application/octet-stream' | Out-Null
+                if ($LASTEXITCODE -ne 0) { throw "Authenticated upload failed for $seedName." }
+              }
+              $seededDraft = gh api "repos/$env:REPOSITORY/releases/$($created.id)" | ConvertFrom-Json
+              foreach ($seedName in $seedNames) {
+                $uploaded = @($seededDraft.assets | Where-Object name -ceq $seedName)
+                if ($uploaded.Count -ne 1 -or $uploaded[0].size -ne (Get-Item -LiteralPath (Join-Path $seedDirectory $seedName)).Length) { throw "New v0.1.2 draft does not contain exactly one validated $seedName asset." }
+              }
+            } finally {
+              if (Test-Path -LiteralPath $seedDirectory) { Remove-Item -LiteralPath $seedDirectory -Recurse -Force }
+            }
             "release_id=$($created.id)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
           }
 
