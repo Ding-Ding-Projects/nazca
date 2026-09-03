@@ -8,6 +8,8 @@
 - Tracking issue: https://github.com/Ding-Ding-Projects/nazca/issues/1
 - Rolling progress: https://github.com/Ding-Ding-Projects/nazca/discussions/2
 - Release progress: https://github.com/Ding-Ding-Projects/nazca/discussions/3
+- Current v0.1.1 integration commit: `134ba0c5a127b4e87319199777399b48e2b59a05`
+- v0.1.1 release target: https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.1. Publication and asset verification are not claimed.
 
 ## Implemented
 
@@ -60,6 +62,12 @@
 - The design handoff record intentionally has no tests, browser interactions,
   or screenshots. Sites remains unavailable and the GitHub Wiki remains
   intentionally uninitialized.
+- The v0.1.1 home-design correction is implemented by
+  `c0f8aafcae2baf94c879ea746c349a3b92a9a75d` and integrated at
+  `134ba0c5a127b4e87319199777399b48e2b59a05`. It adds the atlas hero,
+  destination navigation, evidence and network composition, provenance
+  context, and the responsive phone composition. This correction lane ran no
+  tests, browser interactions, or screenshots.
 - Windows desktop runtime source with isolated renderer boundaries, loopback
   static serving, stable provenance, and an unsigned Squirrel.Windows packaging
   path. The installer itself remains unbuilt and unverified.
@@ -75,6 +83,10 @@
 - `npm run check:no-lfs`
 - Static bundle checks: 20-file Sites candidate and 25-file Pages mirror
 - Production dependency audit: zero high or critical advisories
+
+The checks above are historical baseline records. They were not rerun for the
+v0.1.1 home-design correction. That correction has an exact no-test,
+no-browser-interaction, and no-screenshot boundary.
 
 ## Source policy receipt
 
@@ -99,6 +111,8 @@ response as allowed or verified. The MediaWiki API capture is proceeding.
 The current reader is generated from the fresh non-reconciled snapshot. The raw
 corpus remains outside Git and is packaged as `nazca-current-corpus-0.1.0.zip`.
 The public Pages URL is `https://ding-ding-projects.github.io/nazca/`. A fresh
-workflow run, release publication, installer verification, and runtime capture
-are not claimed here. Historical revisions, media, maps, template and module
-closure, and stable reconciliation remain open.
+workflow run, v0.1.1 release publication, installer verification, and runtime
+capture are not claimed here. The expected v0.1.1 release URL is a target until
+external proof exists. Sites remains unavailable and the GitHub Wiki remains
+uninitialized. Historical revisions, media, maps, template and module closure,
+and stable reconciliation remain open.

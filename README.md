@@ -11,6 +11,12 @@ advertising rails or source-site runtime code.
 
 Published website: https://ding-ding-projects.github.io/nazca/
 
+The v0.1.1 release target is
+https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.1. This URL is a
+release target only until external publication and asset verification are
+complete. The release corrects the reader home design; it does not replace the
+`nazca-current-corpus-0.1.0.zip` corpus archive identity.
+
 The current reader contains 3,422 exact-revision rendered article records, 194
 redirects, 3,616 routes, and 54 shards. The rendered-capture manifest is
 `603528b6695d97da351d49d9e4155ef75ddfc221a90d80421448652ada9c3822`, and the
@@ -32,6 +38,14 @@ production paths are `components/nazca-shell.tsx`,
 update intentionally ran no tests, browser interactions, or screenshots. Sites
 remains unavailable and the GitHub Wiki remains intentionally uninitialized.
 
+The v0.1.1 home-design correction is implemented by
+`c0f8aafcae2baf94c879ea746c349a3b92a9a75d` and integrated at
+`134ba0c5a127b4e87319199777399b48e2b59a05`. It materially changes the reader
+home composition with an atlas hero, destination navigation, evidence and
+network panels, provenance context, and a phone layout. The correction lane
+intentionally ran no tests, browser interactions, or screenshots. The public
+Pages URL remains https://ding-ding-projects.github.io/nazca/.
+
 > [!IMPORTANT]
 > Candidate A now contains a fresh current snapshot: 3,422 article bodies and
 > 194 redirects captured in resumable 50-page batches, with 3,422 sanitized
@@ -45,6 +59,7 @@ remains unavailable and the GitHub Wiki remains intentionally uninitialized.
 - [Migration issue](https://github.com/Ding-Ding-Projects/nazca/issues/1)
 - [Rolling progress](https://github.com/Ding-Ding-Projects/nazca/discussions/2)
 - [v0.1.0 release progress](https://github.com/Ding-Ding-Projects/nazca/discussions/3)
+- [v0.1.1 release target](https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.1)
 - [Source article](https://enlossengas.fandom.com/wiki/Nazca_Railway_%28Los_Sengas_Division%29)
 - [Documentation index](docs/README.md)
 

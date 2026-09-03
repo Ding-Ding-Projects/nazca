@@ -12,6 +12,7 @@
 - [ ] Publish the primary Sites URL and set the repository homepage.
 - [ ] Deploy the identical GitHub Pages mirror.
 - [x] Add a secure Windows desktop runtime and Squirrel.Windows packaging path.
+- [x] Integrate the v0.1.1 home-design correction from implementation commit `c0f8aafcae2baf94c879ea746c349a3b92a9a75d` at integration commit `134ba0c5a127b4e87319199777399b48e2b59a05`, covering the atlas hero, destination, evidence, network, provenance, and phone compositions.
 
 ## Source corpus
 
@@ -61,5 +62,13 @@
 - [ ] Capture all required screens, states, widths, languages, themes, and scales.
 - [ ] Verify the selected 1b design against the built production paths; no tests, browser interactions, or screenshots have run in this design handoff lane.
 - [x] Add the build-only GitHub Actions release and Pages workflow; first remote release run remains pending.
-- [ ] Publish one unique non-draft v0.1.0 release and verify all assets.
+- [ ] Publish one unique non-draft v0.1.1 release and verify all assets at the release target https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.1. Publication is not claimed here.
+- [ ] ~~Publish one unique non-draft v0.1.0 release and verify all assets.~~ Superseded by the v0.1.1 home-design correction; the `nazca-current-corpus-0.1.0.zip` archive identity remains unchanged.
 - [ ] Publish the repository wiki, final handoff, and release announcement.
+
+## v0.1.1 release boundary
+
+The home-design correction intentionally ran no tests, browser interactions, or
+screenshots. The configured Sites project remains unavailable, and the GitHub
+Wiki remains uninitialized. The public Pages URL remains
+https://ding-ding-projects.github.io/nazca/.
