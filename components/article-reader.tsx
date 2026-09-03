@@ -18,6 +18,7 @@ import {
   Map,
   Moon,
   ScrollText,
+  Search,
   Settings,
   Sun,
   TrainFront,
@@ -269,7 +270,7 @@ export function ArticleReader({
 
             <aside className="article-right-rail" aria-label="Article summary">
               <section className="article-summary-card">
-                <p className="article-card-label">ARTICLE AT A GLANCE</p>
+                <p className="article-card-label">{presentation === 'station' ? 'STATION AT A GLANCE' : presentation === 'year' ? 'YEAR AT A GLANCE' : 'ARTICLE AT A GLANCE'}</p>
                 <dl>
                   <div><dt>Title</dt><dd>{record.displayTitle}</dd></div>
                   <div><dt>Sections</dt><dd>{record.headings.length}</dd></div>
@@ -293,6 +294,12 @@ export function ArticleReader({
           </div>
         </main>
       </div>
+      <nav className="reader-bottom-nav" aria-label="Reader quick navigation">
+        <button type="button" onClick={() => navigateDestination('home')}><Home size={19} aria-hidden="true" /><span>Home</span></button>
+        <button type="button" onClick={() => navigateDestination('stations')}><TrainFront size={19} aria-hidden="true" /><span>Stations</span></button>
+        <button type="button" onClick={() => document.getElementById('article-global-search-input')?.focus()}><Search size={19} aria-hidden="true" /><span>Search</span></button>
+        <button type="button" onClick={() => document.getElementById('article-content')?.focus()}><BookOpen size={19} aria-hidden="true" /><span>Reading</span></button>
+      </nav>
     </div>
   );
 }

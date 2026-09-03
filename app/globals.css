@@ -2445,3 +2445,7 @@ input:focus-visible,
   .article-layout-reference .article-source-card { flex-direction: column; }
   .article-layout-reference .article-source-card a { width: 100%; justify-content: center; }
 }
+
+@media (max-width: 38rem) {
+  .article-app-shell .article-tab-dock { display: none; }
+}
