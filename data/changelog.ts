@@ -120,6 +120,6 @@ export const changelogEntries: ChangelogEntry[] = [
     title: 'Completed Reader 1b state compositions',
     summary:
       'Added corpus-backed station and year presentations, full destination and dedicated search states, shared redirect and not-found recovery surfaces, and responsive phone bottom navigation.',
-    commit: 'a9db9ad8caa1ba31206e9aeab27f81c6c6c594f3',
+    commit: '835764c9fe0db7872472c88724fb42b95c7bad6c',
   },
 ];
