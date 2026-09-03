@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const VINEXT = path.join(ROOT, 'node_modules', 'vinext', 'dist', 'cli.js');
+const SEARCH_INDEX_SOURCE = path.join(ROOT, 'data', 'corpus', 'reader', 'v0.1.0', 'search-index.json');
 const command = process.argv[2] ?? 'build';
 const pages = process.argv.includes('--pages');
 const staticOnly = process.argv.includes('--static');
@@ -116,6 +117,20 @@ async function stageBuiltAsset(asset) {
   );
 }
 
+async function stageSearchIndex() {
+  const sourceBytes = await readFile(SEARCH_INDEX_SOURCE);
+  const digest = createHash('sha256').update(sourceBytes).digest('hex');
+  const target = path.join(ROOT, 'dist', 'client', 'search-index.json');
+  await copyFile(SEARCH_INDEX_SOURCE, target);
+  const targetBytes = await readFile(target);
+  const targetDigest = createHash('sha256').update(targetBytes).digest('hex');
+  if (sourceBytes.byteLength !== targetBytes.byteLength || digest !== targetDigest)
+    throw new Error('The staged search index does not match the tracked source.');
+  console.log(
+    `[search-index] staged search-index.json bytes=${targetBytes.byteLength} sha256=${targetDigest}`,
+  );
+}
+
 async function normalizePagesOutput() {
   const client = path.join(ROOT, 'dist', 'client');
   const nestedRoot = path.join(client, 'nazca');
@@ -168,5 +183,6 @@ if (result.signal)
 if (result.code === 0 && command === 'build') {
   if (pages) await normalizePagesOutput();
   await stageBuiltAsset(bundledAsset);
+  await stageSearchIndex();
 }
 process.exitCode = result.code;

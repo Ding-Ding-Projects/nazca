@@ -45,6 +45,13 @@ v0.1.2 deployment, installer publication, or release publication. The v0.1.2
 installer was not built in this documentation lane. The published v0.1.1
 installer remains verified.
 
+The route boundary does not serialize the complete search index into each
+prerendered HTML page. After a successful build, `scripts/run-vinext.mjs` copies
+the tracked `data/corpus/reader/v0.1.0/search-index.json` exactly once to
+`dist/client/search-index.json`, verifies the copied bytes against the source,
+and records the output byte count and SHA-256 in the build log. Both the normal
+Sites root and the normalized Pages output use that one client asset.
+
 The v0.1.2 release specification is tracked in
 `data/release-v0.1.2.json`. It records the published Bamboo Shoot Har Gow code
 name, catalog revision, immutable photo asset digest, and the unchanged raw

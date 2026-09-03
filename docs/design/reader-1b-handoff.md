@@ -37,6 +37,15 @@ build is required before v0.1.2 deployment, installer publication, release
 publication, runtime interaction, visual parity, or capture evidence can be
 claimed.
 
+The redirect and not-found states keep their prerendered props bounded: route
+metadata and the not-found article count are passed server-side, while the
+complete search index is loaded once from the local `search-index.json` asset on
+the client. `scripts/run-vinext.mjs` stages that tracked file exactly once at
+`dist/client/search-index.json`, records its bytes and SHA-256, and serves it
+through `/search-index.json` for the Sites root or `/nazca/search-index.json`
+for the Pages mirror. A missing, oversized, malformed, duplicate, or invalid
+record produces an honest local index error instead of partial results.
+
 ## Screen and state inventory
 
 | ID | Reference state | Production route | Theme and viewport | Implementation |

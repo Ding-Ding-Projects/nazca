@@ -79,14 +79,46 @@ function recordToSearchRecord(record: CorpusSearchRecord): SearchRecord {
   };
 }
 
+function parseSearchIndex(value: unknown): CorpusSearchRecord[] {
+  if (!Array.isArray(value) || value.length > 10_000) throw new Error('The local reader index is outside its supported bounds.');
+  const records: CorpusSearchRecord[] = [];
+  const ids = new Set<string>();
+  for (const item of value) {
+    if (!item || typeof item !== 'object') throw new Error('The local reader index has an invalid record.');
+    const record = item as Record<string, unknown>;
+    const arrays = ['aliases', 'categories'];
+    if (typeof record.id !== 'string' || record.id.length < 1 || record.id.length > 240 || ids.has(record.id)) throw new Error('The local reader index has an invalid record id.');
+    if (typeof record.pageId !== 'number' || !Number.isInteger(record.pageId) || record.pageId < 1) throw new Error('The local reader index has an invalid page id.');
+    if (typeof record.title !== 'string' || record.title.length < 1 || record.title.length > 512 || typeof record.displayTitle !== 'string' || record.displayTitle.length > 1024 || typeof record.excerpt !== 'string' || record.excerpt.length > 640 || typeof record.route !== 'string' || !record.route.startsWith('/wiki/') || record.route.length > 2048) throw new Error('The local reader index has an invalid text or route field.');
+    for (const key of arrays) {
+      const entries = record[key];
+      if (!Array.isArray(entries) || entries.length > 512 || entries.some((entry) => typeof entry !== 'string' || entry.length < 1 || entry.length > 512)) throw new Error('The local reader index has an invalid list field.');
+    }
+    ids.add(record.id);
+    records.push({
+      id: record.id,
+      pageId: record.pageId,
+      title: record.title,
+      displayTitle: record.displayTitle,
+      aliases: record.aliases as string[],
+      categories: record.categories as string[],
+      excerpt: record.excerpt,
+      route: record.route,
+    });
+  }
+  return records;
+}
+
 export function ReaderStatePage({
   state: readerState,
   provenance,
-  corpusSearch = [],
+  articleCount = 0,
+  fallbackArticleRoute,
 }: {
   state: ReaderState;
   provenance: BuildProvenance;
-  corpusSearch?: CorpusSearchRecord[];
+  articleCount?: number;
+  fallbackArticleRoute?: string;
 }) {
   const router = useRouter();
   const { notifications, setPaletteOpen, state, text, updateSettings } = useVisitorState();
@@ -94,11 +126,32 @@ export function ReaderStatePage({
   const languageMode = settings.schoolMode.enabled ? 'en' : settings.languageMode;
   const L = (english: string, cantonese: string) => text(localize(english, cantonese, languageMode));
   const [updatedAt, setUpdatedAt] = useState(() => formatBuildTime(provenance.builtAt));
+  const [corpusSearch, setCorpusSearch] = useState<CorpusSearchRecord[] | null>(null);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setUpdatedAt(formatBuildTime(provenance.builtAt, true)), 0);
     return () => clearTimeout(timer);
   }, [provenance.builtAt]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const loadSearchIndex = async () => {
+      try {
+        const response = await fetch(publicPath('/search-index.json'), { signal: controller.signal, cache: 'no-store' });
+        if (!response.ok) throw new Error(`The local reader index could not be loaded (HTTP ${response.status}).`);
+        const bytes = await response.arrayBuffer();
+        if (bytes.byteLength > 8 * 1024 * 1024) throw new Error('The local reader index exceeds the supported size bound.');
+        const parsed = parseSearchIndex(JSON.parse(new TextDecoder().decode(bytes)));
+        setCorpusSearch(parsed);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setSearchError(error instanceof Error ? error.message : 'The local reader index could not be loaded.');
+      }
+    };
+    loadSearchIndex();
+    return () => controller.abort();
+  }, []);
 
   const openHome = () => router.push(publicPath('/'));
   const openDestination = (destination: string) => {
@@ -109,7 +162,7 @@ export function ReaderStatePage({
     router.push(publicPath(`/?tab=${encodeURIComponent(destination)}`));
   };
   const openRecord = (record: SearchRecord) => {
-    const match = corpusSearch.find((candidate) => candidate.id === record.id);
+    const match = (corpusSearch ?? []).find((candidate) => candidate.id === record.id);
     if (match) router.push(publicPath(match.route));
   };
   const openNotifications = () => {
@@ -119,16 +172,15 @@ export function ReaderStatePage({
   const isRedirect = readerState.kind === 'redirect';
   const redirect = isRedirect ? readerState.record : null;
   const redirectTarget = redirect?.targetRoute ? publicPath(redirect.targetRoute) : null;
-  const fallbackArticle = corpusSearch.find((record) => record.title === 'Nazca Railway (Los Sengas Division)');
   const openReading = () => {
-    const route = redirectTarget ?? (fallbackArticle ? publicPath(fallbackArticle.route) : null);
+    const route = redirectTarget ?? (fallbackArticleRoute ? publicPath(fallbackArticleRoute) : null);
     if (route) {
       router.push(route);
       return;
     }
     openDestination('explore');
   };
-  const searchRecords = corpusSearch.map(recordToSearchRecord);
+  const searchRecords = (corpusSearch ?? []).map(recordToSearchRecord);
 
   return (
     <div className="article-app-shell reader-state-page" data-reader-state={readerState.kind} data-element-id={`reader-state:${readerState.kind}`} data-element-kind="page">
@@ -212,17 +264,10 @@ export function ReaderStatePage({
             ) : (
               <>
                 <h1>That title is not in the current corpus</h1>
-                <p className="reader-state-lede">The current snapshot contains {corpusSearch.length.toLocaleString()} article records. The requested title may be pending import, outside this snapshot, or unavailable at the source.</p>
+                <p className="reader-state-lede">The current snapshot contains {articleCount.toLocaleString()} article records. The requested title may be pending import, outside this snapshot, or unavailable at the source.</p>
                 <div className="reader-state-search-card">
                   <Search size={17} aria-hidden="true" />
-                  <SearchWorkbench
-                    surfaceId="reader-not-found-search"
-                    label="Search the encyclopedia instead"
-                    placeholder="Search the encyclopedia instead"
-                    records={searchRecords}
-                    onActivate={openRecord}
-                    compact
-                  />
+                  {corpusSearch === null ? <p className="reader-state-search-status" role="status">{searchError ?? 'Loading the local reader index…'}</p> : searchError ? <p className="reader-state-search-status" role="status">{searchError}</p> : <SearchWorkbench surfaceId="reader-not-found-search" label="Search the encyclopedia instead" placeholder="Search the encyclopedia instead" records={searchRecords} onActivate={openRecord} compact />}
                 </div>
                 <div className="reader-state-actions reader-state-actions-stack">
                   <button type="button" className="button" onClick={openHome}>Return to the atlas home <span aria-hidden="true">→</span></button>
@@ -238,7 +283,7 @@ export function ReaderStatePage({
         <button type="button" onClick={openHome}><Home size={19} aria-hidden="true" /><span>Home</span></button>
         <button type="button" onClick={() => openDestination('stations')}><TrainFront size={19} aria-hidden="true" /><span>Stations</span></button>
         <button type="button" onClick={() => document.getElementById('reader-boundary-search-input')?.focus()}><Search size={19} aria-hidden="true" /><span>Search</span></button>
-        <button type="button" onClick={openReading}><BookOpen size={19} aria-hidden="true" /><span>{redirectTarget || fallbackArticle ? 'Reading' : 'Explore'}</span></button>
+        <button type="button" onClick={openReading}><BookOpen size={19} aria-hidden="true" /><span>{redirectTarget || fallbackArticleRoute ? 'Reading' : 'Explore'}</span></button>
       </nav>
     </div>
   );

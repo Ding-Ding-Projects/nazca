@@ -42,6 +42,13 @@ including its query and `/nazca/` project prefix, and does not clear visitor
 state. Reloading is user-controlled, so an active edit is not interrupted by an
 automatic loop.
 
+Redirect and not-found pages receive only their small route facts. Their search
+controls fetch the one local `search-index.json` asset from the same origin and
+validate its bounded JSON shape in the browser. The Sites root resolves the
+asset at `/search-index.json`; the GitHub Pages mirror resolves it at
+`/nazca/search-index.json` through the existing project-path helper. No full
+search array is serialized into every route, and no remote URL is used.
+
 ## Configuration
 
 - `npm run build`: Sites candidate

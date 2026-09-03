@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { ArticleReader } from '@/components/article-reader';
 import { ReaderStatePage } from '@/components/reader-state-page';
 import { buildProvenance } from '@/lib/provenance';
-import { loadCurrentRoute, loadCurrentRoutes, loadCurrentSearchIndex } from '@/lib/current-corpus';
+import { loadCurrentRoute, loadCurrentRoutes } from '@/lib/current-corpus';
 import { publicPath } from '@/lib/public-path';
 
 function routeFromSlug(slug: string[]) {
@@ -44,7 +44,7 @@ export default async function WikiArticlePage({ params }: { params: Promise<{ sl
   return (
     <>
       {target ? <meta httpEquiv="refresh" content={`0;url=${target}`} /> : null}
-      <ReaderStatePage state={{ kind: 'redirect', record: result.record }} provenance={buildProvenance} corpusSearch={loadCurrentSearchIndex()} />
+      <ReaderStatePage state={{ kind: 'redirect', record: result.record }} provenance={buildProvenance} />
     </>
   );
 }
