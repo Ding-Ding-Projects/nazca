@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "version": "0.1.2",
+  "tag": "v0.1.2",
+  "codeName": {
+    "id": "hk-dish-0003",
+    "display": "Bamboo Shoot Har Gow · 筍尖蝦餃",
+    "en": "Bamboo Shoot Har Gow",
+    "zhHant": "筍尖蝦餃",
+    "catalogUrl": "https://raw.githubusercontent.com/Ding-Ding-Projects/dim-sum-photos/main/catalog/index.json",
+    "catalogRevision": "736e8c1d9e40e1d146f3c3b11bb329b97c4ef515",
+    "assetRelease": "catalog-v1",
+    "assetPath": "hk-dish-0003-bamboo-shoot-har-gow.png",
+    "assetUrl": "https://github.com/Ding-Ding-Projects/dim-sum-photos/releases/download/catalog-v1/hk-dish-0003-bamboo-shoot-har-gow.png",
+    "assetBytes": 2400309,
+    "assetSha256": "0b4165212c975f47076385acf9e01ed686c9974765d6476cc3cb36bbe46e45ad"
+  },
+  "corpus": {
+    "readerDirectory": "data/corpus/reader/v0.1.0",
+    "archiveName": "nazca-current-corpus-0.1.0.zip",
+    "archiveIdentity": "v0.1.0 raw current-corpus archive remains unchanged"
+  },
+  "publication": {
+    "target": "main",
+    "draftFirst": true,
+    "uniqueNumericTag": true,
+    "photoHandling": "link-only, no copied or attached consumer-repository photo"
+  }
+}

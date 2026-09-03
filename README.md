@@ -11,11 +11,17 @@ advertising rails or source-site runtime code.
 
 Published website: https://ding-ding-projects.github.io/nazca/
 
-The v0.1.1 release target is
-https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.1. This URL is a
-release target only until external publication and asset verification are
-complete. The release corrects the reader home design; it does not replace the
-`nazca-current-corpus-0.1.0.zip` corpus archive identity.
+The v0.1.1 release is published and verified at
+https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.1, targeting
+`f66dc3709941c8795f12121ee4df2a0340e4e8dc`. It corrects the reader home design
+without replacing the `nazca-current-corpus-0.1.0.zip` corpus archive identity.
+
+The next release target is v0.1.2:
+https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.2. Its planned
+code name is `Bamboo Shoot Har Gow · 筍尖蝦餃`, using the published
+`hk-dish-0003-bamboo-shoot-har-gow.png` asset from the public catalog. The
+workflow creates or reuses exactly one numeric v0.1.2 draft, then publishes it
+only after the Pages deployment and generated asset checks complete.
 
 The current reader contains 3,422 exact-revision rendered article records, 194
 redirects, 3,616 routes, and 54 shards. The rendered-capture manifest is
@@ -59,7 +65,8 @@ Pages URL remains https://ding-ding-projects.github.io/nazca/.
 - [Migration issue](https://github.com/Ding-Ding-Projects/nazca/issues/1)
 - [Rolling progress](https://github.com/Ding-Ding-Projects/nazca/discussions/2)
 - [v0.1.0 release progress](https://github.com/Ding-Ding-Projects/nazca/discussions/3)
-- [v0.1.1 release target](https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.1)
+- [v0.1.1 release](https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.1)
+- [v0.1.2 release target](https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.2)
 - [Source article](https://enlossengas.fandom.com/wiki/Nazca_Railway_%28Los_Sengas_Division%29)
 - [Documentation index](docs/README.md)
 
@@ -159,9 +166,12 @@ not substitute design references or generated artwork for runtime evidence.
 
 ## Human implementation estimate
 
-The first release will publish a reproducible line-count table and a human-time
-estimate from the committed counter. No estimate is stated before that release,
-because a number detached from its measured commit would be misleading.
+The published v0.1.1 release measured 25,774 project lines excluding
+documentation, generated corpus, and generated scaffold, with 24,872 nonblank
+lines. Its human implementation estimate is 830 to 1,659 hours, calculated as
+24,872 non-generated project lines at 30 to 15 reviewed lines per hour. This is
+an estimate, not a recorded duration. The v0.1.2 release will refresh the
+convenience copy from its own committed counter report.
 
 ## Project rules mirror
 

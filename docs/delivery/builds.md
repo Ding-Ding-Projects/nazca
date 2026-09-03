@@ -24,8 +24,25 @@ The build-only release workflow uses the root and desktop lockfiles, builds the
 root-path reader, packages unsigned Squirrel.Windows outputs, and prepares the
 static ZIP, setup executable, `RELEASES`, the full and any generated delta nupkg
 files, desktop and combined manifests, `SHA256SUMS.txt`, and the committed
-line-count report. It intentionally runs no tests, lint, type checks, static
-analysis, accessibility checks, security checks, reviews, or screenshots.
+line-count report. The next release is v0.1.2, with its version recorded in both
+package manifests and both lockfiles. It intentionally runs no tests, lint, type
+checks, static analysis, accessibility checks, security checks, reviews, or
+screenshots.
+
+The v0.1.2 release specification is tracked in
+`data/release-v0.1.2.json`. It records the published Bamboo Shoot Har Gow code
+name, catalog revision, immutable photo asset digest, and the unchanged raw
+v0.1.0 archive identity. The photo is linked in release notes and is not copied
+or attached to this consumer release.
+
+When the v0.1.2 workflow creates a new draft, it stages the three immutable
+corpus assets from the one published v0.1.1 release: `nazca-current-corpus-0.1.0.zip`,
+its `.sha256` checksum, and `archive-manifest.json`. It downloads them through
+authenticated `gh` operations into a bounded runner temporary directory,
+validates names, sizes, the tracked archive byte count, SHA-256, and manifest
+counts, uploads them to the new draft, verifies their presence, and removes the
+temporary directory. An existing v0.1.2 draft is not mutated by this staging
+step; its assets are checked by the later exact preservation validation.
 
 All three root scripts accept `/s`, `--silent`, or `SILENT=1`.
 

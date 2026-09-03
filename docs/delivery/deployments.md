@@ -14,9 +14,13 @@ The v0.1.1 home-design correction is implemented by
 `c0f8aafcae2baf94c879ea746c349a3b92a9a75d` and integrated at
 `134ba0c5a127b4e87319199777399b48e2b59a05`. The new home composition includes
 an atlas hero, destination navigation, evidence and network panels, provenance
-context, and a responsive phone composition. The expected release target is
-https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.1. It is not
-presented as published until external release and asset proof exists. The raw
+context, and a responsive phone composition. The published v0.1.1 release
+targets `f66dc3709941c8795f12121ee4df2a0340e4e8dc` at
+https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.1. The next target
+is v0.1.2 at https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.2,
+pending integration of the Reader 1b state-completion lane. Its planned code
+name is `Bamboo Shoot Har Gow · 筍尖蝦餃`, linked from the published catalog asset
+without copying the photo into this repository. The raw
 `nazca-current-corpus-0.1.0.zip` archive identity remains unchanged.
 
 The current reader release contains 3,422 articles, 194 redirects, 3,616
@@ -63,9 +67,10 @@ state.
 
 ## Verification
 
-The Pages URL is configured as shown above. A fresh workflow run, release
-publication, and installer verification remain pending. The workflow and the
-v0.1.1 correction lane run no tests, lint, type checks, static analysis,
+The Pages URL is configured as shown above. The v0.1.1 workflow run, release
+publication, Pages deployment, and installer assets are verified. The v0.1.2
+workflow run, release publication, and installer verification remain pending.
+The workflow and the v0.1.1 correction lane run no tests, lint, type checks, static analysis,
 accessibility checks, security checks, reviews, browser interactions, or
 screenshots. The GitHub Wiki is intentionally uninitialized, and the configured
 Sites project remains unavailable. The public Pages URL remains
