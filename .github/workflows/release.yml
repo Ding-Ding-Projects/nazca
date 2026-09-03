@@ -255,7 +255,7 @@ This build-only workflow does not run tests, lint, type checks, static analysis,
             try {
               foreach ($seedName in $seedNames) {
                 $seedPath = Join-Path $seedDirectory $seedName
-                gh api "repos/$env:REPOSITORY/releases/assets/$($seedAssets[$seedName].id)" -H 'Accept: application/octet-stream' --output $seedPath
+                gh release download v0.1.1 --repo $env:REPOSITORY --pattern $seedName --dir $seedDirectory --clobber
                 if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $seedPath -PathType Leaf)) { throw "Authenticated download failed for $seedName." }
                 $seedFile = Get-Item -LiteralPath $seedPath
                 if ($seedFile.Length -le 0 -or $seedFile.Length -ne [int64]$seedAssets[$seedName].size) { throw "Downloaded $seedName has an unexpected size." }
@@ -275,7 +275,7 @@ This build-only workflow does not run tests, lint, type checks, static analysis,
               foreach ($seedName in $seedNames) {
                 $seedPath = Join-Path $seedDirectory $seedName
                 $assetName = [Uri]::EscapeDataString($seedName)
-                gh api --method POST "https://uploads.github.com/repos/$env:REPOSITORY/releases/assets?name=$assetName" --input $seedPath -H 'Content-Type: application/octet-stream' | Out-Null
+                gh api --method POST "https://uploads.github.com/repos/$env:REPOSITORY/releases/$($created.id)/assets?name=$assetName" --input $seedPath -H 'Content-Type: application/octet-stream' | Out-Null
                 if ($LASTEXITCODE -ne 0) { throw "Authenticated upload failed for $seedName." }
               }
               $seededDraft = gh api "repos/$env:REPOSITORY/releases/$($created.id)" | ConvertFrom-Json
