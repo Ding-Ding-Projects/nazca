@@ -7,6 +7,9 @@ on:
 permissions:
   contents: read
 
+env:
+  RELEASE_VERSION: '0.1.1'
+
 jobs:
   build-pages:
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
@@ -127,15 +130,19 @@ jobs:
           if ($stage -ne $expectedStage -or -not $stage.StartsWith($workspace + [IO.Path]::DirectorySeparatorChar)) { throw "Unsafe release staging path: $stage" }
           if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
           New-Item -ItemType Directory -Path $stage -Force | Out-Null
-          $static = Join-Path $env:GITHUB_WORKSPACE 'outputs\nazca-railway-static-0.1.0.zip'
+          $packageVersion = (Get-Content -Raw (Join-Path $env:GITHUB_WORKSPACE 'package.json') | ConvertFrom-Json).version
+          if ($packageVersion -ne $env:RELEASE_VERSION) { throw "Root package version $packageVersion does not match expected release $env:RELEASE_VERSION." }
+          $staticName = "nazca-railway-static-$packageVersion.zip"
+          $setupName = "Nazca-Railway-$packageVersion-Setup.exe"
+          $static = Join-Path $env:GITHUB_WORKSPACE (Join-Path 'outputs' $staticName)
           $squirrel = Join-Path $env:GITHUB_WORKSPACE 'dist\desktop\squirrel-windows'
-          $setup = Get-ChildItem -LiteralPath $squirrel -File | Where-Object { $_.Name -match '(?i)setup\.exe$' } | Select-Object -First 1
+          $setup = Get-ChildItem -LiteralPath $squirrel -File | Where-Object { $_.Name -ceq $setupName } | Select-Object -First 1
           $releases = Get-ChildItem -LiteralPath $squirrel -File | Where-Object { $_.Name -ceq 'RELEASES' } | Select-Object -First 1
           $full = Get-ChildItem -LiteralPath $squirrel -File | Where-Object { $_.Name -match '(?i)\.nupkg$' -and $_.Name -notmatch '(?i)\.delta\.nupkg$' } | Select-Object -First 1
           if (-not (Test-Path -LiteralPath $static -PathType Leaf)) { throw "Static bundle is missing: $static" }
-          if (-not $setup -or -not $releases -or -not $full) { throw 'Squirrel.Windows outputs are incomplete.' }
-          Copy-Item -LiteralPath $static -Destination (Join-Path $stage 'nazca-railway-static-0.1.0.zip')
-          Copy-Item -LiteralPath $setup.FullName -Destination (Join-Path $stage 'Nazca-Railway-0.1.0-Setup.exe')
+          if (-not $setup -or -not $releases -or -not $full) { throw "Squirrel.Windows outputs are incomplete for $packageVersion." }
+          Copy-Item -LiteralPath $static -Destination (Join-Path $stage $staticName)
+          Copy-Item -LiteralPath $setup.FullName -Destination (Join-Path $stage $setupName)
           Copy-Item -LiteralPath $releases.FullName -Destination (Join-Path $stage 'RELEASES')
           Copy-Item -LiteralPath $full.FullName -Destination (Join-Path $stage $full.Name)
           Get-ChildItem -LiteralPath $squirrel -File -Filter '*.delta.nupkg' | ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $stage $_.Name) }
@@ -143,7 +150,7 @@ jobs:
           Copy-Item -LiteralPath (Join-Path $env:GITHUB_WORKSPACE 'data\corpus\reader\v0.1.0\manifest.json') -Destination (Join-Path $stage 'corpus-manifest.json')
           & node scripts/count-lines.mjs --json | Set-Content -LiteralPath (Join-Path $stage 'line-count-report.json') -Encoding utf8
           $desktopManifest = Get-Content -Raw (Join-Path $stage 'desktop-release-manifest.json') | ConvertFrom-Json
-          $combined = [ordered]@{ schemaVersion = 1; sourceCommit = (git rev-parse HEAD); version = '0.1.0'; staticBundle = 'nazca-railway-static-0.1.0.zip'; desktopManifest = 'desktop-release-manifest.json'; desktopFiles = $desktopManifest.files; generatedAt = (Get-Date).ToUniversalTime().ToString('o') }
+          $combined = [ordered]@{ schemaVersion = 1; sourceCommit = (git rev-parse HEAD); version = $packageVersion; staticBundle = $staticName; desktopManifest = 'desktop-release-manifest.json'; desktopFiles = $desktopManifest.files; generatedAt = (Get-Date).ToUniversalTime().ToString('o') }
           $combined | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $stage 'combined-release-manifest.json') -Encoding utf8
           $sumLines = Get-ChildItem -LiteralPath $stage -File | Sort-Object Name | ForEach-Object { $hash = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(); "$hash  $($_.Name)" }
           $sumLines | Set-Content -LiteralPath (Join-Path $stage 'SHA256SUMS.txt') -Encoding ascii
@@ -188,13 +195,15 @@ jobs:
           name: nazca-release-assets-${{ github.run_id }}
           path: release-staging
 
-      - name: Locate the existing v0.1.0 draft
+      - name: Locate the existing numeric v0.1.1 draft
         id: draft
         shell: pwsh
         run: |
+          $releaseTag = "v$env:RELEASE_VERSION"
+          if ($releaseTag -notmatch '^v\d+\.\d+\.\d+$') { throw "Release tag is not numeric: $releaseTag" }
           $releases = gh api "repos/$env:REPOSITORY/releases?per_page=100" | ConvertFrom-Json
-          $drafts = @($releases | Where-Object { $_.draft -and $_.tag_name -eq 'v0.1.0' })
-          if ($drafts.Count -ne 1) { throw "Expected exactly one numeric v0.1.0 draft, found $($drafts.Count)." }
+          $drafts = @($releases | Where-Object { $_.draft -and $_.tag_name -eq $releaseTag -and $_.tag_name -match '^v\d+\.\d+\.\d+$' })
+          if ($drafts.Count -ne 1) { throw "Expected exactly one numeric $releaseTag draft, found $($drafts.Count)." }
           "release_id=$($drafts[0].id)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
       - name: Verify generated assets and preserve corpus assets
@@ -205,7 +214,7 @@ jobs:
           $stage = Join-Path $env:GITHUB_WORKSPACE 'release-staging'
           foreach ($file in Get-ChildItem -LiteralPath $stage -File) { if ($file.Length -le 0) { throw "Generated asset is empty: $($file.Name)" } }
           $release = gh api "repos/$env:REPOSITORY/releases/$env:RELEASE_ID" | ConvertFrom-Json
-          if (-not $release.target_commitish) { throw 'The v0.1.0 draft has no target commit.' }
+          if (-not $release.target_commitish) { throw "The $env:RELEASE_VERSION draft has no target commit." }
           $draftTarget = gh api "repos/$env:REPOSITORY/commits/$($release.target_commitish)" --jq .sha
           if ($draftTarget.Trim() -ne $env:EXPECTED_SHA) { throw "Draft target $($draftTarget.Trim()) does not match $env:EXPECTED_SHA." }
           $checksums = @{}
@@ -293,11 +302,12 @@ jobs:
           RELEASE_ID: ${{ steps.draft.outputs.release_id }}
         run: |
           $release = gh api "repos/$env:REPOSITORY/releases/$env:RELEASE_ID" | ConvertFrom-Json
-          if ($release.draft -or $release.tag_name -ne 'v0.1.0') { throw 'Published release is not the expected non-draft v0.1.0 record.' }
-          $tagSha = gh api "repos/$env:REPOSITORY/commits/v0.1.0" --jq .sha
-          if ($tagSha.Trim() -ne $env:EXPECTED_SHA) { throw "v0.1.0 targets $($tagSha.Trim()), expected $env:EXPECTED_SHA." }
+          $releaseTag = "v$env:RELEASE_VERSION"
+          if ($release.draft -or $release.tag_name -ne $releaseTag) { throw "Published release is not the expected non-draft $releaseTag record." }
+          $tagSha = gh api "repos/$env:REPOSITORY/commits/$releaseTag" --jq .sha
+          if ($tagSha.Trim() -ne $env:EXPECTED_SHA) { throw "$releaseTag targets $($tagSha.Trim()), expected $env:EXPECTED_SHA." }
           $assets = @($release.assets)
-          $required = @('nazca-railway-static-0.1.0.zip', 'Nazca-Railway-0.1.0-Setup.exe', 'RELEASES', 'desktop-release-manifest.json', 'combined-release-manifest.json', 'SHA256SUMS.txt', 'line-count-report.json')
+          $required = @("nazca-railway-static-$env:RELEASE_VERSION.zip", "Nazca-Railway-$env:RELEASE_VERSION-Setup.exe", 'RELEASES', 'desktop-release-manifest.json', 'combined-release-manifest.json', 'SHA256SUMS.txt', 'line-count-report.json')
           foreach ($name in $required) { $asset = $assets | Where-Object name -eq $name; if (-not $asset -or $asset.size -le 0) { throw "Required release asset is missing or empty: $name" } }
           if (-not ($assets | Where-Object { $_.name -match '(?i)\.nupkg$' -and $_.name -notmatch '(?i)\.delta\.nupkg$' })) { throw 'Full nupkg is missing.' }
           $delta = @($assets | Where-Object { $_.name -match '(?i)\.delta\.nupkg$' })

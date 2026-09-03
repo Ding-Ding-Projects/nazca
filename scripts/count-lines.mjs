@@ -7,6 +7,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const BLAME_MAX_BUFFER_BYTES = 512 * 1024 * 1024;
 const INCLUDED = new Set([
   '.bat',
   '.cjs',
@@ -25,7 +26,11 @@ const INCLUDED = new Set([
 ]);
 
 function git(...arguments_) {
-  return execFileSync('git', arguments_, { cwd: ROOT, encoding: 'utf8' });
+  return execFileSync('git', arguments_, {
+    cwd: ROOT,
+    encoding: 'utf8',
+    maxBuffer: BLAME_MAX_BUFFER_BYTES,
+  });
 }
 
 function lineCount(text) {
@@ -37,6 +42,7 @@ function lineCount(text) {
 
 function category(relativePath) {
   const normalized = relativePath.replaceAll('\\', '/');
+  if (normalized.startsWith('data/corpus/')) return 'Generated corpus';
   if (normalized.startsWith('components/ui/')) return 'Generated scaffold';
   if (/(^|\/)(tests?|__tests__)(\/|$)|\.(test|spec)\./i.test(normalized))
     return 'Tests';
@@ -61,8 +67,11 @@ function blameAgentLines(relativePath) {
       agent: authors.filter((author) => author === 'Claude Fable 5').length,
       human: authors.filter((author) => author !== 'Claude Fable 5').length,
     };
-  } catch {
-    return { agent: 0, human: 0 };
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`git blame failed for ${relativePath}: ${detail}`, {
+      cause: error,
+    });
   }
 }
 
@@ -98,16 +107,26 @@ const ordered = [
   'Styles and markup',
   'Configuration and build',
   'Documentation',
+  'Generated corpus',
   'Generated scaffold',
 ].map((name) => ({
   name,
   ...(rows.get(name) ?? { files: 0, lines: 0, nonblank: 0 }),
 }));
 const projectRows = ordered.filter(
-  (row) => !['Documentation', 'Generated scaffold'].includes(row.name),
+  (row) =>
+    !['Documentation', 'Generated corpus', 'Generated scaffold'].includes(
+      row.name,
+    ),
 );
 const sum = (items, field) =>
   items.reduce((total, item) => total + item[field], 0);
+const grandTotalLines = sum(ordered, 'lines');
+if (agentLines + humanLines !== grandTotalLines) {
+  throw new Error(
+    `Attribution mismatch: ${agentLines} agent lines + ${humanLines} human lines != ${grandTotalLines} grand-total lines`,
+  );
+}
 const projectNonblank = sum(projectRows, 'nonblank');
 const estimateLowHours = Math.ceil(projectNonblank / 30);
 const estimateHighHours = Math.ceil(projectNonblank / 15);
