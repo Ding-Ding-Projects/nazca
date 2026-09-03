@@ -1,5 +1,5 @@
-import rawRegistry from '@/data/media/release-volumes.json';
-import { sourceReferenceSchema } from '@/lib/contracts';
+import rawRegistry from '../data/media/release-volumes.json' with { type: 'json' };
+import { sourceReferenceSchema } from './contracts.ts';
 import { z } from 'zod';
 
 export const MAX_MEDIA_ASSETS_PER_RELEASE = 1_000;
@@ -151,7 +151,11 @@ export const mediaReleaseRegistrySchema = z
     schemaVersion: z.literal('1.0.0'),
     repository: z.string().regex(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/),
     maxAssetsPerRelease: z.literal(MAX_MEDIA_ASSETS_PER_RELEASE),
-    registryState: z.enum(['empty', 'contains-published-assets']),
+    registryState: z.enum([
+      'empty',
+      'contains-pending-assets',
+      'contains-published-assets',
+    ]),
     note: z.string().min(1).max(2_048),
     releases: z.array(mediaReleaseVolumeSchema).max(1_000),
   })
@@ -244,6 +248,16 @@ export const mediaReleaseRegistrySchema = z
         path: ['registryState'],
         message:
           'An empty registry cannot contain releases or published assets.',
+      });
+    }
+    if (
+      registry.registryState === 'contains-pending-assets' &&
+      registry.releases.length === 0
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['registryState'],
+        message: 'A pending registry requires at least one release.',
       });
     }
     if (

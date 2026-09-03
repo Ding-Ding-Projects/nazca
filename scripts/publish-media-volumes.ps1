@@ -19,9 +19,29 @@ function Fail([string]$Message) {
 
 function Invoke-GhJson([string[]]$Arguments) {
   $output = & gh @Arguments 2>&1
-  if ($LASTEXITCODE -ne 0) { Fail ("gh " + ($Arguments -join ' ') + " returned exit code ${LASTEXITCODE}: " + ($output -join "`n")) }
-  if (-not $output) { Fail ("gh " + ($Arguments -join ' ') + ' returned no JSON.') }
+  if ($LASTEXITCODE -ne 0) {
+    Fail ("gh " + ($Arguments -join ' ') + " returned exit code ${LASTEXITCODE}: " + ($output -join "`n"))
+  }
+  if (-not $output) {
+    Fail ("gh " + ($Arguments -join ' ') + ' returned no JSON.')
+  }
   return (($output -join "`n") | ConvertFrom-Json)
+}
+
+function Invoke-RegistryValidation([string]$Path, [string]$ExpectedRepository) {
+  $nodeCommand = Get-Command node.exe -ErrorAction SilentlyContinue
+  if (-not $nodeCommand) {
+    Fail 'node.exe is required for the shared media registry validator.'
+  }
+  $validatorPath = Join-Path $PSScriptRoot 'validate-media-release-registry.mts'
+  if (-not (Test-Path -LiteralPath $validatorPath -PathType Leaf)) {
+    Fail "shared media registry validator '$validatorPath' does not exist."
+  }
+  $output = & $nodeCommand.Source --experimental-strip-types $validatorPath $Path $ExpectedRepository 2>&1
+  if ($LASTEXITCODE -ne 0) {
+    Fail ('shared media registry validation failed: ' + ($output -join "`n"))
+  }
+  $output | Write-Output
 }
 
 function Get-Header([string]$Path) {
@@ -49,116 +69,233 @@ function Assert-SafeAssetName([string]$Name) {
   }
 }
 
+function Resolve-SafeChildPath([string]$Root, [string]$Name) {
+  Assert-SafeAssetName $Name
+  $fullRoot = [System.IO.Path]::GetFullPath($Root)
+  $fullRoot = $fullRoot.TrimEnd([char[]]@([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar))
+  if ($fullRoot.Length -eq 2 -and $fullRoot[1] -eq ':') {
+    $fullRoot += [System.IO.Path]::DirectorySeparatorChar
+  }
+  $fullPath = [System.IO.Path]::GetFullPath((Join-Path $fullRoot $Name))
+  $prefix = $fullRoot + [System.IO.Path]::DirectorySeparatorChar
+  if (-not $fullPath.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) {
+    Fail "asset '$Name' escapes the source directory."
+  }
+  return $fullPath
+}
+
+function Get-ChecksumEntries([string]$Path, [object[]]$Assets, [string]$Tag) {
+  if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+    Fail "checksums file for volume '$Tag' is missing: '$Path'."
+  }
+  $lines = @(Get-Content -LiteralPath $Path)
+  $entries = @{}
+  foreach ($line in $lines) {
+    $trimmed = $line.Trim()
+    if ([string]::IsNullOrWhiteSpace($trimmed)) {
+      continue
+    }
+    $parts = @($trimmed -split '\s+')
+    if ($parts.Count -ne 2 -or $parts[0] -notmatch '^[a-f0-9]{64}$') {
+      Fail "checksums file '$Path' has a malformed line. Expected '<sha256> <filename>'."
+    }
+    $name = [string]$parts[1]
+    Assert-SafeAssetName $name
+    if ($entries.ContainsKey($name)) {
+      Fail "checksums file '$Path' repeats asset '$name'."
+    }
+    $entries[$name] = [string]$parts[0]
+  }
+  if ($entries.Count -ne @($Assets).Count) {
+    Fail "checksums file '$Path' contains $($entries.Count) entries for $(@($Assets).Count) image assets."
+  }
+  foreach ($asset in @($Assets)) {
+    $name = [string]$asset.releaseAssetName
+    if (-not $entries.ContainsKey($name)) {
+      Fail "checksums file '$Path' does not contain asset '$name'."
+    }
+    if ([string]$entries[$name] -ne [string]$asset.expectedSha256) {
+      Fail "checksums file '$Path' has a digest mismatch for asset '$name'."
+    }
+  }
+  return $entries
+}
+
+function Test-LocalVolume([object]$Volume, [string]$SourceRoot) {
+  $tag = [string]$Volume.releaseTag
+  $checksumName = [string]$Volume.checksumsFile
+  $checksumPath = Resolve-SafeChildPath $SourceRoot $checksumName
+  if (-not (Test-Path -LiteralPath $checksumPath -PathType Leaf)) {
+    Fail "checksums file for volume '$tag' is missing."
+  }
+  $checksumDigest = (Get-FileHash -Algorithm SHA256 -LiteralPath $checksumPath).Hash.ToLowerInvariant()
+  if ($checksumDigest -ne [string]$Volume.manifestSha256) {
+    Fail "checksums file '$checksumName' has digest '$checksumDigest', expected manifestSha256 '$($Volume.manifestSha256)'."
+  }
+  $checksumEntries = Get-ChecksumEntries $checksumPath @($Volume.assets) $tag
+  $assetRecords = @()
+  foreach ($asset in @($Volume.assets | Sort-Object releaseAssetName)) {
+    $name = [string]$asset.releaseAssetName
+    $sourcePath = Resolve-SafeChildPath $SourceRoot $name
+    if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
+      Fail "source file for '$name' is missing."
+    }
+    $file = Get-Item -LiteralPath $sourcePath
+    if ($file.Length -le 0 -or $file.Length -ne [int64]$asset.expectedBytes) {
+      Fail "asset '$name' has a mismatched nonzero byte count."
+    }
+    $mime = Detect-Mime (Get-Header $sourcePath)
+    if ($mime -ne [string]$asset.expectedMime) {
+      Fail "asset '$name' has MIME/signature mismatch: detected '$mime', expected '$($asset.expectedMime)'."
+    }
+    $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $sourcePath).Hash.ToLowerInvariant()
+    if ($hash -ne [string]$asset.expectedSha256) {
+      Fail "asset '$name' has a mismatched SHA-256 hash."
+    }
+    if ([string]$checksumEntries[$name] -ne $hash) {
+      Fail "checksums file '$checksumName' does not match source asset '$name'."
+    }
+    $assetRecords += [pscustomobject]@{
+      Name = $name
+      Path = $sourcePath
+      Hash = $hash
+      Bytes = [int64]$file.Length
+      Asset = $asset
+    }
+  }
+  return [pscustomobject]@{
+    Tag = $tag
+    Volume = $Volume
+    ChecksumName = $checksumName
+    ChecksumPath = $checksumPath
+    ChecksumHash = $checksumDigest
+    Assets = @($assetRecords)
+  }
+}
+
 function Get-AssetDigest([object]$Asset) {
   $digest = [string]$Asset.digest
   if ($digest -match '^sha256:([a-f0-9]{64})$') { return $Matches[1] }
   if ($digest -match '^[a-f0-9]{64}$') { return $digest }
-  Fail "GitHub did not return a SHA-256 digest for asset '$($Asset.name)'"
+  Fail "GitHub did not return a SHA-256 digest for asset '$($Asset.name)'."
 }
 
 function Get-Release([string]$Tag) {
-  try { return Invoke-GhJson @('api', "repos/$Repository/releases/tags/$Tag") }
-  catch { Fail "missing release/tag '$Tag' or unreadable release metadata" }
+  try {
+    return Invoke-GhJson @('api', "repos/$Repository/releases/tags/$Tag")
+  } catch {
+    Fail "missing release/tag '$Tag' or unreadable release metadata."
+  }
 }
 
-if ($Repository -notmatch '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$') { Fail "unsafe repository '$Repository'" }
-if (-not (Get-Command gh -ErrorAction SilentlyContinue)) { Fail 'gh CLI is unavailable.' }
+function Verify-RemoteAsset([object]$RemoteAsset, [string]$SourcePath, [string]$ExpectedHash, [string]$Tag, [string]$Name) {
+  if ($null -eq $RemoteAsset) {
+    Fail "release '$Tag' does not contain asset '$Name'."
+  }
+  $sourceFile = Get-Item -LiteralPath $SourcePath
+  if ([int64]$RemoteAsset.size -ne [int64]$sourceFile.Length -or (Get-AssetDigest $RemoteAsset) -ne $ExpectedHash) {
+    Fail "release asset '$Name' contains different bytes."
+  }
+  if ([string]::IsNullOrWhiteSpace([string]$RemoteAsset.browser_download_url)) {
+    Fail "release asset '$Name' has no downloadable URL."
+  }
+  $downloadRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("nazca-media-" + [guid]::NewGuid().ToString('N'))
+  New-Item -ItemType Directory -Path $downloadRoot | Out-Null
+  try {
+    & gh release download $Tag --repo $Repository --pattern $Name --dir $downloadRoot
+    if ($LASTEXITCODE -ne 0) { Fail "fresh download failed for '$Name'." }
+    $downloaded = Join-Path $downloadRoot $Name
+    if (-not (Test-Path -LiteralPath $downloaded -PathType Leaf)) { Fail "fresh download did not produce '$Name'." }
+    $downloadFile = Get-Item -LiteralPath $downloaded
+    $downloadHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $downloaded).Hash.ToLowerInvariant()
+    if ($downloadFile.Length -ne $sourceFile.Length -or $downloadHash -ne $ExpectedHash) {
+      Fail "fresh download verification failed for '$Name'."
+    }
+  } finally {
+    if (Test-Path -LiteralPath $downloadRoot) { Remove-Item -LiteralPath $downloadRoot -Recurse -Force }
+  }
+}
+
+if ($Repository -notmatch '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$') { Fail "unsafe repository '$Repository'." }
 if (-not (Test-Path -LiteralPath $ManifestPath -PathType Leaf)) { Fail "manifest '$ManifestPath' does not exist." }
+
+$manifestFullPath = [System.IO.Path]::GetFullPath($ManifestPath)
+Invoke-RegistryValidation $manifestFullPath $Repository
+$manifest = Get-Content -Raw -LiteralPath $manifestFullPath | ConvertFrom-Json
+if ([string]$manifest.repository -ne $Repository) {
+  Fail "manifest repository '$($manifest.repository)' does not match -Repository '$Repository'."
+}
+if ([int]$manifest.maxAssetsPerRelease -ne $MaxAssetsPerRelease) {
+  Fail 'manifest maxAssetsPerRelease is not 1000.'
+}
 if (-not (Test-Path -LiteralPath $SourceDirectory -PathType Container)) { Fail "source directory '$SourceDirectory' does not exist." }
 
-$manifest = Get-Content -Raw -LiteralPath $ManifestPath | ConvertFrom-Json
-if ($manifest.recordType -ne 'MediaReleaseRegistryV1' -or $manifest.schemaVersion -ne '1.0.0') { Fail 'manifest record type or schema version is unsupported.' }
-if ([int]$manifest.maxAssetsPerRelease -ne $MaxAssetsPerRelease) { Fail 'manifest maxAssetsPerRelease is not 1000.' }
-
-$registryPath = [System.IO.Path]::GetFullPath($ManifestPath)
-$sourceRoot = [System.IO.Path]::GetFullPath($SourceDirectory).TrimEnd([System.IO.Path]::DirectorySeparatorChar)
-$seenTags = @{}
-$seenTitles = @{}
-$seenNames = @{}
+$sourceRoot = [System.IO.Path]::GetFullPath($SourceDirectory)
 $plannedVolumes = @($manifest.releases | Where-Object { $_.publicationState -in @('planned', 'uploading', 'published') })
-
 if ($plannedVolumes.Count -eq 0) {
   Write-Output 'No planned or published media volumes are present. The honest empty registry requires no upload.'
   exit 0
 }
 
-$journal = @{}
-if ($JournalPath) {
-  if (Test-Path -LiteralPath $JournalPath -PathType Leaf) { $journal = Get-Content -Raw -LiteralPath $JournalPath | ConvertFrom-Json -AsHashtable }
+$preflightVolumes = @()
+foreach ($volume in $plannedVolumes) {
+  $preflightVolumes += Test-LocalVolume $volume $sourceRoot
 }
 
-foreach ($volume in $plannedVolumes) {
-  $tag = [string]$volume.releaseTag
-  if ($tag -notmatch '^nazca-media-v1-\d{6}$') { Fail "unsafe or missing release tag '$tag'" }
-  if ($seenTags.ContainsKey($tag)) { Fail "duplicate release tag '$tag'" }
-  $seenTags[$tag] = $true
-  if ([int]$volume.reservedAssetSlots -ne $MaxAssetsPerRelease) { Fail "volume '$tag' does not reserve exactly 1000 image slots." }
-  $assets = @($volume.assets)
-  if ($assets.Count -eq 0 -or $assets.Count -gt $MaxAssetsPerRelease -or [int]$volume.expectedAssetCount -ne $assets.Count) { Fail "volume '$tag' has an incomplete or oversized asset manifest." }
+if (-not (Get-Command gh -ErrorAction SilentlyContinue)) { Fail 'gh CLI is unavailable.' }
+
+foreach ($preflight in $preflightVolumes) {
+  $tag = [string]$preflight.Tag
+  $volume = $preflight.Volume
+  $expectedReleaseUrl = "https://github.com/$Repository/releases/tag/$tag"
   $release = Get-Release $tag
   if ([bool]$release.draft) { Fail "release '$tag' is still a draft." }
   if ([bool]$release.prerelease) { Fail "release '$tag' is a prerelease, not an immutable published volume." }
   if ([string]$release.tag_name -ne $tag) { Fail "release metadata tag mismatch for '$tag'." }
+  if ([string]$release.html_url -ne $expectedReleaseUrl) { Fail "release URL mismatch for '$tag'." }
 
   $remoteAssets = @($release.assets)
-  foreach ($asset in ($assets | Sort-Object releaseAssetName)) {
-    $name = [string]$asset.releaseAssetName
-    Assert-SafeAssetName $name
-    if ($seenNames.ContainsKey($name)) { Fail "duplicate asset name '$name'" }
-    $seenNames[$name] = $true
-    $title = [string]$asset.canonicalTitle
-    if ($seenTitles.ContainsKey($title)) { Fail "duplicate canonical media title '$title'" }
-    $seenTitles[$title] = $true
-    if ([string]::IsNullOrWhiteSpace([string]$asset.mediaId) -or [string]::IsNullOrWhiteSpace([string]$asset.source.sourceUrl) -or [string]$asset.source.sourceSha1 -notmatch '^[a-f0-9]{40}$') { Fail "asset '$name' is missing a source identity." }
-    if ([string]::IsNullOrWhiteSpace([string]$asset.rights.id) -or [string]::IsNullOrWhiteSpace([string]$asset.rights.license) -or [string]::IsNullOrWhiteSpace([string]$asset.rights.permissionBasis) -or @($asset.rights.evidence).Count -eq 0) { Fail "asset '$name' is missing a rights record." }
-    if ([string]$asset.expectedMime -notin $SupportedMime -or [string]$asset.expectedSha256 -notmatch '^[a-f0-9]{64}$' -or [int64]$asset.expectedBytes -le 0) { Fail "asset '$name' has incomplete expected byte, MIME, or hash metadata." }
-    $sourcePath = [System.IO.Path]::GetFullPath((Join-Path $sourceRoot $name))
-    if (-not $sourcePath.StartsWith("$sourceRoot$([System.IO.Path]::DirectorySeparatorChar)", [StringComparison]::OrdinalIgnoreCase)) { Fail "asset '$name' escapes the source directory." }
-    if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) { Fail "source file for '$name' is missing." }
-    $file = Get-Item -LiteralPath $sourcePath
-    if ($file.Length -le 0 -or $file.Length -ne [int64]$asset.expectedBytes) { Fail "asset '$name' has a mismatched nonzero byte count." }
-    $mime = Detect-Mime (Get-Header $sourcePath)
-    if ($mime -ne [string]$asset.expectedMime) { Fail "asset '$name' has MIME/signature mismatch: detected '$mime', expected '$($asset.expectedMime)'." }
-    $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $sourcePath).Hash.ToLowerInvariant()
-    if ($hash -ne [string]$asset.expectedSha256) { Fail "asset '$name' has a mismatched SHA-256 hash." }
+  $checksumRemote = $remoteAssets | Where-Object { $_.name -eq $preflight.ChecksumName } | Select-Object -First 1
+  if ($null -eq $checksumRemote) {
+    if (-not $Publish) {
+      Fail "release '$tag' is missing checksums file '$($preflight.ChecksumName)'. Supply -Publish to upload the verified file."
+    }
+    if ($PSCmdlet.ShouldProcess("$Repository/$tag/$($preflight.ChecksumName)", 'Upload verified checksums file')) {
+      & gh release upload $tag $preflight.ChecksumPath --repo $Repository
+      if ($LASTEXITCODE -ne 0) { Fail "upload failed for checksums file '$($preflight.ChecksumName)'." }
+    }
+    $release = Get-Release $tag
+    $remoteAssets = @($release.assets)
+    $checksumRemote = $remoteAssets | Where-Object { $_.name -eq $preflight.ChecksumName } | Select-Object -First 1
+  }
+  Verify-RemoteAsset $checksumRemote $preflight.ChecksumPath $preflight.ChecksumHash $tag $preflight.ChecksumName
 
-    $remote = $remoteAssets | Where-Object { $_.name -eq $name } | Select-Object -First 1
-    if ($remote) {
-      if ([int64]$remote.size -ne $file.Length -or (Get-AssetDigest $remote) -ne $hash) { Fail "existing release asset '$name' contains different bytes." }
-    } elseif ($Publish) {
-      if ($PSCmdlet.ShouldProcess("$Repository/$tag/$name", 'Upload one verified image asset')) {
-        & gh release upload $tag $sourcePath --repo $Repository
-        if ($LASTEXITCODE -ne 0) { Fail "upload failed for '$name'." }
+  foreach ($assetRecord in @($preflight.Assets)) {
+    $remote = $remoteAssets | Where-Object { $_.name -eq $assetRecord.Name } | Select-Object -First 1
+    if ($null -eq $remote) {
+      if (-not $Publish) {
+        Fail "release '$tag' is missing image asset '$($assetRecord.Name)'. Supply -Publish to upload verified assets."
+      }
+      if ($PSCmdlet.ShouldProcess("$Repository/$tag/$($assetRecord.Name)", 'Upload one verified image asset')) {
+        & gh release upload $tag $assetRecord.Path --repo $Repository
+        if ($LASTEXITCODE -ne 0) { Fail "upload failed for '$($assetRecord.Name)'." }
       }
       $release = Get-Release $tag
-      $remote = @($release.assets) | Where-Object { $_.name -eq $name } | Select-Object -First 1
-      if (-not $remote) { Fail "uploaded asset '$name' was not returned by GitHub." }
-      if ([int64]$remote.size -ne $file.Length -or (Get-AssetDigest $remote) -ne $hash -or [string]::IsNullOrWhiteSpace([string]$remote.browser_download_url)) { Fail "uploaded asset '$name' failed size, digest, or download URL verification." }
-    } else {
-      Write-Output "Validated locally, not uploaded: $tag/$name"
+      $remoteAssets = @($release.assets)
+      $remote = $remoteAssets | Where-Object { $_.name -eq $assetRecord.Name } | Select-Object -First 1
     }
-
-    if ($remote) {
-      if ([string]::IsNullOrWhiteSpace([string]$remote.browser_download_url)) { Fail "release asset '$name' has no downloadable URL." }
-      $downloadRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("nazca-media-" + [guid]::NewGuid().ToString('N'))
-      New-Item -ItemType Directory -Path $downloadRoot | Out-Null
-      try {
-        & gh release download $tag --repo $Repository --pattern $name --dir $downloadRoot
-        if ($LASTEXITCODE -ne 0) { Fail "fresh download failed for '$name'." }
-        $downloaded = Join-Path $downloadRoot $name
-        if (-not (Test-Path -LiteralPath $downloaded -PathType Leaf)) { Fail "fresh download did not produce '$name'." }
-        $downloadFile = Get-Item -LiteralPath $downloaded
-        if ($downloadFile.Length -ne $file.Length -or (Get-FileHash -Algorithm SHA256 -LiteralPath $downloaded).Hash.ToLowerInvariant() -ne $hash) { Fail "fresh download verification failed for '$name'." }
-      } finally {
-        if (Test-Path -LiteralPath $downloadRoot) { Remove-Item -LiteralPath $downloadRoot -Recurse -Force }
-      }
-    }
+    Verify-RemoteAsset $remote $assetRecord.Path $assetRecord.Hash $tag $assetRecord.Name
   }
 
   $release = Get-Release $tag
-  $verifiedRemote = @($release.assets) | Where-Object { $_.name -in @($assets.releaseAssetName) }
-  if ($verifiedRemote.Count -ne $assets.Count) { Fail "volume '$tag' is incomplete and cannot be marked complete." }
-  if ($Publish -and $volume.publicationState -ne 'published') { Write-Output "All $($assets.Count) assets in '$tag' are individually verified. Update the tracked registry to published only in the same commit as the verified checksums." }
+  $remoteAssets = @($release.assets)
+  $expectedNames = @($preflight.ChecksumName) + @($preflight.Assets | ForEach-Object { $_.Name })
+  foreach ($expectedName in $expectedNames) {
+    if ($null -eq ($remoteAssets | Where-Object { $_.name -eq $expectedName } | Select-Object -First 1)) {
+      Fail "volume '$tag' is incomplete because release asset '$expectedName' is absent."
+    }
+  }
+  Write-Output "Validated volume '$tag' with $(@($preflight.Assets).Count) image assets and checksums '$($preflight.ChecksumName)'."
 }
 
 Write-Output 'Media volume validation finished. No release was created, no tag was created, and no asset was uploaded unless -Publish was explicitly supplied.'
