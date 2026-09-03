@@ -104,4 +104,13 @@ export const changelogEntries: ChangelogEntry[] = [
       'Integrated the selected reader design direction into the production shell, article reader, and global styling paths, with the committed handoff archive preserved.',
     commit: '6e23d907c331dff8d37299c19b742931c3eb12ba',
   },
+  {
+    version: '0.1.0-dev.10',
+    date: '2026-09-02T20:39:35-04:00',
+    category: 'Reader',
+    title: 'Rebuilt the home atlas composition',
+    summary:
+      'Replaced the unchanged home overview with the Reader 1b hero, destination cards, useful-record list, corpus evidence, and responsive network and provenance rail.',
+    commit: 'c0f8aafcae2baf94c879ea746c349a3b92a9a75d',
+  },
 ];
