@@ -114,12 +114,21 @@ export const changelogEntries: ChangelogEntry[] = [
     commit: 'c0f8aafcae2baf94c879ea746c349a3b92a9a75d',
   },
   {
-    version: '0.1.1-dev.1',
+    version: '0.1.2-dev.1',
     date: '2026-09-02T21:19:07-04:00',
     category: 'Reader',
     title: 'Completed Reader 1b state compositions',
     summary:
       'Added corpus-backed station and year presentations, full destination and dedicated search states, shared redirect and not-found recovery surfaces, and responsive phone bottom navigation.',
     commit: '835764c9fe0db7872472c88724fb42b95c7bad6c',
+  },
+  {
+    version: '0.1.2-dev.2',
+    date: '2026-09-02T21:31:41-04:00',
+    category: 'Operations',
+    title: 'Reliable Pages cache refresh',
+    summary:
+      'Versioned service-worker caches now retire older project shells deterministically, bypass HTTP cache reuse during updates, and offer an accessible reload action that preserves the current URL and visitor state.',
+    commit: 'ded29c692128a96c6cc54a556ca5d4405db74219',
   },
 ];

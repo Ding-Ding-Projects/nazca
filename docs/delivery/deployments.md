@@ -25,6 +25,17 @@ routes, and 54 shards. Its rendered-capture manifest is
 archive is 60,662,581 bytes with SHA-256
 `3ba23406f379664b36ec53170940f2093f441fe00125ee03e8fb8afd98badf7a`.
 
+The Pages service worker uses the versioned cache namespace
+`nazca-static-reader-1b-v2`. During activation it removes older `nazca-static-`
+caches only after the new precache pass settles, then claims existing clients.
+The registration uses `updateViaCache: 'none'` and requests an immediate update
+comparison when the page becomes visible or receives focus. When an existing
+client has a newer worker, it receives a non-blocking **Update ready** notice
+with an accessible **Reload now** action. That action reloads the current URL,
+including its query and `/nazca/` project prefix, and does not clear visitor
+state. Reloading is user-controlled, so an active edit is not interrupted by an
+automatic loop.
+
 ## Configuration
 
 - `npm run build`: Sites candidate
@@ -36,7 +47,13 @@ archive is 60,662,581 bytes with SHA-256
 ## Failure modes
 
 Missing static routes, wrong asset prefixes, social-preview drift, 250 MiB bundle
-warning, or the 1 GiB hard limit stops the relevant delivery path.
+warning, or the 1 GiB hard limit stops the relevant delivery path. If a worker
+precache request fails, the worker keeps the entries that succeeded and retries
+missing entries through the network-first fetch path. If the network is
+unavailable, cached URLs are served as-is; a missing navigation falls back to
+the cached project root or reports `Offline page unavailable.` with HTTP 503.
+Worker registration failures are reported as an **Offline support unavailable**
+notification and do not block the reader.
 
 ## Security and privacy
 
@@ -53,6 +70,10 @@ accessibility checks, security checks, reviews, browser interactions, or
 screenshots. The GitHub Wiki is intentionally uninitialized, and the configured
 Sites project remains unavailable. The public Pages URL remains
 https://ding-ding-projects.github.io/nazca/.
+
+The cache retirement and reload action are source-level changes in the current
+deployment lane. Automated tests, browser interaction, and screenshots were
+intentionally not run for this rapid-delivery update boundary.
 
 ## Suggested articles
 

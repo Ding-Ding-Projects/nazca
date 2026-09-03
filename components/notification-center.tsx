@@ -24,6 +24,18 @@ export function NotificationToasts() {
           <div>
             <strong>{notification.title}</strong>
             <p>{notification.body}</p>
+            {notification.action?.kind === 'reload' ? (
+              <a
+                href="#reload"
+                onClick={(event) => {
+                  event.preventDefault();
+                  dismissNotification(notification.id);
+                  window.location.reload();
+                }}
+              >
+                {notification.action.label}
+              </a>
+            ) : null}
           </div>
           <button
             type="button"
