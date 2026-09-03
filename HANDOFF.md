@@ -144,3 +144,16 @@ verification, and runtime capture are not claimed here. The expected v0.1.2
 release URL is a target until external proof exists. Sites remains unavailable
 and the GitHub Wiki remains uninitialized. Historical revisions, media, maps, template and module closure,
 and stable reconciliation remain open.
+
+## Reader-first home reorganization
+
+The current source tip reorganizes the GitHub Pages home away from a portal or
+fandom-style dashboard. `components/nazca-shell.tsx` now presents one deliberate
+reading order: introduction, working Search and Explore actions, four subject
+entries, featured records, and short source notes. `app/globals.css` gives the
+home a two-column shell without the duplicate right status rail and includes
+explicit tablet and phone collapses. Other destinations retain their existing
+navigation and contextual rail. The project wiki mirror and atlas-shell guide
+record the new structure. The Pages prerender completed for all routes, but the
+postbuild check remains blocked by its missing article-home artifact; runtime
+accessibility and visual capture remain separate release evidence.

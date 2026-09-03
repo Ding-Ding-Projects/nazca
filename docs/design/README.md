@@ -19,3 +19,11 @@ language settings, theme persistence, and local asset policy. Controls are
 wired to those production behaviours rather than to prototype-only state. The
 reader boundary shell also keeps desktop navigation and a four-action phone
 bottom navigation available on redirect and not-found states.
+
+## Reader-first home revision
+
+The production home now departs from the earlier portal composition where that
+reference made scanning harder. It retains the established type, route colors,
+navigation, search, theming, corpus routes, and attribution, but reorganizes the
+page into a linear encyclopedia directory. The production behavior and
+responsive hierarchy are recorded in [Atlas shell](../reader/atlas-shell.md).

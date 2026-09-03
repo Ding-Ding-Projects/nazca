@@ -28,3 +28,9 @@
 - [Local browser tools](features/local-tools.md)
 - [Element locks and appearance](features/locks-and-appearance.md)
 - [Verification and evidence](verification/README.md)
+
+## Current home structure
+
+The GitHub Pages home uses a reader-first hierarchy rather than a fandom-style
+portal. See [Atlas shell](reader/atlas-shell.md) for its content order,
+responsive behavior, source boundary, and verification status.
