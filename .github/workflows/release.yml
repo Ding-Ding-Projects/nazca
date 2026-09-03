@@ -223,21 +223,21 @@ jobs:
             "release_id=$($drafts[0].id)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
           } else {
             $body = @"
-# Nazca Railway v$env:RELEASE_VERSION
+          # Nazca Railway v$env:RELEASE_VERSION
 
-**Code name:** $env:RELEASE_CODE_NAME
+          **Code name:** $env:RELEASE_CODE_NAME
 
-**Public reader:** https://ding-ding-projects.github.io/nazca/
+          **Public reader:** https://ding-ding-projects.github.io/nazca/
 
-This release carries the completed Reader 1b state work on the default branch. The raw current-corpus archive remains the unchanged `nazca-current-corpus-0.1.0.zip` asset from v0.1.0.
+          This release carries the completed Reader 1b state work on the default branch. The raw current-corpus archive remains the unchanged `nazca-current-corpus-0.1.0.zip` asset from v0.1.0.
 
-The public code-name photo is linked from the catalog and is not copied into this release:
-$env:RELEASE_CODE_PHOTO_URL
+          The public code-name photo is linked from the catalog and is not copied into this release:
+          $env:RELEASE_CODE_PHOTO_URL
 
-## Verification boundary
+          ## Verification boundary
 
-This build-only workflow does not run tests, lint, type checks, static analysis, accessibility checks, security checks, reviews, or screenshots.
-"@
+          This build-only workflow does not run tests, lint, type checks, static analysis, accessibility checks, security checks, reviews, or screenshots.
+          "@
             $trackedCorpus = Get-Content -Raw (Join-Path $env:GITHUB_WORKSPACE 'data\corpus\reader\v0.1.0\manifest.json') | ConvertFrom-Json
             $sourceReleases = @(gh api "repos/$env:REPOSITORY/releases?per_page=100" | ConvertFrom-Json | Where-Object { $_.tag_name -eq 'v0.1.1' -and -not $_.draft -and -not $_.prerelease })
             if ($sourceReleases.Count -ne 1) { throw "Expected exactly one published v0.1.1 source release, found $($sourceReleases.Count)." }
