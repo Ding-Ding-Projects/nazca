@@ -22,6 +22,21 @@ bundle.
 | Corpus boundary | 3,422 articles, 3,616 routes, 194 redirects |
 | Runtime asset policy | Local production assets only, no remote font or icon stylesheet |
 
+## Candidate A evidence
+
+Candidate A is assembled at `2c397fe0957318186be4911df75da08ddf0cd39a`.
+`build.bat /s` completed for that exact source tip in `00:06:17.9001998` and
+reported 3,616 routes, 3,422 articles, 194 redirects, 54 shards, and 3,422
+search records. The Sites bundle contained 36 files and 3,858,585 bytes, with
+`dirty=false` provenance. The feature inventory reported 30 rows with verified
+0, partial 30, and missing 0. The search inventory reported 16 rows with
+verified 0 and incomplete 16.
+
+This documentation commit supersedes Candidate A's source tip. A fresh final
+build is required before v0.1.2 deployment, installer publication, release
+publication, runtime interaction, visual parity, or capture evidence can be
+claimed.
+
 ## Screen and state inventory
 
 | ID | Reference state | Production route | Theme and viewport | Implementation |

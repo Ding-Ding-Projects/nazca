@@ -8,9 +8,10 @@
 - Tracking issue: https://github.com/Ding-Ding-Projects/nazca/issues/1
 - Rolling progress: https://github.com/Ding-Ding-Projects/nazca/discussions/2
 - Release progress: https://github.com/Ding-Ding-Projects/nazca/discussions/3
-- Current v0.1.1 integration commit: `134ba0c5a127b4e87319199777399b48e2b59a05`
-- Published v0.1.1 release commit: `f66dc3709941c8795f12121ee4df2a0340e4e8dc`, verified by run `33701152608` and Pages deployment.
-- v0.1.2 release target: https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.2. Publication remains pending until the Reader 1b state-completion lane is integrated. The planned code name is `Bamboo Shoot Har Gow · 筍尖蝦餃`, linked from the published catalog asset without copying or attaching the photo.
+- Published v0.1.1 integration commit: `134ba0c5a127b4e87319199777399b48e2b59a05`.
+- Published v0.1.1 release commit: `f66dc3709941c8795f12121ee4df2a0340e4e8dc`, verified by run `33701152608` and Pages deployment. Its installer assets are published and verified.
+- Candidate A v0.1.2 source tip: `2c397fe0957318186be4911df75da08ddf0cd39a`.
+- v0.1.2 release target: https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.2. Candidate A is assembled, but this documentation commit supersedes its source tip. A fresh final build is required before deployment, installer publication, or release publication. The planned code name is `Bamboo Shoot Har Gow · 筍尖蝦餃`, linked from the published catalog asset without copying or attaching the photo.
 
 ## Implemented
 
@@ -35,6 +36,10 @@
   evidence are complete.
 - Generated current article and redirect routes with section search, bounded regex
   preview, safe HTML, exact source attribution, and deferred-state disclosure.
+- Reader 1b production mapping with eight explicit states: home, generic article,
+  specialized station article, year or stub article, full destination list,
+  dedicated search, redirect, and not-found. Routes and implementation paths are
+  recorded in `docs/design/reader-1b-handoff.md`.
 - Typed corpus, page, redirect, revision, map, media, rights, volume, feature,
   search, and visitor-state contracts.
 - Bounded source-policy preflight, continuation-cycle protection, namespace
@@ -52,7 +57,8 @@
   `3ba23406f379664b36ec53170940f2093f441fe00125ee03e8fb8afd98badf7a`.
 - Build-only release and Pages workflow is committed for v0.1.2. It runs no tests, lint,
   type checks, static analysis, accessibility checks, security checks, reviews,
-  or screenshots. Its first remote release run remains pending.
+  or screenshots. Candidate A's local reader build passed, but its first v0.1.2
+  release run remains pending.
 - The v0.1.1 release and Pages deployment are verified. The GitHub Wiki is intentionally uninitialized. The configured Sites project
   is unavailable in the current connector workspace, so no Sites URL is claimed.
 - Selected design direction: `Nazca Reader 1b.dc.html`. The committed handoff
@@ -71,9 +77,29 @@
   tests, browser interactions, or screenshots.
 - Windows desktop runtime source with isolated renderer boundaries, loopback
   static serving, stable provenance, and an unsigned Squirrel.Windows packaging
-  path. The installer itself remains unbuilt and unverified.
+  path. The v0.1.1 installer is published and verified. The Candidate A v0.1.2
+  installer was not built in this documentation lane and remains pending.
 - Generated build provenance, social preview, Open Graph metadata, standard Git
   LFS prohibition, static-bundle bounds, and GitHub Pages project-path checks.
+
+## Candidate A local build evidence
+
+Candidate A at `2c397fe0957318186be4911df75da08ddf0cd39a` completed `build.bat /s`
+in `00:06:17.9001998`. The build reported 3,616 routes, 3,422 articles, 194
+redirects, 54 shards, and 3,422 search records. Its Sites bundle contains 36
+files and 3,858,585 bytes, with `dirty=false` build provenance. The feature
+inventory reported 30 rows: verified 0, partial 30, missing 0. The search
+inventory reported 16 rows: verified 0, incomplete 16.
+
+This documentation commit supersedes Candidate A's source tip, so the recorded
+build is evidence for Candidate A only. A fresh final build is required before
+v0.1.2 deployment, installer publication, or release publication.
+
+The Pages service worker uses the `nazca-static-reader-1b-v2` cache namespace.
+It retires older caches only after the new precache settles, uses
+`updateViaCache: 'none'`, checks for updates when the page becomes visible or
+receives focus, and offers a non-blocking reload action that preserves the
+current URL and visitor state.
 
 ## Verified locally
 
@@ -82,7 +108,7 @@
 - `npm exec tsc -- --noEmit`
 - `npm run format -- --check`
 - `npm run check:no-lfs`
-- Static bundle checks: 20-file Sites candidate and 25-file Pages mirror
+- Historical static bundle checks: 20-file Sites candidate and 25-file Pages mirror
 - Production dependency audit: zero high or critical advisories
 
 The checks above are historical baseline records. They were not rerun for the
@@ -104,7 +130,7 @@ response as allowed or verified. The MediaWiki API capture is proceeding.
 3. Implement strict visitor-state storage and the shared search workbench.
 4. Add media rights, staging, volume, and round-trip verification tools before
    downloading any source media.
-5. Run the v0.1.2 build-only GitHub Actions release and Pages publication workflow after the Reader 1b state-completion lane is integrated.
+5. Run a fresh final build from this documentation commit, then run the v0.1.2 build-only GitHub Actions release and Pages publication workflow.
 6. Register the isolated headless verification route and capture the built UI.
 
 ## Honesty boundary

@@ -14,6 +14,7 @@
 - [x] Add a secure Windows desktop runtime and Squirrel.Windows packaging path.
 - [x] Integrate the v0.1.1 home-design correction from implementation commit `c0f8aafcae2baf94c879ea746c349a3b92a9a75d` at integration commit `134ba0c5a127b4e87319199777399b48e2b59a05`, covering the atlas hero, destination, evidence, network, provenance, and phone compositions.
 - [x] Publish and verify the v0.1.1 release at commit `f66dc3709941c8795f12121ee4df2a0340e4e8dc`, including the Pages deployment and release assets.
+- [x] Assemble Candidate A at `2c397fe0957318186be4911df75da08ddf0cd39a` and complete its local `build.bat /s` reader build in `00:06:17.9001998` with a 36-file, 3,858,585-byte Sites bundle and clean provenance.
 
 ## Source corpus
 
@@ -52,6 +53,7 @@
 - [ ] Ship authenticator, local history, converter, and local model manager.
 - [ ] Ship command palette, notifications, exports, bulk actions, and changelog.
 - [ ] Ship offline documentation and service-worker update behavior.
+- [ ] Verify the eight Reader 1b states in the built output: home, generic article, specialized station article, year or stub article, full destination list, dedicated search, redirect, and not-found. Candidate A contains the implementation, but runtime interaction, visual parity, and capture evidence remain pending.
 
 ## Verification and release
 
@@ -61,9 +63,9 @@
 - [ ] Add focused local tests and deliberate red-then-green regressions.
 - [ ] Register and use the required isolated headless verification route.
 - [ ] Capture all required screens, states, widths, languages, themes, and scales.
-- [ ] Verify the selected 1b design against the built production paths; no tests, browser interactions, or screenshots have run in this design handoff lane.
+- [ ] Verify the selected 1b design against the built production paths; Candidate A contains the eight-state mapping, but no tests, browser interactions, or screenshots have run in this documentation lane.
 - [x] Add the build-only GitHub Actions release and Pages workflow; the v0.1.1 run `33701152608`, Pages deployment, and release assets are verified, while the v0.1.2 run remains pending.
-- [ ] Publish one unique non-draft v0.1.2 release and verify all assets at the release target https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.2. The planned code name is `Bamboo Shoot Har Gow · 筍尖蝦餃`; publication remains pending until the Reader 1b state-completion lane is integrated.
+- [ ] Publish one unique non-draft v0.1.2 release and verify all assets at the release target https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.2. Candidate A is assembled, but this documentation commit supersedes its source tip and a fresh final build is required before deployment, installer publication, or release publication. The planned code name is `Bamboo Shoot Har Gow · 筍尖蝦餃`.
 - [ ] ~~Publish one unique non-draft v0.1.0 release and verify all assets.~~ Superseded by the v0.1.1 home-design correction; the `nazca-current-corpus-0.1.0.zip` archive identity remains unchanged.
 - [ ] Publish the repository wiki, final handoff, and release announcement.
 
@@ -73,7 +75,9 @@ The v0.1.2 release wiring carries the next package version, a unique draft-first
 numeric release, and the next published catalog code name. The workflow runs no
 tests, lint, type checks, static analysis, accessibility checks, security checks,
 reviews, browser interactions, or screenshots. It preserves the raw
-`nazca-current-corpus-0.1.0.zip` archive identity. Publication remains pending
-until the Reader 1b state-completion lane is integrated. The configured Sites
+`nazca-current-corpus-0.1.0.zip` archive identity. Candidate A is assembled at
+`2c397fe0957318186be4911df75da08ddf0cd39a`, but this documentation commit
+supersedes its source tip and requires a fresh final build. Publication remains
+pending until that build and the external release evidence complete. The configured Sites
 project remains unavailable, and the GitHub Wiki remains uninitialized. The
 public Pages URL remains https://ding-ding-projects.github.io/nazca/.

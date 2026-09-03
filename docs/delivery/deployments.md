@@ -17,10 +17,12 @@ an atlas hero, destination navigation, evidence and network panels, provenance
 context, and a responsive phone composition. The published v0.1.1 release
 targets `f66dc3709941c8795f12121ee4df2a0340e4e8dc` at
 https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.1. The next target
-is v0.1.2 at https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.2,
-pending integration of the Reader 1b state-completion lane. Its planned code
-name is `Bamboo Shoot Har Gow · 筍尖蝦餃`, linked from the published catalog asset
-without copying the photo into this repository. The raw
+is v0.1.2 at https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.2.
+Candidate A is assembled at `2c397fe0957318186be4911df75da08ddf0cd39a`, but this
+documentation commit supersedes its source tip. A fresh final build is required
+before deployment, installer publication, or release publication. Its planned
+code name is `Bamboo Shoot Har Gow · 筍尖蝦餃`, linked from the published catalog
+asset without copying the photo into this repository. The raw
 `nazca-current-corpus-0.1.0.zip` archive identity remains unchanged.
 
 The current reader release contains 3,422 articles, 194 redirects, 3,616
@@ -76,8 +78,16 @@ screenshots. The GitHub Wiki is intentionally uninitialized, and the configured
 Sites project remains unavailable. The public Pages URL remains
 https://ding-ding-projects.github.io/nazca/.
 
-The cache retirement and reload action are source-level changes in the current
-deployment lane. Automated tests, browser interaction, and screenshots were
+Candidate A's local build reported a 36-file, 3,858,585-byte Sites bundle and
+clean provenance. The cache refresh path uses `nazca-static-reader-1b-v2`,
+retires older caches only after the new precache settles, uses
+`updateViaCache: 'none'`, checks for updates on visibility or focus, and keeps
+the current project URL and visitor state when the user reloads. These facts are
+bound to Candidate A; a fresh final build is required from this documentation
+commit before any v0.1.2 external result is claimed.
+
+The cache retirement and reload action are source-level changes in Candidate A.
+Automated tests, browser interaction, and screenshots were
 intentionally not run for this rapid-delivery update boundary.
 
 ## Suggested articles
