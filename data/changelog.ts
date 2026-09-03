@@ -131,4 +131,13 @@ export const changelogEntries: ChangelogEntry[] = [
       'Versioned service-worker caches now retire older project shells deterministically, bypass HTTP cache reuse during updates, and offer an accessible reload action that preserves the current URL and visitor state.',
     commit: 'ded29c692128a96c6cc54a556ca5d4405db74219',
   },
+  {
+    version: '0.1.2-dev.3',
+    date: '2026-09-02T22:21:46-04:00',
+    category: 'Reader',
+    title: 'Load the search index once at route boundaries',
+    summary:
+      'Removed per-route search-index serialization from redirect and not-found states, added bounded client loading, and staged one verified static search-index asset for Sites and GitHub Pages paths.',
+    commit: 'dc4842c80917738f9b60023990bf832f28819c74',
+  },
 ];
