@@ -43,6 +43,14 @@ bundle.
 - The command button opens the existing command palette, the notification button
   opens the existing notification destination, and the theme button uses the
   existing persisted theme setting.
+- The home route now uses a dedicated 1b composition: a route-colour strip,
+  atlas hero with a local network illustration, destination cards, a six-item
+  useful-record list, five-column corpus evidence, and a stacked map/provenance
+  rail. Destination cards, record rows, brand, command, notification, and theme
+  controls remain wired to their existing actions.
+- The home layout collapses from two columns to a single reading column at
+  tablet widths, then reduces destination and baseline grids to two columns on
+  phone widths without hiding the evidence or deferred-state copy.
 - Tables remain source data, but are placed in bounded scroll containers and
   receive readable borders, headers, spacing, and responsive overflow treatment.
 - Phone layouts collapse the destination rail to a bottom icon strip, stack the
