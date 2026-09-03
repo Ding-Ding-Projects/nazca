@@ -48,3 +48,9 @@ but no original media bytes have been published.
 - [Build and verification](Build-and-Verification)
 
 Repository files remain the source of truth for the mirrored wiki.
+
+## Phone navigation
+
+On phones, the route stripe keeps its own layout row and the complete grouped
+navigation becomes one touch-scrollable, safe-area-aware bottom dock. Long home
+titles and record names wrap within the screen down to 320 px.

@@ -161,3 +161,12 @@ navigation and contextual rail. The project wiki mirror and atlas-shell guide
 record the new structure. The Pages prerender completed for all routes, but the
 postbuild check remains blocked by its missing article-home artifact; runtime
 accessibility and visual capture remain separate release evidence.
+
+## Compact shell repair
+
+The phone shell now retains an explicit row for the route stripe instead of
+letting CSS create an implicit content row. Home-specific desktop columns are
+neutralized at the compact breakpoint, navigation groups flatten into a single
+touch-scrollable bottom dock, and safe-area padding plus wrapping guardrails
+keep content inside a 320 px viewport. A fresh build, type check, layout capture,
+and assistive-technology pass remain required evidence for publication.

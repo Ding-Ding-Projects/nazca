@@ -2747,3 +2747,103 @@ input:focus-visible,
     width: 100%;
   }
 }
+
+/*
+ * Compact shell guardrails.
+ *
+ * Keep these after the home-specific rules so the landing-page column override
+ * cannot revive the desktop grid at phone widths. The compact dock deliberately
+ * flattens the grouped navigation into one predictable, touch-scrollable row.
+ */
+@media (max-width: 38rem) {
+  .app-shell {
+    min-height: 100svh;
+    grid-template-rows: auto 0.3rem minmax(0, 1fr);
+  }
+
+  .home-shell .shell-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .top-bar {
+    padding-block-start: max(0.65rem, env(safe-area-inset-top));
+  }
+
+  .tab-dock {
+    display: flex;
+    gap: 0.2rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: inline proximity;
+    scrollbar-width: thin;
+    padding: 0.35rem 0.4rem calc(0.35rem + env(safe-area-inset-bottom));
+  }
+
+  .tab-dock > div,
+  .tab-dock .tab-list {
+    display: contents;
+  }
+
+  .tab-dock .tab-button {
+    width: 3.4rem;
+    min-width: 3.4rem;
+    min-height: 3.2rem;
+    display: grid;
+    flex: none;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 0;
+    padding: 0.3rem;
+    scroll-snap-align: start;
+  }
+
+  .tab-dock .tab-button .tab-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .main-viewport,
+  .home-shell .main-viewport {
+    padding: 1rem 0.8rem calc(4.8rem + env(safe-area-inset-bottom));
+  }
+
+  .home-overview,
+  .home-welcome-copy,
+  .home-at-a-glance,
+  .directory-card,
+  .featured-records button > span {
+    min-width: 0;
+  }
+
+  .home-welcome {
+    gap: 1.5rem;
+    padding-block: 2rem;
+  }
+
+  .home-welcome .home-title {
+    overflow-wrap: anywhere;
+    font-size: clamp(2.4rem, 13vw, 3.65rem);
+    line-height: 0.96;
+  }
+
+  .home-at-a-glance {
+    width: 100%;
+    max-width: none;
+  }
+
+  .featured-records button {
+    grid-template-columns: 1.5rem auto minmax(0, 1fr) auto;
+    gap: 0.55rem;
+  }
+
+  .featured-records strong,
+  .featured-records small {
+    overflow-wrap: anywhere;
+  }
+
+  .regex-popover,
+  .search-results-popover {
+    max-height: min(60dvh, 28rem);
+  }
+}
