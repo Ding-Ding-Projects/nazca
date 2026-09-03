@@ -35,7 +35,7 @@
 ## Media
 
 - [x] Add a standard Git LFS prohibition check.
-- [ ] Add media, rights, and volume catalogs.
+- [x] Add metadata-only media, rights, and volume catalogs plus a sequential validation publisher checkpoint.
 - [ ] Download and validate originals after policy approval.
 - [ ] Generate bounded display variants and accessible placeholders.
 - [ ] Publish draft-first immutable release volumes.
@@ -91,3 +91,8 @@ public Pages URL remains https://ding-ding-projects.github.io/nazca/.
 - [ ] Complete runtime interaction, accessibility, and multi-width capture evidence for release publication.
 - [x] Repair the Reader 1b redirect-registry type boundary and semantic search loading status found by the local TypeScript and lint checks.
 - [x] Align static Pages verification with the Reader 1b button-based home control.
+
+## Compact shell follow-up
+
+- [x] Stabilize the 320–608 px shell rows, bottom dock, safe-area spacing, and long-content wrapping after the home reorganization.
+- [ ] Capture the repaired home and dock at 320 px and 608 px for release evidence.

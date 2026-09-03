@@ -27,3 +27,9 @@ reference made scanning harder. It retains the established type, route colors,
 navigation, search, theming, corpus routes, and attribution, but reorganizes the
 page into a linear encyclopedia directory. The production behavior and
 responsive hierarchy are recorded in [Atlas shell](../reader/atlas-shell.md).
+
+## Compact implementation note
+
+The compact implementation fixes the mobile shell track model, flattens grouped
+navigation into one touch-scrollable row, and constrains long home content
+without changing the desktop composition.

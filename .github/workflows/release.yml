@@ -201,6 +201,12 @@ jobs:
       EXPECTED_SHA: ${{ github.sha }}
       REPOSITORY: ${{ github.repository }}
     steps:
+      - name: Check out source for release metadata
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
       - name: Download generated release outputs
         uses: actions/download-artifact@v4
         with:

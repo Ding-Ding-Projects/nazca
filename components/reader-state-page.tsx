@@ -168,8 +168,8 @@ export function ReaderStatePage({
     router.push(publicPath('/?tab=notifications'));
   };
 
-  const isRedirect = readerState.kind === 'redirect';
-  const redirect = isRedirect ? readerState.record : null;
+  const redirect = readerState.kind === 'redirect' ? readerState.record : null;
+  const isRedirect = redirect !== null;
   const redirectTarget = redirect?.targetRoute ? publicPath(redirect.targetRoute) : null;
   const openReading = () => {
     const route = redirectTarget ?? (fallbackArticleRoute ? publicPath(fallbackArticleRoute) : null);

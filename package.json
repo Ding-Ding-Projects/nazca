@@ -30,6 +30,7 @@
     "test:totp": "node --experimental-strip-types --test tests/totp.test.mjs",
     "test:dim-sum": "node --experimental-strip-types --test tests/dim-sum.test.mjs",
     "test:locks": "node --experimental-strip-types --test tests/element-locks.test.mjs",
+    "test:media-volumes": "node --experimental-strip-types --test tests/media-volumes.test.mjs",
     "package:offline": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/package-offline-bundle.ps1",
     "start": "wrangler dev --config dist/server/wrangler.json",
     "lint": "oxlint",

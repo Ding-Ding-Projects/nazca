@@ -20,14 +20,16 @@ function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(path.join(CORPUS, name), 'utf8')) as T;
 }
 
-let cached: {
+type LoadedCorpus = {
   manifest: CurrentCorpusManifestV1;
   routes: RouteEntry[];
   redirects: CurrentRedirectRecordV1[];
   articlesById: Map<number, CurrentArticleRecordV1>;
-} | null = null;
+};
 
-function load() {
+let cached: LoadedCorpus | null = null;
+
+function load(): LoadedCorpus {
   if (cached) return cached;
   const manifest = readJson<CurrentCorpusManifestV1>('manifest.json');
   const routes = readJson<RouteEntry[]>(manifest.routes.registry);
@@ -37,8 +39,9 @@ function load() {
     const records = readJson<CurrentArticleRecordV1[]>(shard.name);
     for (const record of records) articlesById.set(record.pageId, record);
   }
-  cached = { manifest, routes, redirects, articlesById };
-  return cached;
+  const loaded: LoadedCorpus = { manifest, routes, redirects, articlesById };
+  cached = loaded;
+  return loaded;
 }
 
 export function loadCurrentCorpusManifest() {

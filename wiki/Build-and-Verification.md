@@ -56,3 +56,11 @@ notes. The redundant home status rail has been removed; other destinations keep
 their contextual rail. The project-path Pages build is the minimum programmatic
 check for this revision. Browser interaction, accessibility, and capture remain
 required release evidence and must not be inferred from the static build alone.
+
+## Compact-layout regression boundary
+
+The mobile shell uses three explicit tracks for the header, route stripe, and
+content. Verification should cover 320 px and 608 px widths, horizontal dock
+scrolling, safe-area padding, long featured-record names, search popovers, and
+the absence of page-level horizontal overflow. A successful static build alone
+does not substitute for that runtime capture.

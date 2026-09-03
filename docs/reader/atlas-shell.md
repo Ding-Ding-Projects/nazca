@@ -52,3 +52,10 @@ requirements.
 - [Search and regex](search-and-regex.md)
 - [Article routes](article-routes.md)
 - [Deployment](../delivery/deployments.md)
+
+## Compact shell guardrails
+
+At 608 px and below, the header, route stripe, and content use explicit grid
+rows; the dock groups flatten into one safe-area-aware horizontal scroller.
+Every destination remains reachable, and long record text wraps within the
+320 px minimum viewport rather than producing page-level horizontal overflow.

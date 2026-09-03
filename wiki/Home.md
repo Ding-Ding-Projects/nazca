@@ -35,7 +35,9 @@ screens. Every visible action opens a real reader destination.
 Fandom remains the credited legacy source, and imported text retains CC BY-SA
 attribution. Nazca Railway is an independent static reader, not the original
 source platform and not a live synchronization service. Historical revisions,
-media bytes, and stable-cutoff reconciliation remain in progress.
+media bytes, and stable-cutoff reconciliation remain in progress. A
+metadata-only release registry and validation publisher checkpoint are present,
+but no original media bytes have been published.
 
 ## Project documentation
 
@@ -46,3 +48,9 @@ media bytes, and stable-cutoff reconciliation remain in progress.
 - [Build and verification](Build-and-Verification)
 
 Repository files remain the source of truth for the mirrored wiki.
+
+## Phone navigation
+
+On phones, the route stripe keeps its own layout row and the complete grouped
+navigation becomes one touch-scrollable, safe-area-aware bottom dock. Long home
+titles and record names wrap within the screen down to 320 px.
