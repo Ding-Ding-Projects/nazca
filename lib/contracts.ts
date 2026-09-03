@@ -284,9 +284,9 @@ export const mediaVolumeSchema = z
   .object({
     recordType: z.literal('MediaVolumeV1'),
     schemaVersion: z.literal('1.0.0'),
-    id: z.string().regex(/^fandom-media-v1-\d{6}$/),
-    releaseTag: z.string().regex(/^fandom-media-v1-\d{6}$/),
-    objectCount: z.number().int().min(1).max(900),
+    id: z.string().regex(/^nazca-media-v1-\d{6}$/),
+    releaseTag: z.string().regex(/^nazca-media-v1-\d{6}$/),
+    objectCount: z.number().int().min(1).max(1000),
     bytes: z.number().int().min(1).max(1_073_741_824),
     catalogSha256: sha256,
     publicationState: z.enum(['planned', 'draft', 'verified', 'published']),

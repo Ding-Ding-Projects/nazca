@@ -1,0 +1,9 @@
+{
+  "recordType": "MediaReleaseRegistryV1",
+  "schemaVersion": "1.0.0",
+  "repository": "Ding-Ding-Projects/nazca",
+  "maxAssetsPerRelease": 1000,
+  "registryState": "empty",
+  "note": "No verified media assets have been published yet.",
+  "releases": []
+}
