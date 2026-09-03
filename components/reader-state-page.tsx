@@ -169,8 +169,8 @@ export function ReaderStatePage({
     router.push(publicPath('/?tab=notifications'));
   };
 
-  const isRedirect = readerState.kind === 'redirect';
-  const redirect = isRedirect ? readerState.record : null;
+  const redirect = readerState.kind === 'redirect' ? readerState.record : null;
+  const isRedirect = redirect !== null;
   const redirectTarget = redirect?.targetRoute ? publicPath(redirect.targetRoute) : null;
   const openReading = () => {
     const route = redirectTarget ?? (fallbackArticleRoute ? publicPath(fallbackArticleRoute) : null);
@@ -246,7 +246,7 @@ export function ReaderStatePage({
               <span aria-hidden="true" />
               {isRedirect ? 'REDIRECT · NOT INDEXED AS AN ARTICLE' : 'NOT IN THIS SNAPSHOT'}
             </p>
-            {isRedirect ? (
+            {redirect ? (
               <>
                 <h1>{redirect.sourceTitle}</h1>
                 <p className="reader-state-lede">This title is one of the captured source redirects. Continue to the current article or inspect the source record.</p>
