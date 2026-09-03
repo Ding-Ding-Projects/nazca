@@ -4,11 +4,17 @@ on:
   push:
   workflow_dispatch:
 
+concurrency:
+  group: nazca-release-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
 env:
-  RELEASE_VERSION: '0.1.1'
+  RELEASE_VERSION: '0.1.2'
+  RELEASE_CODE_NAME: 'Bamboo Shoot Har Gow · 筍尖蝦餃'
+  RELEASE_CODE_PHOTO_URL: 'https://github.com/Ding-Ding-Projects/dim-sum-photos/releases/download/catalog-v1/hk-dish-0003-bamboo-shoot-har-gow.png'
 
 jobs:
   build-pages:
@@ -132,6 +138,12 @@ jobs:
           New-Item -ItemType Directory -Path $stage -Force | Out-Null
           $packageVersion = (Get-Content -Raw (Join-Path $env:GITHUB_WORKSPACE 'package.json') | ConvertFrom-Json).version
           if ($packageVersion -ne $env:RELEASE_VERSION) { throw "Root package version $packageVersion does not match expected release $env:RELEASE_VERSION." }
+          $releaseSpec = Get-Content -Raw (Join-Path $env:GITHUB_WORKSPACE 'data\release-v0.1.2.json') | ConvertFrom-Json
+          if ($releaseSpec.version -ne $packageVersion -or $releaseSpec.tag -ne "v$packageVersion") { throw 'Release specification does not match the package version.' }
+          if ($releaseSpec.codeName.display -ne $env:RELEASE_CODE_NAME -or $releaseSpec.codeName.assetUrl -ne $env:RELEASE_CODE_PHOTO_URL) { throw 'Release code-name metadata does not match the workflow.' }
+          if ($releaseSpec.codeName.id -ne 'hk-dish-0003' -or $releaseSpec.codeName.assetRelease -ne 'catalog-v1' -or $releaseSpec.codeName.assetPath -ne 'hk-dish-0003-bamboo-shoot-har-gow.png') { throw 'Release code-name catalog identity is not the expected published record.' }
+          if ($releaseSpec.codeName.assetBytes -ne 2400309 -or $releaseSpec.codeName.assetSha256 -ne '0b4165212c975f47076385acf9e01ed686c9974765d6476cc3cb36bbe46e45ad') { throw 'Release code-name asset digest metadata does not match the published catalog asset.' }
+          if ($releaseSpec.corpus.archiveName -ne 'nazca-current-corpus-0.1.0.zip') { throw 'Release specification changed the raw v0.1.0 corpus archive identity.' }
           $staticName = "nazca-railway-static-$packageVersion.zip"
           $setupName = "Nazca-Railway-$packageVersion-Setup.exe"
           $static = Join-Path $env:GITHUB_WORKSPACE (Join-Path 'outputs' $staticName)
@@ -195,16 +207,41 @@ jobs:
           name: nazca-release-assets-${{ github.run_id }}
           path: release-staging
 
-      - name: Locate the existing numeric v0.1.1 draft
+      - name: Create or locate the unique numeric v0.1.2 draft
         id: draft
         shell: pwsh
         run: |
           $releaseTag = "v$env:RELEASE_VERSION"
           if ($releaseTag -notmatch '^v\d+\.\d+\.\d+$') { throw "Release tag is not numeric: $releaseTag" }
-          $releases = gh api "repos/$env:REPOSITORY/releases?per_page=100" | ConvertFrom-Json
-          $drafts = @($releases | Where-Object { $_.draft -and $_.tag_name -eq $releaseTag -and $_.tag_name -match '^v\d+\.\d+\.\d+$' })
-          if ($drafts.Count -ne 1) { throw "Expected exactly one numeric $releaseTag draft, found $($drafts.Count)." }
-          "release_id=$($drafts[0].id)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          $releases = @(gh api "repos/$env:REPOSITORY/releases?per_page=100" | ConvertFrom-Json)
+          $tagged = @($releases | Where-Object { $_.tag_name -eq $releaseTag -and $_.tag_name -match '^v\d+\.\d+\.\d+$' })
+          $published = @($tagged | Where-Object { -not $_.draft })
+          if ($published.Count -gt 0) { throw "A published $releaseTag already exists; refusing to create a duplicate release." }
+          $drafts = @($tagged | Where-Object { $_.draft })
+          if ($drafts.Count -gt 1) { throw "Expected at most one numeric $releaseTag draft, found $($drafts.Count)." }
+          if ($drafts.Count -eq 1) {
+            "release_id=$($drafts[0].id)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          } else {
+            $body = @"
+# Nazca Railway v$env:RELEASE_VERSION
+
+**Code name:** $env:RELEASE_CODE_NAME
+
+**Public reader:** https://ding-ding-projects.github.io/nazca/
+
+This release carries the completed Reader 1b state work on the default branch. The raw current-corpus archive remains the unchanged `nazca-current-corpus-0.1.0.zip` asset from v0.1.0.
+
+The public code-name photo is linked from the catalog and is not copied into this release:
+$env:RELEASE_CODE_PHOTO_URL
+
+## Verification boundary
+
+This build-only workflow does not run tests, lint, type checks, static analysis, accessibility checks, security checks, reviews, or screenshots.
+"@
+            $created = gh api --method POST "repos/$env:REPOSITORY/releases" -f "tag_name=$releaseTag" -f "target_commitish=$env:EXPECTED_SHA" -f "name=Nazca Railway v$env:RELEASE_VERSION · $env:RELEASE_CODE_NAME" -f "body=$body" -F draft=true | ConvertFrom-Json
+            if (-not $created.id -or -not $created.draft -or $created.tag_name -ne $releaseTag) { throw "Created release draft is not the expected $releaseTag record." }
+            "release_id=$($created.id)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          }
 
       - name: Verify generated assets and preserve corpus assets
         shell: pwsh
@@ -290,7 +327,7 @@ jobs:
           $completed = [DateTimeOffset]::Parse($release.published_at).ToUniversalTime()
           $duration = $completed - $started
           $body = [string]$release.body
-          $body += "`n`n## Verified delivery`n`n- Workflow started: $($started.ToString('o'))`n- Workflow completed: $($completed.ToString('o'))`n- Workflow duration: $($duration.ToString('hh\:mm\:ss'))`n- Source commit: $env:EXPECTED_SHA`n- Checks run by this workflow: none. This build-only workflow does not run tests, lint, type checks, static analysis, accessibility checks, security checks, reviews, or screenshots.`n- Code name: Scallop Har Gow · 帶子蝦餃. Photo: https://github.com/Ding-Ding-Projects/dim-sum-photos/releases/download/catalog-v1/hk-dish-0002-scallop-har-gow.png"
+          $body += "`n`n## Verified delivery`n`n- Workflow started: $($started.ToString('o'))`n- Workflow completed: $($completed.ToString('o'))`n- Workflow duration: $($duration.ToString('hh\:mm\:ss'))`n- Source commit: $env:EXPECTED_SHA`n- Checks run by this workflow: none. This build-only workflow does not run tests, lint, type checks, static analysis, accessibility checks, security checks, reviews, or screenshots.`n- Code name: $env:RELEASE_CODE_NAME. Photo: $env:RELEASE_CODE_PHOTO_URL"
           $stage = Join-Path $env:GITHUB_WORKSPACE 'release-staging'
           $notesPath = Join-Path $stage 'release-notes.md'
           $body | Set-Content -LiteralPath $notesPath -Encoding utf8

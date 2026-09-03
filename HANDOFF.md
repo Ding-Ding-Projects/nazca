@@ -4,12 +4,13 @@
 
 - Repository: `Ding-Ding-Projects/nazca`
 - Default branch: `main`
-- Last verified pushed commit: `99f6ce6ed6eb45c223fd97cdbddefd9e793bea82`
+- Last verified pushed commit: `f66dc3709941c8795f12121ee4df2a0340e4e8dc`
 - Tracking issue: https://github.com/Ding-Ding-Projects/nazca/issues/1
 - Rolling progress: https://github.com/Ding-Ding-Projects/nazca/discussions/2
 - Release progress: https://github.com/Ding-Ding-Projects/nazca/discussions/3
 - Current v0.1.1 integration commit: `134ba0c5a127b4e87319199777399b48e2b59a05`
-- v0.1.1 release target: https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.1. Publication and asset verification are not claimed.
+- Published v0.1.1 release commit: `f66dc3709941c8795f12121ee4df2a0340e4e8dc`, verified by run `33701152608` and Pages deployment.
+- v0.1.2 release target: https://github.com/Ding-Ding-Projects/nazca/releases/tag/v0.1.2. Publication remains pending until the Reader 1b state-completion lane is integrated. The planned code name is `Bamboo Shoot Har Gow · 筍尖蝦餃`, linked from the published catalog asset without copying or attaching the photo.
 
 ## Implemented
 
@@ -49,10 +50,10 @@
   `603528b6695d97da351d49d9e4155ef75ddfc221a90d80421448652ada9c3822`.
 - The external raw archive is 60,662,581 bytes with SHA-256
   `3ba23406f379664b36ec53170940f2093f441fe00125ee03e8fb8afd98badf7a`.
-- Build-only release and Pages workflow is committed. It runs no tests, lint,
+- Build-only release and Pages workflow is committed for v0.1.2. It runs no tests, lint,
   type checks, static analysis, accessibility checks, security checks, reviews,
   or screenshots. Its first remote release run remains pending.
-- The GitHub Wiki is intentionally uninitialized. The configured Sites project
+- The v0.1.1 release and Pages deployment are verified. The GitHub Wiki is intentionally uninitialized. The configured Sites project
   is unavailable in the current connector workspace, so no Sites URL is claimed.
 - Selected design direction: `Nazca Reader 1b.dc.html`. The committed handoff
   archive is `design/handoff/Wiki design rewrite.zip`, 81,903 bytes, SHA-256
@@ -103,7 +104,7 @@ response as allowed or verified. The MediaWiki API capture is proceeding.
 3. Implement strict visitor-state storage and the shared search workbench.
 4. Add media rights, staging, volume, and round-trip verification tools before
    downloading any source media.
-5. Run the build-only GitHub Actions release and Pages publication workflow.
+5. Run the v0.1.2 build-only GitHub Actions release and Pages publication workflow after the Reader 1b state-completion lane is integrated.
 6. Register the isolated headless verification route and capture the built UI.
 
 ## Honesty boundary
@@ -111,8 +112,9 @@ response as allowed or verified. The MediaWiki API capture is proceeding.
 The current reader is generated from the fresh non-reconciled snapshot. The raw
 corpus remains outside Git and is packaged as `nazca-current-corpus-0.1.0.zip`.
 The public Pages URL is `https://ding-ding-projects.github.io/nazca/`. A fresh
-workflow run, v0.1.1 release publication, installer verification, and runtime
-capture are not claimed here. The expected v0.1.1 release URL is a target until
-external proof exists. Sites remains unavailable and the GitHub Wiki remains
-uninitialized. Historical revisions, media, maps, template and module closure,
+v0.1.1 workflow run, release publication, Pages deployment, and installer assets
+are verified. The v0.1.2 workflow run, release publication, installer
+verification, and runtime capture are not claimed here. The expected v0.1.2
+release URL is a target until external proof exists. Sites remains unavailable
+and the GitHub Wiki remains uninitialized. Historical revisions, media, maps, template and module closure,
 and stable reconciliation remain open.
