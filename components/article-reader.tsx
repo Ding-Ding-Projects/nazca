@@ -32,6 +32,7 @@ import { SearchWorkbench, type SearchRecord } from '@/components/search-workbenc
 import { useVisitorState } from '@/components/visitor-state-provider';
 import type { CurrentArticleRecordV1 } from '@/lib/contracts';
 import { labels, localize } from '@/lib/i18n';
+import { publishedMediaAssetForTitle } from '@/lib/media-volumes';
 import { formatBuildTime, type BuildProvenance } from '@/lib/provenance';
 import { publicPath } from '@/lib/public-path';
 
@@ -100,6 +101,27 @@ function articlePresentation(record: CurrentArticleRecordV1): ArticlePresentatio
     return 'station';
   }
   return 'generic';
+}
+
+function DeferredMediaNotice({ titles }: { titles: string[] }) {
+  if (!titles.length) return <p>No source media file titles were referenced in this article.</p>;
+  return (
+    <p>
+      Media deferred:{' '}
+      {titles.map((title, index) => {
+        const asset = publishedMediaAssetForTitle(title);
+        const separator = index < titles.length - 1 ? ', ' : '';
+        return asset ? (
+          <span key={title}>
+            <a href={asset.immutableUrl} target="_blank" rel="noopener noreferrer external" referrerPolicy="no-referrer">{title}</a>{separator}
+          </span>
+        ) : (
+          <span key={title}>{title}{separator}</span>
+        );
+      })}
+      .
+    </p>
+  );
 }
 
 export function ArticleReader({
@@ -267,7 +289,7 @@ export function ArticleReader({
                 <div>
                   <h2>History boundary</h2>
                   <p>This release includes the current revision only. Complete revision history is explicitly deferred.</p>
-                  {record.deferredMedia.length ? <p>Media deferred: {record.deferredMedia.join(', ')}.</p> : <p>No source media file titles were referenced in this article.</p>}
+                  <DeferredMediaNotice titles={record.deferredMedia} />
                 </div>
               </section>
             </article>
