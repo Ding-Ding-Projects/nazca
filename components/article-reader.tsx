@@ -146,6 +146,12 @@ export function ArticleReader({
     router.push(publicPath(`/?tab=${encodeURIComponent(destination)}`));
   };
 
+  const focusArticle = () => {
+    const target = document.getElementById('article-content');
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  };
+
   return (
     <div className="article-app-shell" data-element-id="article-shell" data-element-kind="page">
       <a className="skip-link" href="#article-content">Skip to article content</a>
@@ -161,7 +167,7 @@ export function ArticleReader({
           <SearchWorkbench
             surfaceId="article-global-search"
             label="Search this article"
-            placeholder="Search 3,422 articles, stations and lines"
+            placeholder="Find a section in this article"
             records={searchRecords}
             onActivate={(section) => openSection(section.id)}
           />
@@ -174,9 +180,7 @@ export function ArticleReader({
           <button className="icon-button" type="button" aria-label={L('Open command palette', '開啟指令面板')} onClick={() => setPaletteOpen(true)}>
             <Command size={19} aria-hidden="true" />
           </button>
-          <button className="icon-button notification-button" type="button" aria-label={L('Open notifications', '開啟通知')} onClick={() => {
-            window.dispatchEvent(new CustomEvent('nazca:navigate', { detail: 'notifications' }));
-          }}>
+          <button className="icon-button notification-button" type="button" aria-label={L('Open notifications', '開啟通知')} onClick={() => router.push(publicPath('/?tab=notifications'))}>
             <Bell size={19} aria-hidden="true" />
             {notifications.some((notification) => !notification.dismissed) ? <span className="notification-badge" aria-hidden="true" /> : null}
           </button>
@@ -210,7 +214,7 @@ export function ArticleReader({
 
         <main className="article-main-viewport" id="main-content" tabIndex={-1}>
           <div className="article-layout article-layout-reference">
-            <article className={`article-body article-body-${presentation}`} id="article-content" data-reader-state={`article-${presentation}`}>
+            <article className={`article-body article-body-${presentation}`} id="article-content" tabIndex={-1} data-reader-state={`article-${presentation}`}>
               <nav className="article-breadcrumbs" aria-label="Breadcrumb">
                 <button type="button" onClick={() => navigateDestination('home')}>Atlas</button>
                 <span aria-hidden="true">›</span>
@@ -298,7 +302,7 @@ export function ArticleReader({
         <button type="button" onClick={() => navigateDestination('home')}><Home size={19} aria-hidden="true" /><span>Home</span></button>
         <button type="button" onClick={() => navigateDestination('stations')}><TrainFront size={19} aria-hidden="true" /><span>Stations</span></button>
         <button type="button" onClick={() => document.getElementById('article-global-search-input')?.focus()}><Search size={19} aria-hidden="true" /><span>Search</span></button>
-        <button type="button" onClick={() => document.getElementById('article-content')?.focus()}><BookOpen size={19} aria-hidden="true" /><span>Reading</span></button>
+        <button type="button" onClick={focusArticle}><BookOpen size={19} aria-hidden="true" /><span>Reading</span></button>
       </nav>
     </div>
   );

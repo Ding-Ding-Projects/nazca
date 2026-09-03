@@ -302,12 +302,18 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
   const L = (english: string, cantonese: string) =>
     text(localize(english, cantonese, languageMode));
   const [activeTab, setActiveTab] = useState('home');
+  const [requestedTool, setRequestedTool] = useState<'notifications' | null>(null);
   const [updatedAt, setUpdatedAt] = useState(() =>
     formatBuildTime(provenance.builtAt),
   );
 
   useEffect(() => {
     const requestedTab = new URLSearchParams(window.location.search).get('tab');
+    if (requestedTab === 'notifications') {
+      setActiveTab('tools');
+      setRequestedTool('notifications');
+      return;
+    }
     if (requestedTab && groups.some((group) => group.items.some((item) => item.id === requestedTab))) {
       setActiveTab(requestedTab);
     }
@@ -326,13 +332,7 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
       const destination = (event as CustomEvent<string>).detail;
       setActiveTab(destination === 'notifications' ? 'tools' : destination);
       if (destination === 'notifications') {
-        setTimeout(
-          () =>
-            window.dispatchEvent(
-              new CustomEvent('nazca:open-tool', { detail: 'notifications' }),
-            ),
-          0,
-        );
+        setRequestedTool('notifications');
       }
     };
     window.addEventListener('nazca:navigate', navigate);
@@ -457,18 +457,7 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
             className="icon-button notification-button"
             type="button"
             aria-label={L('Open notifications', '開啟通知')}
-            onClick={() => {
-              setActiveTab('tools');
-              setTimeout(
-                () =>
-                  window.dispatchEvent(
-                    new CustomEvent('nazca:open-tool', {
-                      detail: 'notifications',
-                    }),
-                  ),
-                0,
-              );
-            }}
+            onClick={() => router.push(publicPath('/?tab=notifications'))}
           >
             <Bell size={19} aria-hidden="true" />
             {notifications.some((notification) => !notification.dismissed) ? (
@@ -555,9 +544,9 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
                   ? 'history'
                   : activeTab === 'changelog'
                     ? 'changelog'
-                    : activeTab === 'help'
-                      ? 'help'
-                      : 'authenticator'
+                      : activeTab === 'help'
+                        ? 'help'
+                        : requestedTool ?? 'authenticator'
               }
             />
           ) : activeTab === 'status' ? (

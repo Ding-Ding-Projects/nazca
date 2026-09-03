@@ -113,12 +113,21 @@ export function ReaderStatePage({
     if (match) router.push(publicPath(match.route));
   };
   const openNotifications = () => {
-    window.dispatchEvent(new CustomEvent('nazca:navigate', { detail: 'notifications' }));
+    router.push(publicPath('/?tab=notifications'));
   };
 
   const isRedirect = readerState.kind === 'redirect';
   const redirect = isRedirect ? readerState.record : null;
   const redirectTarget = redirect?.targetRoute ? publicPath(redirect.targetRoute) : null;
+  const fallbackArticle = corpusSearch.find((record) => record.title === 'Nazca Railway (Los Sengas Division)');
+  const openReading = () => {
+    const route = redirectTarget ?? (fallbackArticle ? publicPath(fallbackArticle.route) : null);
+    if (route) {
+      router.push(route);
+      return;
+    }
+    openDestination('explore');
+  };
   const searchRecords = corpusSearch.map(recordToSearchRecord);
 
   return (
@@ -229,7 +238,7 @@ export function ReaderStatePage({
         <button type="button" onClick={openHome}><Home size={19} aria-hidden="true" /><span>Home</span></button>
         <button type="button" onClick={() => openDestination('stations')}><TrainFront size={19} aria-hidden="true" /><span>Stations</span></button>
         <button type="button" onClick={() => document.getElementById('reader-boundary-search-input')?.focus()}><Search size={19} aria-hidden="true" /><span>Search</span></button>
-        <button type="button" onClick={() => openDestination('explore')}><BookOpen size={19} aria-hidden="true" /><span>Reading</span></button>
+        <button type="button" onClick={openReading}><BookOpen size={19} aria-hidden="true" /><span>{redirectTarget || fallbackArticle ? 'Reading' : 'Explore'}</span></button>
       </nav>
     </div>
   );
