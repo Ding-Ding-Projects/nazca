@@ -42,6 +42,10 @@
   recorded in `docs/design/reader-1b-handoff.md`.
 - Typed corpus, page, redirect, revision, map, media, rights, volume, feature,
   search, and visitor-state contracts.
+- Metadata-only media release registry and sequential publisher checkpoint with
+  source-identity, rights, signature, digest, and fresh-download validation.
+- The media registry is intentionally empty. No original media bytes have been
+  downloaded or published, and release-volume publication remains future work.
 - Bounded source-policy preflight, continuation-cycle protection, namespace
   resolution, bundle hashes, and staged inventory publication.
 - Fresh current inventory with 3,616 routes, 3,422 articles, 194 redirects,
@@ -128,8 +132,8 @@ response as allowed or verified. The MediaWiki API capture is proceeding.
 1. Finish the hand-written feature and search inventories and their checks.
 2. Add categorized feature documentation and the offline documentation index.
 3. Implement strict visitor-state storage and the shared search workbench.
-4. Add media rights, staging, volume, and round-trip verification tools before
-   downloading any source media.
+4. Populate the media registry only after source authorization, then complete
+   staging, volume, and round-trip verification using the committed publisher.
 5. Run a fresh final build from this documentation commit, then run the v0.1.2 build-only GitHub Actions release and Pages publication workflow.
 6. Register the isolated headless verification route and capture the built UI.
 

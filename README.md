@@ -155,8 +155,9 @@ and transformation notices at the future pinned cutoff.
 
 Current media will be published only after byte, MIME, dimension, hash, rights,
 and attribution validation. Large media belongs in immutable release assets from
-this repository. Standard Git LFS pointers and mutable latest-release URLs are
-forbidden.
+this repository. The metadata-only release registry and sequential publisher
+checkpoint are now present, but no media bytes have been published. Standard Git
+LFS pointers and mutable latest-release URLs are forbidden.
 
 </details>
 

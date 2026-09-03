@@ -35,7 +35,7 @@
 ## Media
 
 - [x] Add a standard Git LFS prohibition check.
-- [ ] Add media, rights, and volume catalogs.
+- [x] Add metadata-only media, rights, and volume catalogs plus a sequential validation publisher checkpoint.
 - [ ] Download and validate originals after policy approval.
 - [ ] Generate bounded display variants and accessible placeholders.
 - [ ] Publish draft-first immutable release volumes.

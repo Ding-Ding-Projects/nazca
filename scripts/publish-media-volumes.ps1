@@ -19,7 +19,7 @@ function Fail([string]$Message) {
 
 function Invoke-GhJson([string[]]$Arguments) {
   $output = & gh @Arguments 2>&1
-  if ($LASTEXITCODE -ne 0) { Fail ("gh " + ($Arguments -join ' ') + " returned exit code $LASTEXITCODE: " + ($output -join "`n")) }
+  if ($LASTEXITCODE -ne 0) { Fail ("gh " + ($Arguments -join ' ') + " returned exit code ${LASTEXITCODE}: " + ($output -join "`n")) }
   if (-not $output) { Fail ("gh " + ($Arguments -join ' ') + ' returned no JSON.') }
   return (($output -join "`n") | ConvertFrom-Json)
 }
