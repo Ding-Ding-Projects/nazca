@@ -401,7 +401,7 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
 
   return (
     <div
-      className="app-shell"
+      className={`app-shell ${activeTab === 'home' ? 'home-shell' : ''}`}
       data-element-id="shell:nazca"
       data-element-kind="page"
     >
@@ -655,147 +655,196 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
             />
           ) : (
             <div className="route-content home-overview">
-              <section className="home-hero" aria-labelledby="home-heading">
-                <div className="home-hero-copy">
+              <section className="home-welcome" aria-labelledby="home-heading">
+                <div className="home-welcome-copy">
                   <p className="home-kicker">
                     <span aria-hidden="true" />
-                    {L('Static reader · current snapshot', '靜態閱讀器 · 目前快照')}
+                    {L('Independent static encyclopedia', '獨立靜態百科全書')}
                   </p>
                   <h1 id="home-heading" className="home-title">
-                    {activeTab === 'home'
-                      ? L('The Encyclopedia of Los Sengas', '洛斯辛格斯百科全書')
-                      : tabLabel(activeTab, selectedLabel)}
+                    {L(
+                      'Find your way through Los Sengas.',
+                      '搵到你嘅洛斯辛格斯路線。',
+                    )}
                   </h1>
                   <p className="home-intro">
                     {L(
-                      'A clarity-first reader for the Los Sengas transport encyclopedia: searchable routes, readable railway tables, permanent attribution, and no advertising rails.',
-                      '清晰易用嘅洛斯辛格斯交通百科：路線可搜尋、鐵路表格易讀、來源註明永久保留，冇廣告欄位阻住你。',
+                      'A reorganized, reader-first home for railway lines, stations, places, infrastructure, and history. No advertising columns, fandom chrome, or maze of unrelated links.',
+                      '以讀者為先，重新整理鐵路線、車站、地點、基建同歷史。冇廣告欄，冇社群網站雜亂介面，搵資料唔使行迷宮。',
                     )}
                   </p>
-                </div>
-                <div className="home-hero-art" aria-hidden="true">
-                  <span className="hero-orbit hero-orbit-blue" />
-                  <span className="hero-orbit hero-orbit-green" />
-                  <span className="hero-orbit hero-orbit-gold" />
-                  <span className="hero-orbit hero-orbit-red" />
-                  <span className="hero-hub">NR</span>
-                  <span className="hero-node hero-node-one" />
-                  <span className="hero-node hero-node-two" />
-                  <span className="hero-node hero-node-three" />
-                </div>
-              </section>
-
-              <section className="quick-grid home-destinations" aria-labelledby="destinations-heading">
-                <div className="section-heading destination-heading">
-                  <div>
-                    <p className="section-overline">Explore</p>
-                    <h2 id="destinations-heading">Choose a destination</h2>
-                  </div>
-                  <span>Four indexed views</span>
-                </div>
-                <div className="destination-card-grid">
-                  {quickLinks.map((link) => (
+                  <div className="home-actions">
                     <button
-                      key={link.label}
                       type="button"
-                      className="quick-card destination-card"
-                      aria-label={tabLabel(link.tab, link.label)}
-                      onClick={() => setActiveTab(link.tab)}
+                      className="home-primary-action"
+                      onClick={() => setActiveTab('search')}
                     >
-                      <span className="destination-card-top">
-                        <span className="route-dot" style={{ color: link.color }} aria-hidden="true" />
-                        <ArrowUpRight size={17} aria-hidden="true" />
-                      </span>
-                      <span>
-                        <strong>{tabLabel(link.tab, link.label)}</strong>
-                        <span>{link.meta}</span>
-                      </span>
+                      <Search size={18} aria-hidden="true" />
+                      {L('Search the encyclopedia', '搜尋百科全書')}
                     </button>
-                  ))}
+                    <button
+                      type="button"
+                      className="home-secondary-action"
+                      onClick={() => setActiveTab('explore')}
+                    >
+                      {L('Browse all articles', '瀏覽所有文章')}
+                      <ArrowUpRight size={17} aria-hidden="true" />
+                    </button>
+                  </div>
+                </div>
+                <div
+                  className="home-at-a-glance"
+                  aria-label="Current reader at a glance"
+                >
+                  <p>Current reader</p>
+                  <strong>3,422</strong>
+                  <span>captured articles</span>
+                  <dl>
+                    <div>
+                      <dt>Routes</dt>
+                      <dd>3,616</dd>
+                    </div>
+                    <div>
+                      <dt>Redirects</dt>
+                      <dd>194</dd>
+                    </div>
+                    <div>
+                      <dt>Reader shards</dt>
+                      <dd>54</dd>
+                    </div>
+                  </dl>
                 </div>
               </section>
 
-              <div className="home-grid home-grid-reference">
-                <div className="home-main-column">
-                  <section className="content-card useful-record-card" aria-labelledby="recent-heading">
-                    <div className="section-heading">
-                      <div>
-                        <p className="section-overline">Reader index</p>
-                        <h2 id="recent-heading">Start with a useful record</h2>
-                      </div>
-                      <span>{records.length} featured</span>
-                    </div>
-                    <ul className="recent-list">
-                      {records.slice(0, 6).map((record) => (
-                        <li key={record.id}>
-                          <button type="button" className="recent-item" aria-label={record.title} onClick={() => openRecord(record)}>
-                            <span className="route-dot" style={{ color: record.color }} aria-hidden="true" />
-                            <span className="record-copy">
-                              <strong>{record.title}</strong>
-                              <span>{record.kind} · {record.detail}</span>
-                            </span>
-                            <ChevronRight size={17} aria-hidden="true" />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-
-                  <section className="content-card corpus-baseline-card" aria-labelledby="corpus-heading">
-                    <div className="section-heading">
-                      <div>
-                        <p className="section-overline">Evidence</p>
-                        <h2 id="corpus-heading">Pinned corpus baseline</h2>
-                      </div>
-                      <span className="baseline-mark" aria-hidden="true" />
-                    </div>
-                    <div className="baseline-stats">
-                      <div className="baseline-stat"><strong>3,422</strong><span>articles</span></div>
-                      <div className="baseline-stat"><strong>194</strong><span>redirects</span></div>
-                      <div className="baseline-stat"><strong>3,616</strong><span>routes</span></div>
-                      <div className="baseline-stat"><strong>54</strong><span>reader shards</span></div>
-                      <div className="baseline-stat baseline-stat-warning"><strong>16,555</strong><span>media deferred</span></div>
-                    </div>
-                    <p className="baseline-note">The importer recaptures and reconciles one stable cutoff before this repository becomes canonical. Historical revisions, media bytes, and maps remain outside the current snapshot.</p>
-                  </section>
+              <section
+                className="home-directory"
+                aria-labelledby="directory-heading"
+              >
+                <div className="section-heading directory-heading">
+                  <div>
+                    <p className="section-overline">Directory</p>
+                    <h2 id="directory-heading">Browse by subject</h2>
+                  </div>
+                  <span>Clear routes into the archive</span>
                 </div>
+                <div className="directory-grid">
+                  {quickLinks.map((link, index) => {
+                    const DirectoryIcon = [
+                      TrainFront,
+                      Layers3,
+                      Building2,
+                      Landmark,
+                    ][index];
+                    return (
+                      <button
+                        key={link.label}
+                        type="button"
+                        className="directory-card"
+                        onClick={() => setActiveTab(link.tab)}
+                      >
+                        <span
+                          className="directory-icon"
+                          style={{ color: link.color }}
+                        >
+                          <DirectoryIcon size={21} aria-hidden="true" />
+                        </span>
+                        <span className="directory-copy">
+                          <strong>{tabLabel(link.tab, link.label)}</strong>
+                          <small>{link.meta}</small>
+                        </span>
+                        <ChevronRight size={18} aria-hidden="true" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
 
-                <div className="home-side-column">
-                  <section className="map-card network-card" aria-labelledby="map-heading">
-                    <div className="map-card-header">
-                      <div>
-                        <p className="section-overline">Held for reconciliation</p>
-                        <h2 id="map-heading">Network map</h2>
-                        <p>Three source map records held back</p>
-                      </div>
-                      <Map size={20} aria-hidden="true" />
+              <div className="home-reading-grid">
+                <section
+                  className="home-featured"
+                  aria-labelledby="featured-heading"
+                >
+                  <div className="section-heading">
+                    <div>
+                      <p className="section-overline">
+                        Recommended starting points
+                      </p>
+                      <h2 id="featured-heading">Featured records</h2>
                     </div>
-                    <div className="network-placeholder">
-                      <span>network map · route diagram deferred</span>
-                    </div>
+                    <button
+                      type="button"
+                      className="text-action"
+                      onClick={() => setActiveTab('explore')}
+                    >
+                      View index <ArrowUpRight size={14} aria-hidden="true" />
+                    </button>
+                  </div>
+                  <ul className="featured-records">
+                    {records.slice(0, 6).map((record, index) => (
+                      <li key={record.id}>
+                        <button
+                          type="button"
+                          onClick={() => openRecord(record)}
+                          aria-label={`Open ${record.title}`}
+                        >
+                          <span className="featured-number">
+                            {String(index + 1).padStart(2, '0')}
+                          </span>
+                          <span
+                            className="route-dot"
+                            style={{ color: record.color }}
+                            aria-hidden="true"
+                          />
+                          <span className="record-copy">
+                            <strong>{record.title}</strong>
+                            <small>
+                              {record.kind} · {record.detail}
+                            </small>
+                          </span>
+                          <ChevronRight size={17} aria-hidden="true" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+
+                <aside className="home-notes" aria-label="Reader notes">
+                  <section>
+                    <p className="section-overline">Why this reader</p>
+                    <h2>Built for reading, not engagement</h2>
+                    <p>
+                      Content is arranged around subjects and records, with calm
+                      navigation, local search, readable tables, and no
+                      advertising rail.
+                    </p>
                   </section>
-
-                  <section className="content-card provenance-card" aria-labelledby="provenance-heading">
-                    <div className="section-heading">
-                      <div>
-                        <p className="section-overline">Source record</p>
-                        <h2 id="provenance-heading">Source provenance</h2>
-                      </div>
-                      <span className="status-dot" aria-label="Pending stable import" />
-                    </div>
-                    <dl className="provenance-list">
-                      <div><dt>Source</dt><dd>enlossengas.fandom.com</dd></div>
-                      <div><dt>Text licence</dt><dd>CC BY-SA</dd></div>
-                      <div><dt>Capture</dt><dd>31 Aug 2026</dd></div>
-                      <div><dt>Final cutoff</dt><dd className="provenance-pending">Pending stable import</dd></div>
-                    </dl>
+                  <section>
+                    <p className="section-overline">Source &amp; scope</p>
+                    <h2>Preserved with attribution</h2>
+                    <p>
+                      Fandom remains the credited legacy source under CC BY-SA.
+                      This current snapshot is not a live synchronization
+                      service.
+                    </p>
+                    <button
+                      type="button"
+                      className="text-action"
+                      onClick={() => setActiveTab('about')}
+                    >
+                      Read project notes{' '}
+                      <ArrowUpRight size={14} aria-hidden="true" />
+                    </button>
                   </section>
-
-                  <section className="content-card status-strip" aria-label="Implementation status">
+                  <section className="snapshot-note">
                     <span className="status-dot" aria-hidden="true" />
-                    <span><strong>Running</strong><small>first atlas slice</small></span>
+                    <div>
+                      <strong>Current snapshot</strong>
+                      <small>
+                        Media and historical revisions remain deferred.
+                      </small>
+                    </div>
                   </section>
-                </div>
+                </aside>
               </div>
             </div>
           )}

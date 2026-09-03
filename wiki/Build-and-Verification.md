@@ -41,3 +41,12 @@ npm run check:coverage:self-test
 
 Release mode remains intentionally blocked while required feature and evidence
 rows are incomplete.
+
+## Reader-first home reorganization
+
+The GitHub Pages home is now a linear encyclopedia directory with working Search
+and Explore actions, subject navigation, featured records, and concise source
+notes. The redundant home status rail has been removed; other destinations keep
+their contextual rail. The project-path Pages build is the minimum programmatic
+check for this revision. Browser interaction, accessibility, and capture remain
+required release evidence and must not be inferred from the static build alone.

@@ -200,3 +200,11 @@ convenience copy from its own committed counter report.
 This public repository follows the sanitized project rules in [AGENTS.md](AGENTS.md).
 The mirror covers source policy, privacy, accessibility, local verification,
 static deployment, release-backed media, documentation, and release evidence.
+
+## Reader-first home organization
+
+The GitHub Pages home is organized as an encyclopedia directory instead of a
+fandom-style portal: introduction and working search actions first, subject
+navigation second, useful records third, and concise source boundaries last.
+The home drops the duplicate third status rail while preserving the persistent
+Reader, Atlas, and Research navigation and the local regex-enabled search.

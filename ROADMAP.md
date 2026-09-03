@@ -81,3 +81,11 @@ supersedes its source tip and requires a fresh final build. Publication remains
 pending until that build and the external release evidence complete. The configured Sites
 project remains unavailable, and the GitHub Wiki remains uninitialized. The
 public Pages URL remains https://ding-ding-projects.github.io/nazca/.
+
+## Reader home reorganization
+
+- [x] Replace the portal-style home dashboard with a reader-first information hierarchy.
+- [x] Put search and complete-index actions before subject navigation and featured records.
+- [x] Remove the duplicate home status rail while retaining source and snapshot boundaries.
+- [x] Document the responsive directory in the repository wiki and reader guide.
+- [ ] Complete runtime interaction, accessibility, and multi-width capture evidence for release publication.

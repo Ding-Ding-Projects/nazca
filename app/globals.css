@@ -2449,3 +2449,301 @@ input:focus-visible,
 @media (max-width: 38rem) {
   .article-app-shell .article-tab-dock { display: none; }
 }
+
+/* Reader-first home: a flat information hierarchy instead of a portal dashboard. */
+.home-shell .shell-grid {
+  grid-template-columns: var(--dock-width) minmax(0, 1fr);
+}
+.home-shell .right-rail {
+  display: none;
+}
+.home-shell .main-viewport {
+  padding-block-start: 0;
+}
+.home-overview {
+  width: min(100%, 76rem);
+  padding-block-end: 4rem;
+}
+.home-welcome {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(16rem, 0.55fr);
+  gap: clamp(2rem, 7vw, 6rem);
+  align-items: end;
+  padding: clamp(3rem, 7vw, 6rem) 0 clamp(2.5rem, 5vw, 4rem);
+  border-block-end: 1px solid var(--outline);
+}
+.home-welcome-copy {
+  min-width: 0;
+}
+.home-welcome .home-title {
+  max-width: 14ch;
+  font-size: clamp(3rem, 7vw, 6.25rem);
+  line-height: 0.91;
+}
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-block-start: 1.5rem;
+}
+.home-primary-action,
+.home-secondary-action {
+  min-height: 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border-radius: 0.65rem;
+  padding: 0.75rem 1rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+.home-primary-action {
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.home-secondary-action {
+  border: 1px solid var(--outline-strong);
+  background: var(--surface);
+  color: var(--ink);
+}
+.home-primary-action:hover {
+  background: var(--primary-strong);
+}
+.home-secondary-action:hover {
+  border-color: var(--primary);
+  color: var(--primary-strong);
+}
+.home-at-a-glance {
+  border-inline-start: 0.3rem solid var(--route-blue);
+  padding-inline-start: 1.25rem;
+}
+.home-at-a-glance > p {
+  margin: 0 0 0.35rem;
+  color: var(--ink-muted);
+  font:
+    700 0.67rem/1.2 ui-monospace,
+    Consolas,
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.home-at-a-glance > strong {
+  display: block;
+  font-size: clamp(2.6rem, 5vw, 4.3rem);
+  letter-spacing: -0.07em;
+  line-height: 1;
+}
+.home-at-a-glance > span {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+}
+.home-at-a-glance dl {
+  margin: 1.2rem 0 0;
+}
+.home-at-a-glance dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-block-start: 1px solid var(--outline);
+  padding-block: 0.55rem;
+  font-size: 0.72rem;
+}
+.home-at-a-glance dt {
+  color: var(--ink-muted);
+}
+.home-at-a-glance dd {
+  margin: 0;
+  font-weight: 800;
+}
+.home-directory {
+  padding-block: 2.2rem;
+  border-block-end: 1px solid var(--outline);
+}
+.directory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-block-start: 1rem;
+}
+.directory-card {
+  min-width: 0;
+  min-height: 8.5rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-content: space-between;
+  gap: 0.7rem;
+  border: 1px solid var(--outline);
+  border-radius: 0.8rem;
+  background: var(--surface);
+  color: var(--ink);
+  padding: 1rem;
+  text-align: start;
+  cursor: pointer;
+}
+.directory-card:hover {
+  border-color: var(--primary);
+  background: var(--surface-accent);
+}
+.directory-icon {
+  width: 2.4rem;
+  height: 2.4rem;
+  display: grid;
+  place-items: center;
+  border-radius: 0.55rem;
+  background: var(--surface-soft);
+}
+.directory-card > svg {
+  align-self: center;
+  color: var(--ink-muted);
+}
+.directory-copy {
+  grid-column: 1 / -1;
+}
+.directory-copy strong,
+.directory-copy small {
+  display: block;
+}
+.directory-copy strong {
+  font-size: 1rem;
+}
+.directory-copy small {
+  margin-block-start: 0.18rem;
+  color: var(--ink-muted);
+  font-size: 0.68rem;
+}
+.home-reading-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(17rem, 0.65fr);
+  gap: clamp(1.5rem, 4vw, 3rem);
+  padding-block-start: 2.3rem;
+}
+.text-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 0;
+  background: transparent;
+  color: var(--primary-strong);
+  padding: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.featured-records {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  border-block-start: 1px solid var(--outline);
+}
+.featured-records li {
+  border-block-end: 1px solid var(--outline);
+}
+.featured-records button {
+  width: 100%;
+  min-height: 4.7rem;
+  display: grid;
+  grid-template-columns: 2rem auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.8rem;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  padding: 0.65rem 0.25rem;
+  text-align: start;
+  cursor: pointer;
+}
+.featured-records button:hover {
+  background: var(--surface-soft);
+  color: var(--primary-strong);
+}
+.featured-number {
+  color: var(--ink-muted);
+  font:
+    700 0.65rem/1 ui-monospace,
+    Consolas,
+    monospace;
+}
+.featured-records small {
+  display: block;
+  margin-block-start: 0.25rem;
+  color: var(--ink-muted);
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+.home-notes {
+  display: grid;
+  align-content: start;
+  gap: 0;
+  border-block-start: 0.3rem solid var(--route-green);
+  background: var(--surface-soft);
+}
+.home-notes section {
+  padding: 1.15rem;
+  border-block-end: 1px solid var(--outline);
+}
+.home-notes h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+.home-notes p:not(.section-overline) {
+  margin: 0.45rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+.home-notes .text-action {
+  margin-block-start: 0.75rem;
+}
+.home-notes .snapshot-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  border-block-end: 0;
+}
+.snapshot-note div,
+.snapshot-note strong,
+.snapshot-note small {
+  display: block;
+}
+.snapshot-note small {
+  margin-block-start: 0.2rem;
+  color: var(--ink-muted);
+  font-size: 0.67rem;
+  line-height: 1.4;
+}
+@media (max-width: 62rem) {
+  .home-welcome {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .home-at-a-glance {
+    max-width: 28rem;
+  }
+  .directory-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 48rem) {
+  .home-reading-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 38rem) {
+  .home-welcome {
+    padding-block-start: 2.5rem;
+  }
+  .home-welcome .home-title {
+    font-size: clamp(2.75rem, 14vw, 4.2rem);
+  }
+  .directory-grid {
+    grid-template-columns: 1fr;
+  }
+  .directory-card {
+    min-height: 6.5rem;
+  }
+  .home-actions > button {
+    width: 100%;
+  }
+}
