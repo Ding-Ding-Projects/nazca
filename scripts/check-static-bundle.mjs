@@ -26,6 +26,17 @@ function sha256(bytes) {
   return createHash('sha256').update(bytes).digest('hex');
 }
 
+async function pathExists(target) {
+  try {
+    await stat(target);
+    return true;
+  } catch (error) {
+    if (error && typeof error === 'object' && error.code === 'ENOENT')
+      return false;
+    throw error;
+  }
+}
+
 const files = await filesBelow(CLIENT);
 let bytes = 0;
 for (const file of files) bytes += (await stat(file)).size;
@@ -67,10 +78,15 @@ if (pages) {
     await readFile(path.join(readerRoot, 'manifest.json'), 'utf8'),
   );
   const readerRoutes = JSON.parse(
-    await readFile(path.join(readerRoot, readerManifest.routes.registry), 'utf8'),
+    await readFile(
+      path.join(readerRoot, readerManifest.routes.registry),
+      'utf8',
+    ),
   );
   const renderedRoutes = files.filter(
-    (file) => file.startsWith(`${path.join(CLIENT, 'wiki')}${path.sep}`) && file.endsWith('.html'),
+    (file) =>
+      file.startsWith(`${path.join(CLIENT, 'wiki')}${path.sep}`) &&
+      file.endsWith('.html'),
   );
   if (renderedRoutes.length !== readerRoutes.length) {
     throw new Error(
@@ -78,8 +94,9 @@ if (pages) {
     );
   }
   for (const route of readerRoutes) {
-    const output = path.join(CLIENT, `${route.route.slice(1)}.html`);
-    if (!files.includes(output)) throw new Error(`GitHub Pages output is missing ${route.route}.`);
+    const output = path.join(CLIENT, route.route.slice(1), 'index.html');
+    if (!files.includes(output))
+      throw new Error(`GitHub Pages output is missing ${route.route}.`);
   }
   const rootAssets = await stat(path.join(CLIENT, '_next', 'static'));
   if (!rootAssets.isDirectory()) {
@@ -95,14 +112,43 @@ if (pages) {
       throw error;
   }
   const home = await readFile(path.join(CLIENT, 'index.html'), 'utf8');
-  const sampleRoute = readerRoutes.find((entry) => entry.title === 'Nazca Railway (Los Sengas Division)')?.route ?? readerRoutes[0]?.route;
-  const article = await readFile(path.join(CLIENT, `${sampleRoute.slice(1)}.html`), 'utf8');
+  const sampleRoute =
+    readerRoutes.find(
+      (entry) => entry.title === 'Nazca Railway (Los Sengas Division)',
+    )?.route ?? readerRoutes[0]?.route;
+  const sampleDirectoryOutput = path.join(
+    CLIENT,
+    sampleRoute.slice(1),
+    'index.html',
+  );
+  const sampleFlatOutput = path.join(CLIENT, `${sampleRoute.slice(1)}.html`);
+  if (await pathExists(sampleFlatOutput)) {
+    throw new Error(
+      `GitHub Pages output still contains the flat wiki sibling for ${sampleRoute}.`,
+    );
+  }
+  const article = await readFile(sampleDirectoryOutput, 'utf8');
   for (const [label, value] of [
     ['home asset prefix', home.includes('/nazca/_next/')],
     ['article asset prefix', article.includes('/nazca/_next/')],
-    ['article home control', article.includes('aria-label="Open Nazca Railway home"')],
-    ['article title', article.includes(sampleRoute ? (readerRoutes.find((entry) => entry.route === sampleRoute)?.title ?? '') : '')],
-    ['article current-snapshot marker', article.includes('outside this current snapshot')],
+    [
+      'article home control',
+      article.includes('aria-label="Open Nazca Railway home"'),
+    ],
+    [
+      'article title',
+      article.includes(
+        sampleRoute
+          ? (readerRoutes.find((entry) => entry.route === sampleRoute)?.title ??
+              '')
+          : '',
+      ),
+    ],
+    [
+      'article current-snapshot marker',
+      article.includes('outside this current snapshot'),
+    ],
+    ['article directory route', article.includes(`/nazca${sampleRoute}/`)],
     [
       'Open Graph image',
       article.includes(

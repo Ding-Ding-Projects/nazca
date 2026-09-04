@@ -6,7 +6,9 @@ const staticExport = process.env.STATIC_EXPORT === '1';
 const nextConfig: NextConfig = {
   ...(pagesBasePath ? { assetPrefix: pagesBasePath } : {}),
   ...(staticExport ? { output: 'export' as const } : {}),
-  trailingSlash: false,
+  // GitHub Pages serves static directories predictably, while the primary
+  // Sites and offline outputs retain their root-path file layout.
+  trailingSlash: Boolean(pagesBasePath),
 };
 
 export default nextConfig;
