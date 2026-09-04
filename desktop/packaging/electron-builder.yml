@@ -4,7 +4,6 @@ artifactName: Nazca-Railway-${version}-${arch}.${ext}
 asar: true
 compression: maximum
 forceCodeSigning: false
-signAndEditExecutable: false
 directories:
   app: .
   output: ../dist/desktop
@@ -20,10 +19,13 @@ extraResources:
       - '**/*'
 win:
   icon: packaging/assets/nazca.ico
+  signExecutable: false
+  signAndEditExecutable: false
   target:
     - target: squirrel
       arch:
         - x64
 squirrelWindows:
   msi: false
+  iconUrl: https://raw.githubusercontent.com/Ding-Ding-Projects/nazca/main/desktop/packaging/assets/nazca.ico
   artifactName: Nazca-Railway-${version}-Setup.exe

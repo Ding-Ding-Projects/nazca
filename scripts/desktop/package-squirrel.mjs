@@ -78,9 +78,11 @@ function assertSafeOutput(outputRoot) {
 function assertConfigText(configText) {
   const required = [
     'forceCodeSigning: false',
+    'signExecutable: false',
     'signAndEditExecutable: false',
     'target: squirrel',
     'msi: false',
+    'iconUrl: https://raw.githubusercontent.com/Ding-Ding-Projects/nazca/main/desktop/packaging/assets/nazca.ico',
     'from: ../dist/client',
     'to: site',
   ];
@@ -146,19 +148,21 @@ function assertUnsigned(path) {
       'Squirrel.Windows packaging must run on Windows so Authenticode status can be checked',
     );
   }
-  const script = `& { (Get-AuthenticodeSignature -LiteralPath '${path.replaceAll("'", "''")}').Status }`;
-  const status = execFileSync(
-    'powershell.exe',
-    ['-NoProfile', '-NonInteractive', '-Command', script],
-    {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    },
-  ).trim();
-  if (status !== 'NotSigned')
-    throw new Error(
-      `Setup.exe Authenticode status is ${status}, expected NotSigned`,
-    );
+  const bytes = readFileSync(path);
+  if (bytes.length < 0x40 || bytes.toString('ascii', 0, 2) !== 'MZ')
+    throw new Error(`Setup.exe is not a PE image: ${path}`);
+  const peOffset = bytes.readUInt32LE(0x3c);
+  if (peOffset + 24 > bytes.length || bytes.toString('ascii', peOffset, peOffset + 4) !== 'PE\u0000\u0000')
+    throw new Error(`Setup.exe has an invalid PE header: ${path}`);
+  const optionalOffset = peOffset + 24;
+  const magic = bytes.readUInt16LE(optionalOffset);
+  const dataDirectoryOffset = magic === 0x10b ? optionalOffset + 96 : magic === 0x20b ? optionalOffset + 112 : 0;
+  if (!dataDirectoryOffset || dataDirectoryOffset + 40 > bytes.length)
+    throw new Error(`Setup.exe has an unsupported PE optional header: ${path}`);
+  const certificateAddress = bytes.readUInt32LE(dataDirectoryOffset + 8 * 4);
+  const certificateSize = bytes.readUInt32LE(dataDirectoryOffset + 8 * 4 + 4);
+  if (certificateAddress !== 0 || certificateSize !== 0)
+    throw new Error(`Setup.exe contains an Authenticode certificate table (address=${certificateAddress}, size=${certificateSize}): ${path}`);
 }
 
 function validateNupkg(path) {
@@ -248,9 +252,20 @@ if (process.platform !== 'win32') {
         'electron-builder is not installed in desktop or the workspace; install the pinned desktop dependency first',
       );
 
+    const builderIsCmd = builder.toLowerCase().endsWith('.cmd');
+    const builderJs = resolve(
+      builder.startsWith(desktopRoot)
+        ? desktopRoot
+        : repositoryRoot,
+      'node_modules/electron-builder/out/cli/cli.js',
+    );
+    const builderCommand = builderIsCmd && existsSync(builderJs) ? process.execPath : builder;
+    const builderArguments = builderCommand === process.execPath
+      ? [builderJs, '--config', configPath, '--win', 'squirrel']
+      : ['--config', configPath, '--win', 'squirrel'];
     const result = spawnSync(
-      builder,
-      ['--config', configPath, '--win', 'squirrel'],
+      builderCommand,
+      builderArguments,
       {
         cwd: desktopRoot,
         env: {

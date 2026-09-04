@@ -48,3 +48,6 @@ next-env.d.ts
 /data/import-journal/
 /public/provenance.json
 /public/_next/
+
+# nested package installs
+/desktop/node_modules/

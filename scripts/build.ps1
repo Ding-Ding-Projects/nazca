@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('Dependencies', 'Build', 'Bundle')]
+    [ValidateSet('Dependencies', 'Build', 'Bundle', 'Installer')]
     [string]$Mode = 'Build',
     [switch]$Silent
 )
@@ -151,9 +151,25 @@ if ($Mode -eq 'Dependencies') {
     exit 0
 }
 
-if ($Mode -eq 'Build') {
-    Write-Phase 'Building the Sites deployment candidate.'
-    & $npm run build
+if ($Mode -eq 'Build' -or $Mode -eq 'Installer') {
+    if ($Mode -eq 'Installer') {
+        Write-Phase 'Building the root-path offline reader for desktop packaging.'
+        & $npm run build:offline
+    }
+    else {
+        Write-Phase 'Building the Sites deployment candidate.'
+        & $npm run build
+    }
+    if ($LASTEXITCODE -eq 0 -and $Mode -eq 'Installer') {
+        $desktopNpm = Join-Path $projectRoot 'desktop\node_modules\.bin\npm.cmd'
+        if (-not (Test-Path -LiteralPath $desktopNpm -PathType Leaf)) { $desktopNpm = $npm }
+        Write-Phase 'Installing the pinned desktop packaging dependencies.'
+        & $desktopNpm --prefix (Join-Path $projectRoot 'desktop') ci --audit=false
+        if ($LASTEXITCODE -eq 0) {
+            Write-Phase 'Building the unsigned Squirrel.Windows installer.'
+            & $nodeDirectory\node.exe (Join-Path $projectRoot 'scripts\desktop\package-squirrel.mjs')
+        }
+    }
 }
 else {
     Write-Phase 'Building the offline static website bundle.'

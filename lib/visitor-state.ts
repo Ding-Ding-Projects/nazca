@@ -107,6 +107,10 @@ export const defaultVisitorState: VisitorState = {
 };
 
 export type VocabularyEntry = { from: string; to: string };
+export type NotificationAction = {
+  kind: 'reload';
+  label: string;
+};
 export type NotificationRecord = {
   id: string;
   kind: 'info' | 'success' | 'warning' | 'error';
@@ -114,6 +118,7 @@ export type NotificationRecord = {
   body: string;
   createdAt: string;
   dismissed: boolean;
+  action?: NotificationAction;
 };
 export type HistoryRecord = {
   id: string;

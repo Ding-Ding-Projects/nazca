@@ -4,6 +4,8 @@ import {
   Bell,
   BookOpen,
   Building2,
+  ArrowUpRight,
+  ChevronRight,
   CircleGauge,
   Clock3,
   Command,
@@ -17,6 +19,7 @@ import {
   Map,
   Moon,
   ScrollText,
+  Search,
   Settings,
   Sun,
   TramFront,
@@ -57,6 +60,17 @@ type AtlasTab = {
 type AtlasTabGroup = {
   label: string;
   items: readonly AtlasTab[];
+};
+
+type CorpusSearchRecord = {
+  id: string;
+  pageId: number;
+  title: string;
+  displayTitle: string;
+  aliases: string[];
+  categories: string[];
+  excerpt: string;
+  route: string;
 };
 
 const records: AtlasRecord[] = [
@@ -111,6 +125,7 @@ const groups: readonly AtlasTabGroup[] = [
     items: [
       { id: 'home', label: 'Home', icon: Home, count: '' },
       { id: 'explore', label: 'Explore', icon: Compass, count: '' },
+      { id: 'search', label: 'Search', icon: Search, count: '3.4k' },
       { id: 'stations', label: 'Stations', icon: TrainFront, count: '1.2k' },
       { id: 'lines', label: 'Lines', icon: Layers3, count: '156' },
       {
@@ -183,7 +198,100 @@ const searchRecords: SearchRecord[] = records.map((record) => ({
   text: recordText(record),
 }));
 
-export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
+function CorpusDestination({
+  eyebrow,
+  title,
+  description,
+  records: destinationRecords,
+  onOpen,
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+  records: CorpusSearchRecord[];
+  onOpen: (record: CorpusSearchRecord) => void;
+}) {
+  return (
+    <div className="route-content">
+      <p className="eyebrow">{eyebrow}</p>
+      <h1 className="page-title">{title}</h1>
+      <p className="lede">{description}</p>
+      {destinationRecords.length ? (
+        <ul className="recent-list destination-record-list">
+          {destinationRecords.map((record) => (
+            <li key={record.id}>
+              <button
+                type="button"
+                className="recent-item"
+                aria-label={`Open ${record.displayTitle || record.title}`}
+                onClick={() => onOpen(record)}
+              >
+                <span className="route-dot" aria-hidden="true" />
+                <span>
+                  <strong>{record.displayTitle || record.title}</strong>
+                  <span>
+                    {record.categories.slice(0, 3).join(' · ') || 'Article'}
+                  </span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <section className="content-card" aria-label="No records available">
+          <h2>No records in this destination yet</h2>
+          <p>
+            The current generated index has no matching records. The source
+            boundary remains visible instead of recycling the Home content.
+          </p>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function CorpusSearchDestination({
+  records,
+  onOpen,
+}: {
+  records: CorpusSearchRecord[];
+  onOpen: (record: CorpusSearchRecord) => void;
+}) {
+  const searchRecords: SearchRecord[] = records.map((record) => ({
+    id: record.id,
+    title: record.displayTitle || record.title,
+    subtitle: record.categories.slice(0, 3).join(' · ') || 'Article',
+    text: `${record.title} ${record.displayTitle} ${record.aliases.join(' ')} ${record.categories.join(' ')} ${record.excerpt}`,
+  }));
+  return (
+    <div className="route-content reader-search-state" data-reader-state="search">
+      <p className="eyebrow"><span aria-hidden="true" />SEARCH · LOCAL, NO NETWORK CALLS</p>
+      <h1 className="page-title">Search the current reader</h1>
+      <p className="lede">Search {records.length.toLocaleString()} captured article records, aliases, categories, and excerpts. Every result opens its exact static route.</p>
+      <div className="reader-search-panel">
+        <SearchWorkbench
+          surfaceId="dedicated-reader-search"
+          label="Search the current reader"
+          placeholder="Search articles, stations, lines, and places"
+          records={searchRecords}
+          onActivate={(result) => {
+            const record = records.find((candidate) => candidate.id === result.id);
+            if (record) onOpen(record);
+          }}
+        />
+      </div>
+      <section className="content-card reader-search-summary" aria-label="Search index summary">
+        <div className="section-heading">
+          <div><p className="section-overline">Indexed source</p><h2>Complete current index</h2></div>
+          <span>{records.length.toLocaleString()} records</span>
+        </div>
+        <p>Plain text is the default. Open the adjacent regular-expression builder when you need bounded RE2 matching, captures, replacement preview, and timing.</p>
+      </section>
+    </div>
+  );
+}
+
+export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: BuildProvenance; corpusSearch?: CorpusSearchRecord[] }) {
   const router = useRouter();
   const { notifications, setPaletteOpen, state, text, updateSettings } =
     useVisitorState();
@@ -194,9 +302,22 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
   const L = (english: string, cantonese: string) =>
     text(localize(english, cantonese, languageMode));
   const [activeTab, setActiveTab] = useState('home');
+  const [requestedTool, setRequestedTool] = useState<'notifications' | null>(null);
   const [updatedAt, setUpdatedAt] = useState(() =>
     formatBuildTime(provenance.builtAt),
   );
+
+  useEffect(() => {
+    const requestedTab = new URLSearchParams(window.location.search).get('tab');
+    if (requestedTab === 'notifications') {
+      setActiveTab('tools');
+      setRequestedTool('notifications');
+      return;
+    }
+    if (requestedTab && groups.some((group) => group.items.some((item) => item.id === requestedTab))) {
+      setActiveTab(requestedTab);
+    }
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(
@@ -211,13 +332,7 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
       const destination = (event as CustomEvent<string>).detail;
       setActiveTab(destination === 'notifications' ? 'tools' : destination);
       if (destination === 'notifications') {
-        setTimeout(
-          () =>
-            window.dispatchEvent(
-              new CustomEvent('nazca:open-tool', { detail: 'notifications' }),
-            ),
-          0,
-        );
+        setRequestedTool('notifications');
       }
     };
     window.addEventListener('nazca:navigate', navigate);
@@ -233,6 +348,17 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
   };
 
   const openRecord = (record: AtlasRecord) => {
+    if (record.kind === 'Article') {
+      const corpusRecord = corpusSearch.find(
+        (candidate) =>
+          candidate.title === record.title ||
+          candidate.displayTitle === record.title,
+      );
+      if (corpusRecord) {
+        router.push(publicPath(corpusRecord.route));
+        return;
+      }
+    }
     if (record.id === 'nazca') {
       router.push(publicPath('/wiki/Nazca_Railway_(Los_Sengas_Division)'));
       return;
@@ -249,15 +375,33 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
   };
 
   const activateSearchRecord = (searchRecord: SearchRecord) => {
+    const corpusRecord = corpusSearch.find((candidate) => candidate.id === searchRecord.id);
+    if (corpusRecord) {
+      router.push(publicPath(corpusRecord.route));
+      return;
+    }
     const record = records.find(
       (candidate) => candidate.id === searchRecord.id,
     );
     if (record) openRecord(record);
   };
 
+  const openCorpusRecord = (record: CorpusSearchRecord) => {
+    router.push(publicPath(record.route));
+  };
+  const destinationRecords = (destination: string) =>
+    corpusSearch.filter((record) => {
+      const text = `${record.title} ${record.displayTitle} ${record.categories.join(' ')}`.toLocaleLowerCase();
+      if (destination === 'stations') return text.includes('station');
+      if (destination === 'lines') return text.includes('line') || text.includes('railway');
+      if (destination === 'places') return text.includes('district') || text.includes('island') || text.includes('bay');
+      if (destination === 'streetcars') return text.includes('tram') || text.includes('streetcar') || text.includes('light rail');
+      return true;
+    });
+
   return (
     <div
-      className="app-shell"
+      className={`app-shell ${activeTab === 'home' ? 'home-shell' : ''}`}
       data-element-id="shell:nazca"
       data-element-kind="page"
     >
@@ -288,7 +432,7 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
             surfaceId="global-atlas-search"
             label="Search the encyclopedia"
             placeholder="Search stations, lines, places, and articles"
-            records={searchRecords}
+            records={corpusSearch.length ? corpusSearch.map((record) => ({ id: record.id, title: record.displayTitle || record.title, subtitle: record.categories.slice(0, 3).join(' · ') || 'Article', text: `${record.title} ${record.displayTitle} ${record.aliases.join(' ')} ${record.categories.join(' ')} ${record.excerpt}` })) : searchRecords}
             onActivate={activateSearchRecord}
           />
         </div>
@@ -313,18 +457,7 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
             className="icon-button notification-button"
             type="button"
             aria-label={L('Open notifications', '開啟通知')}
-            onClick={() => {
-              setActiveTab('tools');
-              setTimeout(
-                () =>
-                  window.dispatchEvent(
-                    new CustomEvent('nazca:open-tool', {
-                      detail: 'notifications',
-                    }),
-                  ),
-                0,
-              );
-            }}
+            onClick={() => router.push(publicPath('/?tab=notifications'))}
           >
             <Bell size={19} aria-hidden="true" />
             {notifications.some((notification) => !notification.dismissed) ? (
@@ -354,6 +487,13 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
           </button>
         </div>
       </header>
+
+      <div className="route-color-bar home-route-bar" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
 
       <div className="shell-grid">
         <nav className="tab-dock" aria-label="Atlas tabs">
@@ -404,13 +544,46 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
                   ? 'history'
                   : activeTab === 'changelog'
                     ? 'changelog'
-                    : activeTab === 'help'
-                      ? 'help'
-                      : 'authenticator'
+                      : activeTab === 'help'
+                        ? 'help'
+                        : requestedTool ?? 'authenticator'
               }
             />
           ) : activeTab === 'status' ? (
             <StatusWorkspace provenance={provenance} />
+          ) : activeTab === 'search' ? (
+            <CorpusSearchDestination records={corpusSearch} onOpen={openCorpusRecord} />
+          ) : ['explore', 'stations', 'lines', 'places', 'streetcars'].includes(activeTab) ? (
+            <CorpusDestination
+              eyebrow={tabLabel(activeTab, selectedLabel)}
+              title={tabLabel(activeTab, selectedLabel)}
+              description={
+                activeTab === 'explore'
+                  ? 'Browse the generated current reader index. Every result opens its exact static article route.'
+                  : 'Browse records from the generated current reader index. Selecting a record opens its exact static article route.'
+              }
+              records={destinationRecords(activeTab)}
+              onOpen={openCorpusRecord}
+            />
+          ) : activeTab === 'maps' ? (
+            <SimpleWorkspace
+              eyebrow="Maps"
+              title="Map records are retained, rendering is deferred."
+              description="The current source inventory includes three map records. Interactive map rendering remains pending stable source reconciliation."
+              cards={[
+                { id: 'map-inventory', title: 'Three source map records', body: 'The inventory is available for later reconciliation. No map image or guessed geometry is presented here.' },
+                { id: 'map-status', title: 'Current status', body: 'Map rendering is deferred until source policy and stable cutoff checks complete.' },
+              ]}
+            />
+          ) : activeTab === 'timeline' ? (
+            <SimpleWorkspace
+              eyebrow="Timeline"
+              title="Timeline records are not in this snapshot."
+              description="Historical revision history is explicitly deferred, so this destination reports the boundary instead of repeating Home content."
+              cards={[
+                { id: 'timeline-status', title: 'Historical revisions deferred', body: 'No timeline records are fabricated from the current-only capture.' },
+              ]}
+            />
           ) : activeTab === 'media' ? (
             <SimpleWorkspace
               eyebrow="Media catalog"
@@ -481,129 +654,197 @@ export function NazcaShell({ provenance }: { provenance: BuildProvenance }) {
               ]}
             />
           ) : (
-            <div className="route-content">
-              <p className="eyebrow">
-                {L('Nazca Railway atlas', 'Nazca Railway 鐵路圖鑑')}
-              </p>
-              <h1 className="page-title">
-                {activeTab === 'home'
-                  ? localize(
-                      settings.funnyLevelEnglish === 1
-                        ? 'A clear railway encyclopedia.'
-                        : 'Railways without the clutter.',
-                      settings.funnyLevelCantonese === 1
-                        ? '清晰嘅鐵路百科。'
-                        : '清楚睇鐵路，唔使同雜亂版面搏鬥。',
-                      languageMode,
-                    )
-                  : tabLabel(activeTab, selectedLabel)}
-              </h1>
-              <p className="lede">
-                {L(
-                  'A modern, searchable home for the complete Los Sengas transport encyclopedia, with clear routes, readable tables, source history, and a focused map-first experience.',
-                  '一個現代、可搜尋嘅洛斯辛格斯交通百科首頁，路線清楚、表格易讀、來源歷史齊全，地圖放喺最有用嘅位置。',
-                )}
-              </p>
-
-              <section
-                className="quick-grid"
-                aria-label="Explore the encyclopedia"
-              >
-                {quickLinks.map((link) => (
-                  <button
-                    key={link.label}
-                    type="button"
-                    className="quick-card"
-                    aria-label={tabLabel(link.tab, link.label)}
-                    onClick={() => setActiveTab(link.tab)}
-                  >
-                    <span
-                      className="route-dot"
-                      style={{ color: link.color }}
-                      aria-hidden="true"
-                    />
-                    <span>
-                      <strong>{tabLabel(link.tab, link.label)}</strong>
-                      <span>{link.meta}</span>
-                    </span>
-                  </button>
-                ))}
+            <div className="route-content home-overview">
+              <section className="home-welcome" aria-labelledby="home-heading">
+                <div className="home-welcome-copy">
+                  <p className="home-kicker">
+                    <span aria-hidden="true" />
+                    {L('Independent static encyclopedia', '獨立靜態百科全書')}
+                  </p>
+                  <h1 id="home-heading" className="home-title">
+                    {L(
+                      'Find your way through Los Sengas.',
+                      '搵到你嘅洛斯辛格斯路線。',
+                    )}
+                  </h1>
+                  <p className="home-intro">
+                    {L(
+                      'A reorganized, reader-first home for railway lines, stations, places, infrastructure, and history. No advertising columns, fandom chrome, or maze of unrelated links.',
+                      '以讀者為先，重新整理鐵路線、車站、地點、基建同歷史。冇廣告欄，冇社群網站雜亂介面，搵資料唔使行迷宮。',
+                    )}
+                  </p>
+                  <div className="home-actions">
+                    <button
+                      type="button"
+                      className="home-primary-action"
+                      onClick={() => setActiveTab('search')}
+                    >
+                      <Search size={18} aria-hidden="true" />
+                      {L('Search the encyclopedia', '搜尋百科全書')}
+                    </button>
+                    <button
+                      type="button"
+                      className="home-secondary-action"
+                      onClick={() => setActiveTab('explore')}
+                    >
+                      {L('Browse all articles', '瀏覽所有文章')}
+                      <ArrowUpRight size={17} aria-hidden="true" />
+                    </button>
+                  </div>
+                </div>
+                <div
+                  className="home-at-a-glance"
+                  aria-label="Current reader at a glance"
+                >
+                  <p>Current reader</p>
+                  <strong>3,422</strong>
+                  <span>captured articles</span>
+                  <dl>
+                    <div>
+                      <dt>Routes</dt>
+                      <dd>3,616</dd>
+                    </div>
+                    <div>
+                      <dt>Redirects</dt>
+                      <dd>194</dd>
+                    </div>
+                    <div>
+                      <dt>Reader shards</dt>
+                      <dd>54</dd>
+                    </div>
+                  </dl>
+                </div>
               </section>
 
-              <div className="home-grid">
-                <section className="map-card" aria-labelledby="map-heading">
-                  <div className="map-card-header">
-                    <div>
-                      <h2 id="map-heading">Metropolis network overview</h2>
-                      <p>
-                        The final interactive view preserves all three source
-                        map records and a complete text equivalent.
-                      </p>
-                    </div>
-                    <Map size={20} aria-hidden="true" />
+              <section
+                className="home-directory"
+                aria-labelledby="directory-heading"
+              >
+                <div className="section-heading directory-heading">
+                  <div>
+                    <p className="section-overline">Directory</p>
+                    <h2 id="directory-heading">Browse by subject</h2>
                   </div>
-                  <span className="map-label one">Metropolis</span>
-                  <span className="map-label two">Arcgo</span>
-                  <span className="map-label three">Oasis Bay</span>
+                  <span>Clear routes into the archive</span>
+                </div>
+                <div className="directory-grid">
+                  {quickLinks.map((link, index) => {
+                    const DirectoryIcon = [
+                      TrainFront,
+                      Layers3,
+                      Building2,
+                      Landmark,
+                    ][index];
+                    return (
+                      <button
+                        key={link.label}
+                        type="button"
+                        className="directory-card"
+                        onClick={() => setActiveTab(link.tab)}
+                      >
+                        <span
+                          className="directory-icon"
+                          style={{ color: link.color }}
+                        >
+                          <DirectoryIcon size={21} aria-hidden="true" />
+                        </span>
+                        <span className="directory-copy">
+                          <strong>{tabLabel(link.tab, link.label)}</strong>
+                          <small>{link.meta}</small>
+                        </span>
+                        <ChevronRight size={18} aria-hidden="true" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+
+              <div className="home-reading-grid">
+                <section
+                  className="home-featured"
+                  aria-labelledby="featured-heading"
+                >
+                  <div className="section-heading">
+                    <div>
+                      <p className="section-overline">
+                        Recommended starting points
+                      </p>
+                      <h2 id="featured-heading">Featured records</h2>
+                    </div>
+                    <button
+                      type="button"
+                      className="text-action"
+                      onClick={() => setActiveTab('explore')}
+                    >
+                      View index <ArrowUpRight size={14} aria-hidden="true" />
+                    </button>
+                  </div>
+                  <ul className="featured-records">
+                    {records.slice(0, 6).map((record, index) => (
+                      <li key={record.id}>
+                        <button
+                          type="button"
+                          onClick={() => openRecord(record)}
+                          aria-label={`Open ${record.title}`}
+                        >
+                          <span className="featured-number">
+                            {String(index + 1).padStart(2, '0')}
+                          </span>
+                          <span
+                            className="route-dot"
+                            style={{ color: record.color }}
+                            aria-hidden="true"
+                          />
+                          <span className="record-copy">
+                            <strong>{record.title}</strong>
+                            <small>
+                              {record.kind} · {record.detail}
+                            </small>
+                          </span>
+                          <ChevronRight size={17} aria-hidden="true" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 </section>
 
-                <div className="content-stack">
-                  <section
-                    className="content-card"
-                    aria-labelledby="corpus-heading"
-                  >
-                    <h2 id="corpus-heading">Pinned corpus baseline</h2>
+                <aside className="home-notes" aria-label="Reader notes">
+                  <section>
+                    <p className="section-overline">Why this reader</p>
+                    <h2>Built for reading, not engagement</h2>
                     <p>
-                      The importer recaptures and reconciles one stable cutoff
-                      before this repository becomes canonical.
+                      Content is arranged around subjects and records, with calm
+                      navigation, local search, readable tables, and no
+                      advertising rail.
                     </p>
-                    <div className="stat-row">
-                      <div className="stat">
-                        <strong>3,422</strong>
-                        <span>articles</span>
-                      </div>
-                      <div className="stat">
-                        <strong>194</strong>
-                        <span>redirects</span>
-                      </div>
-                      <div className="stat">
-                        <strong>16,555</strong>
-                        <span>media</span>
-                      </div>
+                  </section>
+                  <section>
+                    <p className="section-overline">Source &amp; scope</p>
+                    <h2>Preserved with attribution</h2>
+                    <p>
+                      Fandom remains the credited legacy source under CC BY-SA.
+                      This current snapshot is not a live synchronization
+                      service.
+                    </p>
+                    <button
+                      type="button"
+                      className="text-action"
+                      onClick={() => setActiveTab('about')}
+                    >
+                      Read project notes{' '}
+                      <ArrowUpRight size={14} aria-hidden="true" />
+                    </button>
+                  </section>
+                  <section className="snapshot-note">
+                    <span className="status-dot" aria-hidden="true" />
+                    <div>
+                      <strong>Current snapshot</strong>
+                      <small>
+                        Media and historical revisions remain deferred.
+                      </small>
                     </div>
                   </section>
-
-                  <section
-                    className="content-card"
-                    aria-labelledby="recent-heading"
-                  >
-                    <h2 id="recent-heading">Start with a useful record</h2>
-                    <ul className="recent-list">
-                      {records.slice(0, 3).map((record) => (
-                        <li key={record.id}>
-                          <button
-                            type="button"
-                            className="recent-item"
-                            aria-label={record.title}
-                            onClick={() => openRecord(record)}
-                          >
-                            <span
-                              className="route-dot"
-                              style={{ color: record.color }}
-                              aria-hidden="true"
-                            />
-                            <span>
-                              <strong>{record.title}</strong>
-                              <span>
-                                {record.kind} · {record.detail}
-                              </span>
-                            </span>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                </div>
+                </aside>
               </div>
             </div>
           )}

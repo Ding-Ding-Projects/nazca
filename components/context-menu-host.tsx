@@ -52,12 +52,26 @@ const actions: SearchRecord[] = [
 ];
 
 function targetLabel(element: HTMLElement) {
-  return (
-    element.getAttribute('aria-label') ||
-    element.getAttribute('title') ||
-    element.textContent?.trim().replace(/\s+/g, ' ').slice(0, 120) ||
-    element.tagName.toLocaleLowerCase()
-  );
+  const explicitLabel =
+    element.getAttribute('aria-label')?.trim() ||
+    element.getAttribute('title')?.trim();
+  if (explicitLabel) return explicitLabel.slice(0, 120);
+
+  // Read only text owned directly by the target. Descendant text can include
+  // the entire page shell when a broad container is right-clicked.
+  const directText = Array.from(element.childNodes)
+    .filter((node) => node.nodeType === Node.TEXT_NODE)
+    .map((node) => node.textContent?.trim() ?? '')
+    .filter(Boolean)
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .slice(0, 120);
+  if (directText) return directText;
+
+  const kind = element.getAttribute('role')?.trim() ||
+    element.tagName.toLocaleLowerCase();
+  const elementId = element.dataset.elementId?.trim();
+  return elementId ? `${kind} (${elementId})`.slice(0, 120) : kind;
 }
 
 export function ContextMenuHost() {

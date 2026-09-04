@@ -77,4 +77,76 @@ export const changelogEntries: ChangelogEntry[] = [
       'Added the command palette, notifications, redacted history, authenticator, converter, loopback model checks, exports, and offline help.',
     commit: 'f5df08d90be60f1b6014ec6a2258ffec81cbe3d1',
   },
+  {
+    version: '0.1.0-dev.7',
+    date: '2026-09-02T19:00:52-04:00',
+    category: 'Reader',
+    title: 'Exact-revision rendered reader corpus',
+    summary:
+      'Compiled 3,422 current article records from exact-revision rendered HTML with semantic tables, safe links, and deferred media metadata.',
+    commit: 'b10334bd5c8d4d312a65ca5c14f26ba2ff09a237',
+  },
+  {
+    version: '0.1.0-dev.8',
+    date: '2026-09-02T19:01:07-04:00',
+    category: 'Reader',
+    title: 'Truthful atlas destinations',
+    summary:
+      'Made each left navigation destination render its own truthful surface, with generated article records opening their exact reader routes.',
+    commit: '99f6ce6ed6eb45c223fd97cdbddefd9e793bea82',
+  },
+  {
+    version: '0.1.0-dev.9',
+    date: '2026-09-02T19:44:53-04:00',
+    category: 'Foundation',
+    title: 'Selected Reader 1b design direction',
+    summary:
+      'Integrated the selected reader design direction into the production shell, article reader, and global styling paths, with the committed handoff archive preserved.',
+    commit: '6e23d907c331dff8d37299c19b742931c3eb12ba',
+  },
+  {
+    version: '0.1.0-dev.10',
+    date: '2026-09-02T20:39:35-04:00',
+    category: 'Reader',
+    title: 'Rebuilt the home atlas composition',
+    summary:
+      'Replaced the unchanged home overview with the Reader 1b hero, destination cards, useful-record list, corpus evidence, and responsive network and provenance rail.',
+    commit: 'c0f8aafcae2baf94c879ea746c349a3b92a9a75d',
+  },
+  {
+    version: '0.1.2-dev.1',
+    date: '2026-09-02T21:19:07-04:00',
+    category: 'Reader',
+    title: 'Completed Reader 1b state compositions',
+    summary:
+      'Added corpus-backed station and year presentations, full destination and dedicated search states, shared redirect and not-found recovery surfaces, and responsive phone bottom navigation.',
+    commit: '835764c9fe0db7872472c88724fb42b95c7bad6c',
+  },
+  {
+    version: '0.1.2-dev.2',
+    date: '2026-09-02T21:31:41-04:00',
+    category: 'Operations',
+    title: 'Reliable Pages cache refresh',
+    summary:
+      'Versioned service-worker caches now retire older project shells deterministically, bypass HTTP cache reuse during updates, and offer an accessible reload action that preserves the current URL and visitor state.',
+    commit: 'ded29c692128a96c6cc54a556ca5d4405db74219',
+  },
+  {
+    version: '0.1.2-dev.3',
+    date: '2026-09-02T22:21:46-04:00',
+    category: 'Reader',
+    title: 'Load the search index once at route boundaries',
+    summary:
+      'Removed per-route search-index serialization from redirect and not-found states, added bounded client loading, and staged one verified static search-index asset for Sites and GitHub Pages paths.',
+    commit: 'dc4842c80917738f9b60023990bf832f28819c74',
+  },
+  {
+    version: '0.1.2-dev.4',
+    date: '2026-09-03T17:15:46-04:00',
+    category: 'Reader',
+    title: 'Bound context-menu target labels',
+    summary:
+      'Preserved explicit accessible labels and prevented broad containers from concatenating descendant navigation text into one target label.',
+    commit: 'a5cb9d7aba63cf3347ade74539ff730717793292',
+  },
 ];

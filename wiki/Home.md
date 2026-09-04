@@ -1,24 +1,56 @@
 # Nazca Railway
 
-Nazca Railway is a modern static reader and transit atlas for the reader-facing
-content of The Encyclopedia of Los Sengas.
+**A reader-first home for The Encyclopedia of Los Sengas**
 
-## Current status
+The GitHub Pages reader has been reorganized around how people look for
+information—not around a fandom portal layout. The page now starts with a clear
+introduction, direct search and browse actions, a subject directory, useful
+starting records, and concise source notes.
 
-- The public repository and initial reader shell are available.
-- The first Nazca Railway article route builds as static HTML.
-- The GitHub Pages project-path export is verified locally.
-- The complete corpus import is blocked before capture because the source
-  `robots.txt` endpoint returns an HTTP 403 HTML challenge.
-- No public deployment or release is verified yet.
+## Open the reader
 
-## Documentation
+**[Browse Nazca Railway on GitHub Pages](https://ding-ding-projects.github.io/nazca/)**
+
+The current reader contains 3,422 captured articles, 194 redirects, and 3,616
+static routes. Search runs locally over the generated current index.
+
+## Find a subject
+
+- **Stations** — station records and associated places
+- **Lines** — railways, services, and routes
+- **Places** — districts, islands, bays, and hubs
+- **Infrastructure** — structures, roads, bridges, and depots
+- **Explore** — the complete generated current reader index
+- **Search** — titles, aliases, categories, and excerpts
+
+## What changed
+
+The home page no longer duplicates provenance and implementation panels in a
+third column. It uses one primary reading path, keeps the persistent navigation
+dock, and progressively collapses the directory and featured records for phone
+screens. Every visible action opens a real reader destination.
+
+## Source and scope
+
+Fandom remains the credited legacy source, and imported text retains CC BY-SA
+attribution. Nazca Railway is an independent static reader, not the original
+source platform and not a live synchronization service. Historical revisions,
+media bytes, and stable-cutoff reconciliation remain in progress. A
+metadata-only release registry and validation publisher checkpoint are present,
+but no original media bytes have been published.
+
+## Project documentation
 
 - [Project README](https://github.com/Ding-Ding-Projects/nazca#readme)
-- [Migration issue](https://github.com/Ding-Ding-Projects/nazca/issues/1)
-- [Rolling progress](https://github.com/Ding-Ding-Projects/nazca/discussions/2)
+- [Reader shell behavior](https://github.com/Ding-Ding-Projects/nazca/blob/main/docs/reader/atlas-shell.md)
+- [Search behavior](https://github.com/Ding-Ding-Projects/nazca/blob/main/docs/reader/search-and-regex.md)
 - [Source policy](https://github.com/Ding-Ding-Projects/nazca/blob/main/docs/import/source-policy.md)
-- [Release-backed media](https://github.com/Ding-Ding-Projects/nazca/blob/main/docs/media/release-backed-storage.md)
+- [Build and verification](Build-and-Verification)
 
-The wiki mirrors committed project documentation. Repository files remain the
-source of truth.
+Repository files remain the source of truth for the mirrored wiki.
+
+## Phone navigation
+
+On phones, the route stripe keeps its own layout row and the complete grouped
+navigation becomes one touch-scrollable, safe-area-aware bottom dock. Long home
+titles and record names wrap within the screen down to 320 px.

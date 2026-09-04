@@ -10,6 +10,11 @@
 - media and rights validation
 - offline bundle and update behavior
 
+The redirect route check includes the registry's array shape, null-safe state
+narrowing, and the semantic status exposed while the shared search index loads.
+The static artifact check also locates the Reader 1b home button by its
+accessible label, matching the production interaction contract.
+
 GitHub Actions builds, packages, deploys, and publishes. It does not run tests,
 lint, type checks, accessibility checks, or capture checks.
 

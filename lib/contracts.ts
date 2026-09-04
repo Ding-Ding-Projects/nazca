@@ -284,9 +284,9 @@ export const mediaVolumeSchema = z
   .object({
     recordType: z.literal('MediaVolumeV1'),
     schemaVersion: z.literal('1.0.0'),
-    id: z.string().regex(/^fandom-media-v1-\d{6}$/),
-    releaseTag: z.string().regex(/^fandom-media-v1-\d{6}$/),
-    objectCount: z.number().int().min(1).max(900),
+    id: z.string().regex(/^nazca-media-v1-\d{6}$/),
+    releaseTag: z.string().regex(/^nazca-media-v1-\d{6}$/),
+    objectCount: z.number().int().min(1).max(1000),
     bytes: z.number().int().min(1).max(1_073_741_824),
     catalogSha256: sha256,
     publicationState: z.enum(['planned', 'draft', 'verified', 'published']),
@@ -373,3 +373,152 @@ export type RightsRecordV1 = z.infer<typeof rightsRecordSchema>;
 export type MediaVolumeV1 = z.infer<typeof mediaVolumeSchema>;
 export type FeatureCoverageV1 = z.infer<typeof featureCoverageSchema>;
 export type VisitorStateV1 = z.infer<typeof visitorStateSchema>;
+
+/** Current, intentionally non-reconciled reader snapshot contracts. */
+export const currentArticleRecordSchema = z
+  .object({
+    recordType: z.literal('CurrentArticleRecordV1'),
+    schemaVersion: z.literal('1.0.0'),
+    pageId: z.number().int().positive(),
+    title: z.string().min(1).max(512),
+    displayTitle: z.string().min(1).max(1024),
+    normalizedTitle: z.string().min(1).max(512),
+    route: z
+      .string()
+      .regex(/^\/wiki\//)
+      .max(2048),
+    aliases: z.array(z.string().min(1).max(512)).max(64),
+    safeHtml: z.string().max(16_777_216),
+    plainTextExcerpt: z.string().max(640),
+    headings: z
+      .array(
+        z
+          .object({
+            id: z.string().min(1).max(512),
+            anchor: z.string().min(1).max(512),
+            level: z.number().int().min(1).max(6),
+            heading: z.string().min(1).max(1024),
+            markdown: z.string().max(2048),
+          })
+          .strict(),
+      )
+      .max(512),
+    categories: z.array(z.string().min(1).max(512)).max(512),
+    knownInternalLinks: z.array(z.string().min(1).max(512)).max(8192),
+    externalLinks: z.array(httpsUrl).max(4096),
+    deferredMedia: z.array(z.string().min(1).max(512)).max(2048),
+    currentRevisionId: z.number().int().positive(),
+    sha1,
+    timestamp: isoTime,
+    contributor: z.string().max(512).nullable(),
+    contributorState: z.enum(['visible', 'hidden', 'unknown']),
+    sourceUrl: httpsUrl,
+    transforms: z.array(z.string().min(1).max(2048)).max(64),
+    renderedSha256: sha256,
+  })
+  .strict();
+
+export const currentRedirectRecordSchema = z
+  .object({
+    recordType: z.literal('CurrentRedirectRecordV1'),
+    schemaVersion: z.literal('1.0.0'),
+    sourcePageId: z.number().int().positive(),
+    sourceTitle: z.string().min(1).max(512),
+    sourceRoute: z
+      .string()
+      .regex(/^\/wiki\//)
+      .max(2048),
+    targetTitle: z.string().min(1).max(512),
+    targetRoute: z
+      .string()
+      .regex(/^\/wiki\//)
+      .max(2048)
+      .optional(),
+    fragment: z.string().max(512).optional(),
+    sourceRevisionId: z.number().int().positive(),
+    sourceUrl: httpsUrl,
+    state: z.enum(['resolved', 'outside-reader-corpus', 'invalid']),
+  })
+  .strict();
+
+export const currentCorpusManifestSchema = z
+  .object({
+    recordType: z.literal('CurrentCorpusManifestV1'),
+    schemaVersion: z.literal('1.0.0'),
+    release: z.string().regex(/^\d+\.\d+\.\d+$/),
+    captureWindow: z
+      .object({ startedAt: isoTime, finishedAt: isoTime })
+      .strict(),
+    source: z
+      .object({
+        apiUrl: httpsUrl,
+        rightsUrl: httpsUrl,
+        termsUrl: httpsUrl,
+        termsState: z.string().min(1).max(80),
+        robotsState: z.string().min(1).max(80),
+        policyReceipts: z.record(z.string().max(120), z.unknown()),
+      })
+      .strict(),
+    counts: z
+      .object({
+        routes: z.number().int().nonnegative(),
+        articles: z.number().int().nonnegative(),
+        redirects: z.number().int().nonnegative(),
+        articleShards: z.number().int().nonnegative(),
+        searchRecords: z.number().int().nonnegative(),
+      })
+      .strict(),
+    redirectStates: z.record(
+      z.enum(['resolved', 'outside-reader-corpus', 'invalid']),
+      z.number().int().nonnegative(),
+    ),
+    routes: z.object({ registry: z.string().min(1).max(256), sha256 }).strict(),
+    redirects: z
+      .object({
+        registry: z.string().min(1).max(256),
+        sha256,
+        hashes: z.record(z.string().max(64), sha256),
+      })
+      .strict(),
+    search: z.object({ index: z.string().min(1).max(256), sha256 }).strict(),
+    rendered: z
+      .object({
+        manifest: z.string().min(1).max(256),
+        pages: z.number().int().nonnegative(),
+        sha256,
+      })
+      .strict(),
+    shards: z
+      .array(
+        z
+          .object({
+            name: z.string().regex(/^articles-\d{4}\.json$/),
+            records: z.number().int().positive().max(64),
+            sha256,
+            bytes: z.number().int().positive(),
+          })
+          .strict(),
+      )
+      .max(1000),
+    articleHashes: z.record(z.string().max(64), sha256),
+    archive: z
+      .object({
+        name: z.string().regex(/^nazca-current-corpus-\d+\.\d+\.\d+\.zip$/),
+        bytes: z.number().int().positive(),
+        sha256,
+        manifestSha256: sha256,
+      })
+      .strict(),
+    deferredScope: z.array(z.string().min(1).max(512)).max(64),
+    generatedAt: isoTime,
+    manifestSha256: sha256,
+  })
+  .strict();
+
+export type CurrentArticleRecordV1 = z.infer<typeof currentArticleRecordSchema>;
+export type CurrentRedirectRecordV1 = z.infer<
+  typeof currentRedirectRecordSchema
+>;
+export type CurrentCorpusManifestV1 = z.infer<
+  typeof currentCorpusManifestSchema
+>;
