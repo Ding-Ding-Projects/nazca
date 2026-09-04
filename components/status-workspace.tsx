@@ -2,6 +2,8 @@
 
 import featureInventory from '@/data/inventories/feature-coverage.json';
 import searchInventory from '@/data/inventories/search-surfaces.json';
+import captureSummary from '@/data/corpus/current-capture-summary.json';
+import mediaRegistry from '@/data/media/release-volumes.json';
 import {
   SearchWorkbench,
   type SearchRecord,
@@ -12,26 +14,29 @@ const statusRecords: SearchRecord[] = [
   {
     id: 'status-source',
     title: 'Source import',
-    subtitle: 'Blocked before capture',
-    text: 'source import robots challenge HTTP 403 blocked before capture',
+    subtitle: 'Current reader captured',
+    text: 'source current reader captured articles redirects routes stable reconciliation pending',
   },
   {
     id: 'status-sites',
     title: 'Sites deployment',
-    subtitle: 'Local candidate only',
-    text: 'Sites primary deployment local candidate pending public URL',
+    subtitle: 'Project registered',
+    text: 'Sites primary project registered production deployment evidence external',
   },
   {
     id: 'status-pages',
     title: 'GitHub Pages mirror',
-    subtitle: 'Static export verified locally',
-    text: 'GitHub Pages mirror static export three routes project path pending deployment',
+    subtitle: 'Current build aware',
+    text: 'GitHub Pages mirror deployment derives from running build provenance',
   },
   {
     id: 'status-media',
     title: 'Media volumes',
-    subtitle: 'Not published',
-    text: 'media rights volumes release assets not published',
+    subtitle:
+      mediaRegistry.registryState === 'empty'
+        ? 'Not published'
+        : 'Registry available',
+    text: 'media rights volumes immutable release assets registry state',
   },
   {
     id: 'status-features',
@@ -61,6 +66,13 @@ export function StatusWorkspace({
   const verified = featureInventory.rows.filter(
     (row) => row.state === 'verified',
   ).length;
+  const searchPartial = searchInventory.rows.filter(
+    (row) => row.state === 'partial',
+  ).length;
+  const searchMissing = searchInventory.rows.filter(
+    (row) => row.state === 'missing',
+  ).length;
+  const pagesDeployment = provenance.deployment === 'github-pages-mirror';
   return (
     <section className="status-workspace" aria-labelledby="status-heading">
       <p className="eyebrow">Current build status</p>
@@ -80,28 +92,41 @@ export function StatusWorkspace({
       />
       <div className="status-card-grid">
         <article id="status-source" tabIndex={-1}>
-          <strong>🧱 Source import blocked</strong>
+          <strong>✅ Current reader captured</strong>
           <p>
-            `robots.txt` returns HTTP 403 HTML. No corpus capture is treated as
-            canonical.
+            {captureSummary.currentPages.captured.toLocaleString()} current
+            articles, {captureSummary.inventory.redirects.toLocaleString()}{' '}
+            redirects, and {captureSummary.inventory.routes.toLocaleString()}{' '}
+            routes are compiled. Historical revisions, maps, media bytes, and
+            stable reconciliation remain open.
           </p>
         </article>
         <article id="status-sites" tabIndex={-1}>
-          <strong>🏗️ Sites candidate local</strong>
-          <p>Primary public deployment has not been created or verified.</p>
+          <strong>🏗️ Sites project registered</strong>
+          <p>
+            The primary production URL is external deployment evidence. This
+            running build does not invent a successful Sites state.
+          </p>
         </article>
         <article id="status-pages" tabIndex={-1}>
-          <strong>✅ Pages export local</strong>
+          <strong>
+            {pagesDeployment ? '✅ Pages mirror build' : '🟡 Pages build state'}
+          </strong>
           <p>
-            Three routes prerender, project assets normalize correctly, and the
-            mirror is not deployed yet.
+            {captureSummary.inventory.routes.toLocaleString()} reader routes are
+            in the static corpus. This build identifies itself as{' '}
+            <code>{provenance.deployment}</code>.
           </p>
         </article>
         <article id="status-media" tabIndex={-1}>
-          <strong>⏳ Media pending</strong>
+          <strong>
+            {mediaRegistry.registryState === 'empty'
+              ? '⏳ Media pending'
+              : '🟡 Media registry available'}
+          </strong>
           <p>
-            No source originals, rights catalog, or immutable media volume is
-            published.
+            {mediaRegistry.releases.length} immutable media releases are in the
+            tracked registry. Empty remains pending, never silently complete.
           </p>
         </article>
         <article id="status-features" tabIndex={-1}>
@@ -139,7 +164,10 @@ export function StatusWorkspace({
           </div>
           <div>
             <dt>Search rows</dt>
-            <dd>{searchInventory.rows.length}, all incomplete for release</dd>
+            <dd>
+              {searchInventory.rows.length} total, {searchPartial} partial,{' '}
+              {searchMissing} missing
+            </dd>
           </div>
         </dl>
         <div className="tool-actions">

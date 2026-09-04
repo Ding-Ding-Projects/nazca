@@ -72,7 +72,7 @@ canonical source first when changing cross-project behavior.
 ## Git and releases
 
 - Pull and reconcile the remote branch before editing. Preserve unrelated work.
-- Commit with `Claude Fable 5 <noreply@anthropic.com>` as author and committer,
+- Commit with `Claude Fable 5.1 <noreply@anthropic.com>` as author and committer,
   plus exactly one matching `Co-Authored-By` trailer.
 - Use bilingual English and playful Hong Kong-style Cantonese commit bodies.
   Keep the subject precise and roast code behavior, never people.

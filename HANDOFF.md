@@ -1,6 +1,42 @@
 # Nazca Railway handoff
 
-## Current baseline
+## Preservation handoff, 2026-09-04
+
+This section supersedes older completion and release claims below.
+
+- The default branch and `origin/main` match at
+  `dd5944959314be727b2a57924eab2e74229346e2`.
+- GitHub Pages is live at https://ding-ding-projects.github.io/nazca/ and its
+  served provenance names that exact commit.
+- The current reader contains 3,616 routes, 3,422 current articles, 194
+  redirects, 54 article shards, 3,422 search records, and 3,422 rendered
+  current-page records.
+- The canonical extensionless article route works, but its trailing-slash form
+  returns HTTP 404. The isolated `codex/pages-trailing-routes` branch owns a
+  directory-index repair that has not yet been integrated.
+- Release `v0.1.2` exists, but it targets
+  `1ef6cdb11603c167932002eade86b98ba804a1cc`. Workflow run `33836578762`
+  built the reader, Pages output, offline archive, and unsigned Squirrel.Windows
+  package for `dd594495...`, then failed because the workflow tried to create
+  `v0.1.2` again. The isolated `codex/release-run-identity` branch owns the
+  deterministic per-run release repair and has not yet been integrated.
+- A current-owner Sites project is registered for the product at
+  `https://nazca-railway.gerktongdew.chatgpt.site`, but no product version has
+  been saved or deployed there yet. The repository homepage therefore remains
+  the verified GitHub Pages URL.
+- Feature inventory: 30 partial, 0 verified. Search inventory: 11 partial, 5
+  missing, 0 verified. Missing search rows cover current-strip tabs, per-group
+  tabs, group names, the master tab list, and dropdown or picker choices.
+- Historical revisions, stable reconciliation, map payloads, template and
+  module closure, media bytes, complete rights records, runtime captures, and
+  the required recording remain unfinished.
+- The primary checkout has an in-progress Sites rebind, a corrected commit
+  identity mirror, and a data-backed status surface. Preserve these changes.
+- The isolated `codex/tab-search-completion` branch is an unfinished feature
+  lane and must not be merged unless its implementation and focused checks are
+  complete.
+
+## Historical baseline
 
 The current source includes a post-integration verification repair: the redirect
 registry is decoded as an array, the redirect state is narrowed before it is
