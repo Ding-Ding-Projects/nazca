@@ -36,6 +36,7 @@ import {
 import { SettingsWorkspace } from '@/components/settings-workspace';
 import { SimpleWorkspace } from '@/components/simple-workspace';
 import { StatusWorkspace } from '@/components/status-workspace';
+import { TabWorkspace } from '@/components/tab-workspace';
 import { ToolsWorkspace } from '@/components/tools-workspace';
 import { useVisitorState } from '@/components/visitor-state-provider';
 import { labels, localize } from '@/lib/i18n';
@@ -264,10 +265,20 @@ function CorpusSearchDestination({
     text: `${record.title} ${record.displayTitle} ${record.aliases.join(' ')} ${record.categories.join(' ')} ${record.excerpt}`,
   }));
   return (
-    <div className="route-content reader-search-state" data-reader-state="search">
-      <p className="eyebrow"><span aria-hidden="true" />SEARCH · LOCAL, NO NETWORK CALLS</p>
+    <div
+      className="route-content reader-search-state"
+      data-reader-state="search"
+    >
+      <p className="eyebrow">
+        <span aria-hidden="true" />
+        SEARCH · LOCAL, NO NETWORK CALLS
+      </p>
       <h1 className="page-title">Search the current reader</h1>
-      <p className="lede">Search {records.length.toLocaleString()} captured article records, aliases, categories, and excerpts. Every result opens its exact static route.</p>
+      <p className="lede">
+        Search {records.length.toLocaleString()} captured article records,
+        aliases, categories, and excerpts. Every result opens its exact static
+        route.
+      </p>
       <div className="reader-search-panel">
         <SearchWorkbench
           surfaceId="dedicated-reader-search"
@@ -275,23 +286,41 @@ function CorpusSearchDestination({
           placeholder="Search articles, stations, lines, and places"
           records={searchRecords}
           onActivate={(result) => {
-            const record = records.find((candidate) => candidate.id === result.id);
+            const record = records.find(
+              (candidate) => candidate.id === result.id,
+            );
             if (record) onOpen(record);
           }}
         />
       </div>
-      <section className="content-card reader-search-summary" aria-label="Search index summary">
+      <section
+        className="content-card reader-search-summary"
+        aria-label="Search index summary"
+      >
         <div className="section-heading">
-          <div><p className="section-overline">Indexed source</p><h2>Complete current index</h2></div>
+          <div>
+            <p className="section-overline">Indexed source</p>
+            <h2>Complete current index</h2>
+          </div>
           <span>{records.length.toLocaleString()} records</span>
         </div>
-        <p>Plain text is the default. Open the adjacent regular-expression builder when you need bounded RE2 matching, captures, replacement preview, and timing.</p>
+        <p>
+          Plain text is the default. Open the adjacent regular-expression
+          builder when you need bounded RE2 matching, captures, replacement
+          preview, and timing.
+        </p>
       </section>
     </div>
   );
 }
 
-export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: BuildProvenance; corpusSearch?: CorpusSearchRecord[] }) {
+export function NazcaShell({
+  provenance,
+  corpusSearch = [],
+}: {
+  provenance: BuildProvenance;
+  corpusSearch?: CorpusSearchRecord[];
+}) {
   const router = useRouter();
   const { notifications, setPaletteOpen, state, text, updateSettings } =
     useVisitorState();
@@ -302,7 +331,9 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
   const L = (english: string, cantonese: string) =>
     text(localize(english, cantonese, languageMode));
   const [activeTab, setActiveTab] = useState('home');
-  const [requestedTool, setRequestedTool] = useState<'notifications' | null>(null);
+  const [requestedTool, setRequestedTool] = useState<'notifications' | null>(
+    null,
+  );
   const [updatedAt, setUpdatedAt] = useState(() =>
     formatBuildTime(provenance.builtAt),
   );
@@ -314,7 +345,12 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
       setRequestedTool('notifications');
       return;
     }
-    if (requestedTab && groups.some((group) => group.items.some((item) => item.id === requestedTab))) {
+    if (
+      requestedTab &&
+      groups.some((group) =>
+        group.items.some((item) => item.id === requestedTab),
+      )
+    ) {
       setActiveTab(requestedTab);
     }
   }, []);
@@ -375,7 +411,9 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
   };
 
   const activateSearchRecord = (searchRecord: SearchRecord) => {
-    const corpusRecord = corpusSearch.find((candidate) => candidate.id === searchRecord.id);
+    const corpusRecord = corpusSearch.find(
+      (candidate) => candidate.id === searchRecord.id,
+    );
     if (corpusRecord) {
       router.push(publicPath(corpusRecord.route));
       return;
@@ -391,11 +429,23 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
   };
   const destinationRecords = (destination: string) =>
     corpusSearch.filter((record) => {
-      const text = `${record.title} ${record.displayTitle} ${record.categories.join(' ')}`.toLocaleLowerCase();
+      const text =
+        `${record.title} ${record.displayTitle} ${record.categories.join(' ')}`.toLocaleLowerCase();
       if (destination === 'stations') return text.includes('station');
-      if (destination === 'lines') return text.includes('line') || text.includes('railway');
-      if (destination === 'places') return text.includes('district') || text.includes('island') || text.includes('bay');
-      if (destination === 'streetcars') return text.includes('tram') || text.includes('streetcar') || text.includes('light rail');
+      if (destination === 'lines')
+        return text.includes('line') || text.includes('railway');
+      if (destination === 'places')
+        return (
+          text.includes('district') ||
+          text.includes('island') ||
+          text.includes('bay')
+        );
+      if (destination === 'streetcars')
+        return (
+          text.includes('tram') ||
+          text.includes('streetcar') ||
+          text.includes('light rail')
+        );
       return true;
     });
 
@@ -432,7 +482,17 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
             surfaceId="global-atlas-search"
             label="Search the encyclopedia"
             placeholder="Search stations, lines, places, and articles"
-            records={corpusSearch.length ? corpusSearch.map((record) => ({ id: record.id, title: record.displayTitle || record.title, subtitle: record.categories.slice(0, 3).join(' · ') || 'Article', text: `${record.title} ${record.displayTitle} ${record.aliases.join(' ')} ${record.categories.join(' ')} ${record.excerpt}` })) : searchRecords}
+            records={
+              corpusSearch.length
+                ? corpusSearch.map((record) => ({
+                    id: record.id,
+                    title: record.displayTitle || record.title,
+                    subtitle:
+                      record.categories.slice(0, 3).join(' · ') || 'Article',
+                    text: `${record.title} ${record.displayTitle} ${record.aliases.join(' ')} ${record.categories.join(' ')} ${record.excerpt}`,
+                  }))
+                : searchRecords
+            }
             onActivate={activateSearchRecord}
           />
         </div>
@@ -496,43 +556,12 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
       </div>
 
       <div className="shell-grid">
-        <nav className="tab-dock" aria-label="Atlas tabs">
-          {groups.map((group) => (
-            <div key={group.label}>
-              <p className="dock-label">
-                {group.label === 'Reader'
-                  ? L('Reader', '閱讀')
-                  : group.label === 'Atlas'
-                    ? L('Atlas', '圖鑑')
-                    : L('Research', '研究')}
-              </p>
-              <div className="tab-list">
-                {group.items.map((item) => {
-                  const Icon = item.icon;
-                  const selected = activeTab === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className="tab-button"
-                      aria-current={selected ? 'page' : undefined}
-                      title={tabLabel(item.id, item.label)}
-                      onClick={() => setActiveTab(item.id)}
-                    >
-                      <span className="tab-icon">
-                        <Icon size={18} aria-hidden="true" />
-                      </span>
-                      <span>{tabLabel(item.id, item.label)}</span>
-                      {item.count ? (
-                        <span className="tab-count">{item.count}</span>
-                      ) : null}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </nav>
+        <TabWorkspace
+          groups={groups}
+          activeTab={activeTab}
+          onActivate={setActiveTab}
+          labelFor={tabLabel}
+        />
 
         <main id="main-content" className="main-viewport" tabIndex={-1}>
           {activeTab === 'settings' ? (
@@ -544,16 +573,21 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
                   ? 'history'
                   : activeTab === 'changelog'
                     ? 'changelog'
-                      : activeTab === 'help'
-                        ? 'help'
-                        : requestedTool ?? 'authenticator'
+                    : activeTab === 'help'
+                      ? 'help'
+                      : (requestedTool ?? 'authenticator')
               }
             />
           ) : activeTab === 'status' ? (
             <StatusWorkspace provenance={provenance} />
           ) : activeTab === 'search' ? (
-            <CorpusSearchDestination records={corpusSearch} onOpen={openCorpusRecord} />
-          ) : ['explore', 'stations', 'lines', 'places', 'streetcars'].includes(activeTab) ? (
+            <CorpusSearchDestination
+              records={corpusSearch}
+              onOpen={openCorpusRecord}
+            />
+          ) : ['explore', 'stations', 'lines', 'places', 'streetcars'].includes(
+              activeTab,
+            ) ? (
             <CorpusDestination
               eyebrow={tabLabel(activeTab, selectedLabel)}
               title={tabLabel(activeTab, selectedLabel)}
@@ -571,8 +605,16 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
               title="Map records are retained, rendering is deferred."
               description="The current source inventory includes three map records. Interactive map rendering remains pending stable source reconciliation."
               cards={[
-                { id: 'map-inventory', title: 'Three source map records', body: 'The inventory is available for later reconciliation. No map image or guessed geometry is presented here.' },
-                { id: 'map-status', title: 'Current status', body: 'Map rendering is deferred until source policy and stable cutoff checks complete.' },
+                {
+                  id: 'map-inventory',
+                  title: 'Three source map records',
+                  body: 'The inventory is available for later reconciliation. No map image or guessed geometry is presented here.',
+                },
+                {
+                  id: 'map-status',
+                  title: 'Current status',
+                  body: 'Map rendering is deferred until source policy and stable cutoff checks complete.',
+                },
               ]}
             />
           ) : activeTab === 'timeline' ? (
@@ -581,7 +623,11 @@ export function NazcaShell({ provenance, corpusSearch = [] }: { provenance: Buil
               title="Timeline records are not in this snapshot."
               description="Historical revision history is explicitly deferred, so this destination reports the boundary instead of repeating Home content."
               cards={[
-                { id: 'timeline-status', title: 'Historical revisions deferred', body: 'No timeline records are fabricated from the current-only capture.' },
+                {
+                  id: 'timeline-status',
+                  title: 'Historical revisions deferred',
+                  body: 'No timeline records are fabricated from the current-only capture.',
+                },
               ]}
             />
           ) : activeTab === 'media' ? (

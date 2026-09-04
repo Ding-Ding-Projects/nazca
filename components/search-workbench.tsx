@@ -1,7 +1,7 @@
 'use client';
 
 import { Search, X } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { RegexEvaluationResult } from '@/lib/search/regex-engine';
 
 export type SearchRecord = {
@@ -11,6 +11,13 @@ export type SearchRecord = {
   text: string;
 };
 
+export type SearchMatchSummary = {
+  query: string;
+  mode: 'plain' | 'regex';
+  invalid: boolean;
+  ids: string[];
+};
+
 type SearchWorkbenchProps = {
   surfaceId: string;
   label: string;
@@ -18,6 +25,9 @@ type SearchWorkbenchProps = {
   records: SearchRecord[];
   onActivate: (record: SearchRecord) => void;
   compact?: boolean;
+  initialQuery?: string;
+  onQueryChange?: (query: string) => void;
+  onMatchSummaryChange?: (summary: SearchMatchSummary) => void;
 };
 
 function plainMatches(records: SearchRecord[], query: string) {
@@ -35,8 +45,11 @@ export function SearchWorkbench({
   records,
   onActivate,
   compact = false,
+  initialQuery = '',
+  onQueryChange,
+  onMatchSummaryChange,
 }: SearchWorkbenchProps) {
-  const [query, setQuery] = useState('');
+  const [query, setQueryState] = useState(initialQuery);
   const [mode, setMode] = useState<'plain' | 'regex'>('plain');
   const [flags, setFlags] = useState('iu');
   const [replacement, setReplacement] = useState('$&');
@@ -51,6 +64,22 @@ export function SearchWorkbench({
   const inputRef = useRef<HTMLInputElement>(null);
   const builderButtonRef = useRef<HTMLButtonElement>(null);
   const patternRef = useRef<HTMLInputElement>(null);
+  const summaryListener = useRef(onMatchSummaryChange);
+  useEffect(() => {
+    summaryListener.current = onMatchSummaryChange;
+  }, [onMatchSummaryChange]);
+  const setQuery = useCallback(
+    (next: string) => {
+      const bounded = next.slice(0, 256);
+      setQueryState(bounded);
+      onQueryChange?.(bounded);
+    },
+    [onQueryChange],
+  );
+
+  useEffect(() => {
+    setQueryState(initialQuery);
+  }, [initialQuery]);
 
   useEffect(() => {
     try {
@@ -123,6 +152,14 @@ export function SearchWorkbench({
     mode === 'regex' &&
     !!query &&
     (workerState === 'unavailable' || result?.valid === false);
+  useEffect(() => {
+    summaryListener.current?.({
+      query,
+      mode,
+      invalid,
+      ids: matches.map((record) => record.id),
+    });
+  }, [invalid, matches, mode, query]);
   const resultId = `${surfaceId}-results`;
   const builderId = `${surfaceId}-builder`;
   const errorId = `${surfaceId}-error`;
