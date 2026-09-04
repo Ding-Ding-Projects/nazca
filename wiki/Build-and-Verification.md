@@ -39,6 +39,12 @@ npm run check:coverage
 npm run check:coverage:self-test
 ```
 
+TypeScript must cover the generated redirect registry and the Reader 1b
+redirect/not-found boundary. Lint discovery excludes dependency trees,
+including the desktop package's nested `node_modules` directory.
+Static Pages verification requires the Reader 1b article header's accessible
+home control rather than an anchor from the superseded shell.
+
 Release mode remains intentionally blocked while required feature and evidence
 rows are incomplete.
 

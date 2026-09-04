@@ -102,7 +102,7 @@ if (pages) {
     ['article asset prefix', article.includes('/nazca/_next/')],
     ['article home control', article.includes('aria-label="Open Nazca Railway home"')],
     ['article title', article.includes(sampleRoute ? (readerRoutes.find((entry) => entry.route === sampleRoute)?.title ?? '') : '')],
-    ['article current-snapshot disclosure', article.includes('current snapshot')],
+    ['article current-snapshot marker', article.includes('outside this current snapshot')],
     [
       'Open Graph image',
       article.includes(

@@ -2,6 +2,13 @@
 
 ## Current baseline
 
+The current source includes a post-integration verification repair: the redirect
+registry is decoded as an array, the redirect state is narrowed before it is
+rendered, asynchronous search-index loading is explicitly observed, and nested
+desktop dependencies are outside lint and Git discovery.
+The Pages checker now identifies the rendered Reader 1b home button by its
+accessible name; it no longer expects the removed legacy home anchor.
+
 - Repository: `Ding-Ding-Projects/nazca`
 - Default branch: `main`
 - Last verified pushed commit: `f66dc3709941c8795f12121ee4df2a0340e4e8dc`

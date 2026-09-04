@@ -11,7 +11,6 @@ import {
   Home,
   Image,
   Info,
-  Landmark,
   Layers3,
   Map,
   Moon,
@@ -149,7 +148,7 @@ export function ReaderStatePage({
         setSearchError(error instanceof Error ? error.message : 'The local reader index could not be loaded.');
       }
     };
-    loadSearchIndex();
+    void loadSearchIndex();
     return () => controller.abort();
   }, []);
 
@@ -267,7 +266,7 @@ export function ReaderStatePage({
                 <p className="reader-state-lede">The current snapshot contains {articleCount.toLocaleString()} article records. The requested title may be pending import, outside this snapshot, or unavailable at the source.</p>
                 <div className="reader-state-search-card">
                   <Search size={17} aria-hidden="true" />
-                  {corpusSearch === null ? <p className="reader-state-search-status" role="status">{searchError ?? 'Loading the local reader index…'}</p> : searchError ? <p className="reader-state-search-status" role="status">{searchError}</p> : <SearchWorkbench surfaceId="reader-not-found-search" label="Search the encyclopedia instead" placeholder="Search the encyclopedia instead" records={searchRecords} onActivate={openRecord} compact />}
+                  {corpusSearch === null ? <output className="reader-state-search-status">{searchError ?? 'Loading the local reader index…'}</output> : searchError ? <output className="reader-state-search-status">{searchError}</output> : <SearchWorkbench surfaceId="reader-not-found-search" label="Search the encyclopedia instead" placeholder="Search the encyclopedia instead" records={searchRecords} onActivate={openRecord} compact />}
                 </div>
                 <div className="reader-state-actions reader-state-actions-stack">
                   <button type="button" className="button" onClick={openHome}>Return to the atlas home <span aria-hidden="true">→</span></button>

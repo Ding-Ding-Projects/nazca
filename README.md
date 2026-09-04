@@ -2,6 +2,13 @@
 
 **The Encyclopedia of Los Sengas**
 
+The Reader 1b route boundary now loads the redirect registry as a collection,
+keeps redirect rendering null-safe, and exposes search-index loading messages
+through a semantic live output. Nested desktop dependencies are excluded from
+repository checks rather than being mistaken for project source. The Pages
+bundle check validates the working Reader 1b home control instead of requiring
+the obsolete anchor used by the previous article shell.
+
 ![Nazca Railway transit-atlas social preview](social-preview.png)
 
 Nazca Railway is a clarity-first static reader for the reader-facing content of
