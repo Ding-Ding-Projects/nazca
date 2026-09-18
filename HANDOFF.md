@@ -37,6 +37,18 @@ This preservation section records the exact state that was observed before the
 documentation refresh. The new commit and the verified `origin/main` ref are
 reported in the closing handoff below.
 
+## Closeout evidence, 2026-09-18
+
+- Documentation refresh commit: `d75cafae461acd37e4ac47fab49db31edf9d5c92`.
+- `git push origin main` completed successfully.
+- `git ls-remote origin refs/heads/main` returned
+  `d75cafae461acd37e4ac47fab49db31edf9d5c92`.
+- The primary checkout is clean and tracks `origin/main` with no ahead or
+  behind commits after the push.
+- No linked checkout, local non-default branch, stash, or remote branch was
+  deleted. The four remote branches listed above remain documented because
+  deletion safety was not proven.
+
 ## Preservation handoff, 2026-09-04
 
 This section supersedes older completion and release claims below.
