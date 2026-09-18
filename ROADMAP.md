@@ -1,5 +1,18 @@
 # Nazca Railway roadmap
 
+## Repository preservation
+
+- [x] Inventory the primary checkout, fetch all refs, and verify the default ref.
+- [x] Confirm that no linked checkout, stash, submodule, or local uncommitted
+  path requires preservation.
+- [x] Record every fetched non-default ref, its exact SHA, ancestry state, and
+  retention reason in `HANDOFF.md`.
+- [x] Preserve the remote refs whose ownership or ancestry does not prove safe
+  removal; no remote ref was deleted in this pass.
+- [x] Refresh `HANDOFF.md` and this roadmap with the 2026-09-18 inventory.
+- [ ] Create an external archive before any future cleanup removal. No removal
+  occurred in the 2026-09-18 pass, so no archive was required or produced.
+
 ## Foundation
 
 - [x] Create the public `Ding-Ding-Projects/nazca` repository.

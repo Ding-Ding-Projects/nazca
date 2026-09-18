@@ -1,5 +1,42 @@
 # Nazca Railway handoff
 
+## Repository preservation pass, 2026-09-18
+
+- Inventory and fetch were completed from the primary checkout at
+  `C:\Users\cntow\Documents\GitHub\nazca`.
+- The primary checkout is the only linked checkout discovered. It is on `main`
+  at `88014aee640b18a81572d80ed3b9bf2b69c6e74e` before this documentation
+  refresh, with no uncommitted files, no stashes, and no submodules.
+- The fetched default ref `origin/main` and the local `main` both pointed to
+  `88014aee640b18a81572d80ed3b9bf2b69c6e74e`.
+- The fetched remote refs were inventoried and retained:
+  - `origin/codex/close-github-issues` at
+    `ca9961b896f8f1c10aa2fa2690715aa8dd4793c6`, `9 0` against
+    `origin/main`, and already an ancestor of `origin/main`.
+  - `origin/codex/pages-trailing-routes` at
+    `baa7f77cd2b89a06c6dbd3cae4ddac1f0f6ccc1e`, `4 1` against
+    `origin/main`, and not an ancestor of `origin/main`.
+  - `origin/codex/release-run-identity` at
+    `3e477c8945d06fad18ffd77c1238c2ca629306c9`, `3 0` against
+    `origin/main`, and already an ancestor of `origin/main`.
+  - `origin/codex/tab-search-completion` at
+    `4ab79946e37083727088268b7a1463c7555521c8`, `4 1` against
+    `origin/main`, and not an ancestor of `origin/main`.
+- No remote ref was removed. The four remote refs have no discovered linked
+  checkout in this repository, and ownership, active status, and load-bearing
+  status were not proven safe for removal. The two non-ancestor refs also hold
+  unique commits, so they remain preserved and documented.
+- No external archive was created because no cleanup removal was authorized or
+  needed: there were no redundant linked checkouts, local non-default branches,
+  or stashes to remove. If a later pass identifies a safe removal, it must
+  create and verify the external archive before deleting anything.
+- No conflicts or unmerged index entries were present in the primary checkout.
+  No conflict-resolution choice was required.
+
+This preservation section records the exact state that was observed before the
+documentation refresh. The new commit and the verified `origin/main` ref are
+reported in the closing handoff below.
+
 ## Preservation handoff, 2026-09-04
 
 This section supersedes older completion and release claims below.
